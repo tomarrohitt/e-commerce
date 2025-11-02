@@ -1,0 +1,49 @@
+import cors from "cors";
+import helmet from "helmet";
+import express from "express";
+import cookieParser from "cookie-parser";
+``;
+import { errorHandler } from "./src/middleware/error-middleware";
+import { logger } from "./src/utils/logger";
+import { prisma } from "./src/config/prisma";
+import { config } from "./src/config";
+import { toNodeHandler } from "better-auth/node";
+import auth from "./src/config/auth";
+import userRouter from "./src/router/user-router";
+import productRouter from "./src/router/product-router";
+
+const app = express();
+const PORT = config.port || 4000;
+
+app.use(helmet());
+app.use(
+  cors({
+    origin: process.env.BETTER_AUTH_URL,
+    credentials: true,
+  }),
+);
+app.all("/api/auth/*splat", toNodeHandler(auth));
+
+app.use(cookieParser());
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use("/api/users", userRouter);
+app.use("/api/products", productRouter);
+// app.use("/api/orders", orderRoutes);
+
+app.use(errorHandler);
+
+app.listen(PORT, () => {
+  logger.info(`Server running on port ${PORT}`);
+});
+
+const shutdown = async () => {
+  logger.info("Shutting down gracefully...");
+  await prisma.$disconnect();
+  process.exit(0);
+};
+
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);
