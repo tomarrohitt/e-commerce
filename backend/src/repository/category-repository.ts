@@ -2,7 +2,7 @@ import { Prisma } from "../../generated/prisma/client";
 import { prisma } from "../config/prisma";
 import { safeQuery } from "../middleware/prisma-error-middleware";
 
-export class CategoryRepository {
+class CategoryRepository {
   async create(data: Prisma.CategoryCreateInput) {
     return await safeQuery(
       () =>
@@ -72,6 +72,14 @@ export class CategoryRepository {
   }
 
   async delete(id: string) {
+    const products = await prisma.product.findFirst({
+      where: { categoryId: id },
+    });
+
+    if (products) {
+      throw new Error("Cannot delete category with associated products");
+    }
+
     return await safeQuery(
       () =>
         prisma.category.delete({
@@ -81,3 +89,5 @@ export class CategoryRepository {
     );
   }
 }
+
+export default new CategoryRepository();

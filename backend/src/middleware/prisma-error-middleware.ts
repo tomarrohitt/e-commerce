@@ -111,7 +111,7 @@ export function handlePrismaError(error: unknown, context?: ErrorContext) {
       );
     }
 
-    // Creating Editing, Deleting some which doesn't exist
+    // Creating Editing, Deleting some which doesn't exist refernce field doesn't exist
     if (error.code === "P2003") {
       const meta = error.meta as { field_name?: string };
       const field = meta?.field_name;
@@ -128,7 +128,7 @@ export function handlePrismaError(error: unknown, context?: ErrorContext) {
       }
 
       return new DatabaseError(
-        "Invalid reference. The related record does not exist.",
+        "Invalid reference. The related does not exist.",
         400,
         "INVALID_REFERENCE",
       );

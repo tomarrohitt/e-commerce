@@ -1,5 +1,7 @@
 import cors from "cors";
 import helmet from "helmet";
+import compression from "compression";
+
 import express from "express";
 import cookieParser from "cookie-parser";
 ``;
@@ -11,11 +13,14 @@ import { toNodeHandler } from "better-auth/node";
 import auth from "./src/config/auth";
 import userRouter from "./src/router/user-router";
 import productRouter from "./src/router/product-router";
+import categoryRouter from "./src/router/category-router";
 
 const app = express();
 const PORT = config.port || 4000;
 
 app.use(helmet());
+app.use(compression());
+
 app.use(
   cors({
     origin: process.env.BETTER_AUTH_URL,
@@ -31,9 +36,22 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/users", userRouter);
 app.use("/api/products", productRouter);
+app.use("/api/category", categoryRouter);
 // app.use("/api/orders", orderRoutes);
 
 app.use(errorHandler);
+app.use((req, res, next) => {
+  const start = Date.now();
+
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    logger.info(
+      `${req.method} ${req.originalUrl} - ${res.statusCode} [${duration}ms]`,
+    );
+  });
+
+  next();
+});
 
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);

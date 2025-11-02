@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { ProductRepository } from "../repository/product-repository";
 import {
   addImagesSchema,
   createProductSchema,
@@ -7,8 +6,9 @@ import {
   updateProductSchema,
 } from "../lib/product-validation-schema";
 
+import productRepostiory from "../repository/product-repository";
+
 class ProductController {
-  private productRepostiory = new ProductRepository();
   async createProduct(req: Request, res: Response) {
     try {
       const { error, value } = createProductSchema.validate(req.body, {
@@ -24,7 +24,8 @@ class ProductController {
           })),
         });
       }
-      const product = await this.productRepostiory.create(value);
+
+      const product = await productRepostiory.create(value);
       res.status(201).json(product);
     } catch (error) {
       if (error instanceof Error) {
@@ -36,7 +37,7 @@ class ProductController {
 
   async getProduct(req: Request, res: Response) {
     try {
-      const product = await this.productRepostiory.findbyId(req.params.id);
+      const product = await productRepostiory.findbyId(req.params.id);
       res.json(product);
     } catch (error) {
       if (error instanceof Error) {
@@ -61,7 +62,7 @@ class ProductController {
           })),
         });
       }
-      const products = await this.productRepostiory.findMany(value);
+      const products = await productRepostiory.findMany(value);
       res.status(201).json(products);
     } catch (error) {
       if (error instanceof Error) {
@@ -86,7 +87,7 @@ class ProductController {
           })),
         });
       }
-      const products = await this.productRepostiory.findMany(value);
+      const products = await productRepostiory.findMany(value);
       res.status(201).json({
         message: `Product with productID:${req.params.id} has been updated successfully`,
         products,
@@ -100,7 +101,7 @@ class ProductController {
   }
   async deleteProduct(req: Request, res: Response) {
     try {
-      await this.productRepostiory.delete(req.params.id);
+      await productRepostiory.delete(req.params.id);
       res.status(204).json({
         message: `Product with ProductID:${req.params.id} has been deleted successfully`,
       });
@@ -120,7 +121,7 @@ class ProductController {
         return res.status(400).json({ error: "Quantity must be a number" });
       }
 
-      const product = await this.productRepostiory.updateStock(id, quantity);
+      const product = await productRepostiory.updateStock(id, quantity);
       res.status(201).json({
         message: `Product with productID:${req.params.id} has been updated successfully`,
         product,
@@ -153,7 +154,7 @@ class ProductController {
         });
       }
 
-      const product = await this.productRepostiory.addImage(id, images);
+      const product = await productRepostiory.addImage(id, images);
       res.status(201).json({
         message: `Product with productID:${req.params.id} has been updated successfully`,
         product,

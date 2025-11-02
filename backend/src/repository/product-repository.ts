@@ -6,7 +6,7 @@ import {
 } from "../middleware/prisma-error-middleware";
 import { ProductFilterType } from "../types";
 
-export class ProductRepository {
+class ProductRepository {
   async create(data: Prisma.ProductCreateInput) {
     return await safeQuery(
       () =>
@@ -188,3 +188,5 @@ export class ProductRepository {
     );
   }
 }
+
+export default new ProductRepository();

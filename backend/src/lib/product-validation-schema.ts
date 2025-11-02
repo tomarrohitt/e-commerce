@@ -26,7 +26,7 @@ export const addImagesSchema = Joi.object({
 
 export const listProductSchema = Joi.object({
   page: Joi.number().integer().min(1).default(1),
-  limit: Joi.number().integer().min(1).max(100).default(20),
+  limit: Joi.number().integer().min(1).max(100).default(50),
   search: Joi.string().optional(),
   inStock: Joi.boolean().optional(),
   minPrice: Joi.number().positive().optional(),
