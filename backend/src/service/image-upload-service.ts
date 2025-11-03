@@ -1,5 +1,4 @@
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
-import { User } from "better-auth/types";
 import { config } from "../config/index";
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024;

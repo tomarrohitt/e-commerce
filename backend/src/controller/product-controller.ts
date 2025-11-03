@@ -134,7 +134,7 @@ class ProductController {
     }
   }
 
-  addImage = async (req: Request, res: Response) => {
+   async addImage (req: Request, res: Response){
     try {
       const id = req.params.id;
       const { error, value: images } = addImagesSchema.validate(

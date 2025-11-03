@@ -34,9 +34,23 @@ class CategoryController {
     }
   }
 
-  async getCategory(req: Request, res: Response) {
+  async getCategoryById(req: Request, res: Response) {
+    console.log({req: req.params})
+
     try {
       const category = await categoryRepository.findbyId(req.params.id);
+      res.json({ category });
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(401).json({ error: error.message });
+      }
+      res.status(500).json({ error, message: "Internal server error" });
+    }
+  }
+  async getCategoryBySlug(req: Request, res: Response) {
+    console.log({req: req.params})
+    try {
+      const category = await categoryRepository.findBySlug(req.params.slug);
       res.json({ category });
     } catch (error) {
       if (error instanceof Error) {

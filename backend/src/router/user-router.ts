@@ -1,13 +1,12 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth-middleware";
-import {
-  confirmUploadController,
-  getUploadUrlController,
-} from "../controller/image-upload-controllers";
+
+import  imageUploadController from "../controller/image-upload-controllers";
+
 
 const userRouter = Router();
 
-userRouter.post("/get-upload-url", requireAuth, getUploadUrlController);
-userRouter.post("/confirm-upload", requireAuth, confirmUploadController);
+userRouter.post("/get-upload-url", requireAuth, imageUploadController.getUploadUrl);
+userRouter.post("/confirm-upload", requireAuth, imageUploadController.confirmUpload);
 
 export default userRouter;

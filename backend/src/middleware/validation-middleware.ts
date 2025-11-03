@@ -1,4 +1,3 @@
-// auth/hooks.ts
 import { APIError } from "better-auth";
 import type { BetterAuthOptions } from "better-auth";
 import { createAuthMiddleware } from "better-auth/api";
