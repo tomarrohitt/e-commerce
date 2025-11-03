@@ -14,7 +14,7 @@ export function requireAdmin(req: Request, res: Response, next: NextFunction) {
 export async function requireAuth(
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   try {
     const session = await auth.api.getSession({
@@ -24,6 +24,7 @@ export async function requireAuth(
     if (!session?.user) {
       return res.status(401).json({ error: "Unauthorized" });
     }
+
     req.user = session.user;
     next();
   } catch (error) {

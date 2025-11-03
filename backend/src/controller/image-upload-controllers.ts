@@ -1,5 +1,8 @@
 import { Request, Response } from "express";
-import { imageUploadService } from "../service/image-upload-service";
+import {
+  deleteImage,
+  imageUploadService,
+} from "../service/image-upload-service";
 import { fromNodeHeaders } from "better-auth/node";
 import auth from "../config/auth";
 
@@ -25,18 +28,21 @@ class ImageUploadController {
       if (!key) {
         return res.status(400).json({ error: "key is required" });
       }
-      const imageUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+
+      if (req.user.image) {
+        deleteImage(req.user.image);
+      }
 
       await auth.api.updateUser({
         body: {
-          image: imageUrl,
+          image: key,
         },
         headers: fromNodeHeaders(req.headers),
       });
 
       res.json({
         success: true,
-        imageUrl,
+        image: key,
       });
     } catch (error) {
       console.error("Error confirming upload:", error);

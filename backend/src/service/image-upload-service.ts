@@ -1,6 +1,10 @@
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { config } from "../config/index";
-import { HeadObjectCommand } from "@aws-sdk/client-s3";
+import {
+  DeleteObjectCommand,
+  DeleteObjectsCommand,
+  HeadObjectCommand,
+} from "@aws-sdk/client-s3";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
@@ -76,4 +80,49 @@ export async function validateImagesExist(keys: string[]) {
   }
 
   return true;
+}
+
+export async function deleteImage(key: string): Promise<boolean> {
+  try {
+    const command = new DeleteObjectCommand({
+      Bucket: process.env.AWS_BUCKET_NAME!,
+      Key: key,
+    });
+
+    const result = await config.s3Client.send(command);
+    console.log(`Deleted image: ${key}`, { result });
+    return true;
+  } catch (error) {
+    console.error(`Failed to delete image ${key}:`, error);
+    return false;
+  }
+}
+
+export async function deleteImages(
+  keys: string[]
+): Promise<{ deleted: string[]; failed: string[] }> {
+  if (keys.length === 0) return { deleted: [], failed: [] };
+
+  try {
+    const command = new DeleteObjectsCommand({
+      Bucket: process.env.AWS_BUCKET_NAME!,
+      Delete: {
+        Objects: keys.map((key) => ({ Key: key })),
+        Quiet: false,
+      },
+    });
+
+    const response = await config.s3Client.send(command);
+
+    const deleted =
+      response.Deleted?.map((obj) => obj.Key!).filter(Boolean) || [];
+    const failed =
+      response.Errors?.map((err) => err.Key!).filter(Boolean) || [];
+
+    console.log(`Deleted ${deleted.length} images, ${failed.length} failed`);
+    return { deleted, failed };
+  } catch (error) {
+    console.error("Failed to delete images:", error);
+    return { deleted: [], failed: keys };
+  }
 }
