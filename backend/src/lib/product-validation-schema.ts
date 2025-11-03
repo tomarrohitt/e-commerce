@@ -16,12 +16,15 @@ export const updateProductSchema = Joi.object({
   description: Joi.string().min(10).max(1000).optional(),
   stockQuantity: Joi.number().integer().min(0).optional(),
   sku: Joi.string().alphanum().min(5).max(20).optional(),
-
   categoryId: Joi.string().optional(),
 });
 
+export const updateProductQuantitySchema = Joi.object({
+  stockQuantity: Joi.number().integer().optional(),
+});
+
 export const addImagesSchema = Joi.object({
-  images: Joi.array().items(Joi.string().uri()).min(1).required(),
+  images: Joi.array().items(Joi.string()).min(3).required(),
 });
 
 export const listProductSchema = Joi.object({

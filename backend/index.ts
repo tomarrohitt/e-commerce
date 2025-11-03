@@ -25,7 +25,7 @@ app.use(
   cors({
     origin: process.env.BETTER_AUTH_URL,
     credentials: true,
-  }),
+  })
 );
 app.all("/api/auth/*splat", toNodeHandler(auth));
 
@@ -40,18 +40,6 @@ app.use("/api/category", categoryRouter);
 // app.use("/api/orders", orderRoutes);
 
 app.use(errorHandler);
-app.use((req, res, next) => {
-  const start = Date.now();
-
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    logger.info(
-      `${req.method} ${req.originalUrl} - ${res.statusCode} [${duration}ms]`,
-    );
-  });
-
-  next();
-});
 
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);

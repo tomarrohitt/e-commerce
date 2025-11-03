@@ -16,7 +16,7 @@ class ProductRepository {
             category: true,
           },
         }),
-      { model: "Product", operation: "create" },
+      { model: "Product", operation: "create" }
     );
   }
 
@@ -29,7 +29,7 @@ class ProductRepository {
             category: true,
           },
         }),
-      { model: "Product", id, operation: "find" },
+      { model: "Product", id, operation: "find" }
     );
   }
 
@@ -120,7 +120,7 @@ class ProductRepository {
       throw new DatabaseError(
         "Stock quantity cannot be updated through this endpoint. Use /api/products/:id/stock instead.",
         400,
-        "INVALID_OPERATION",
+        "INVALID_OPERATION"
       );
     }
 
@@ -133,7 +133,7 @@ class ProductRepository {
             category: true,
           },
         }),
-      { model: "Product", id, operation: "update" },
+      { model: "Product", id, operation: "update" }
     );
   }
 
@@ -143,26 +143,11 @@ class ProductRepository {
         prisma.product.delete({
           where: { id },
         }),
-      { model: "Product", id, operation: "delete" },
+      { model: "Product", id, operation: "delete" }
     );
   }
 
   async updateStock(id: string, quantity: number) {
-    if (quantity < 0) {
-      const product = await prisma.product.findUnique({
-        where: { id },
-        select: { stockQuantity: true },
-      });
-
-      if (!product) {
-        throw new Error("Product not found");
-      }
-
-      if (product.stockQuantity + quantity < 0) {
-        throw new Error("Insufficient stock");
-      }
-    }
-
     return await safeQuery(
       () =>
         prisma.product.update({
@@ -171,9 +156,11 @@ class ProductRepository {
             stockQuantity: { increment: quantity },
           },
         }),
-      { model: "Product", id, operation: "update" },
+      { model: "Product", id, operation: "update" }
     );
   }
+
+  async generateMultipleUrls(id: string, count: number) {}
 
   async addImage(id: string, images: string[]) {
     return await safeQuery(
@@ -184,7 +171,7 @@ class ProductRepository {
             images,
           },
         }),
-      { model: "Product", id, operation: "update" },
+      { model: "Product", id, operation: "update" }
     );
   }
 }

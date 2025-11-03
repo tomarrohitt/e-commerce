@@ -2,10 +2,10 @@ import { Request, Response, NextFunction } from "express";
 import { logger } from "../utils/logger";
 
 export function errorHandler(
-  err: any,
+  err: Error & { status?: number },
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   logger.error("Error:", {
     message: err.message,
