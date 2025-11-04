@@ -13,6 +13,10 @@ enum Role {
   user
   admin
 }
+enum AddressType {
+  shipping
+  billing
+}
 
 
 model User {
@@ -160,7 +164,7 @@ model OrderItem {
 model Address {
   id        String      @id @default(cuid())
   userId    String      @map("user_id")
-  type      String  
+  type      AddressType @default(shipping) 
   street    String
   city      String
   state     String
@@ -168,6 +172,8 @@ model Address {
   country   String
   isDefault Boolean  @default(false) @map("is_default")
   createdAt DateTime @default(now()) @map("created_at")
+    updatedAt             DateTime? @updatedAt @map("updated_at")
+
   
   user   User    @relation(fields: [userId], references: [id])
   orders Order[] 

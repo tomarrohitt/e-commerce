@@ -8,7 +8,10 @@ import {
 } from "../lib/product-validation-schema";
 
 import productRepostiory from "../repository/product-repository";
-import { generateMultipleUrls } from "../service/image-upload-service";
+import {
+  deleteImages,
+  generateMultipleUrls,
+} from "../service/image-upload-service";
 
 class ProductController {
   async createProduct(req: Request, res: Response) {
@@ -28,6 +31,7 @@ class ProductController {
       }
 
       const product = await productRepostiory.create(value);
+
       res.status(201).json(product);
     } catch (error) {
       if (error instanceof Error) {
@@ -40,7 +44,10 @@ class ProductController {
   async getProduct(req: Request, res: Response) {
     try {
       const product = await productRepostiory.findbyId(req.params.id);
-      res.json(product);
+      if (!product) {
+        return res.status(400).json({ message: "Product not found" });
+      }
+      res.status(200).json(product);
     } catch (error) {
       if (error instanceof Error) {
         res.status(401).json({ error: error.message });
@@ -65,6 +72,9 @@ class ProductController {
         });
       }
       const products = await productRepostiory.findMany(value);
+      if (!products) {
+        return res.status(400).json({ message: "Products not found" });
+      }
       res.status(201).json(products);
     } catch (error) {
       if (error instanceof Error) {
@@ -103,9 +113,23 @@ class ProductController {
   }
   async deleteProduct(req: Request, res: Response) {
     try {
+      const product = await productRepostiory.findbyId(req.params.id);
+
+      if (!product) {
+        return res.status(400).json("Product not found");
+      }
+
+      const { failed, deleted } = await deleteImages(product.images);
+      if (failed.length > 0) {
+        return res.status(200).json({
+          message: `Product with ProductID:${req.params.id} has been deleted successfully, but ${failed.length} associated images failed to delete and require manual cleanup.`,
+          failedImages: failed,
+          deletedImagesCount: deleted.length,
+        });
+      }
       await productRepostiory.delete(req.params.id);
-      res.status(204).json({
-        message: `Product with ProductID:${req.params.id} has been deleted successfully`,
+      return res.status(200).json({
+        message: `Product with ProductID:${req.params.id} and all ${deleted.length} associated images have been deleted successfully.`,
       });
     } catch (error) {
       if (error instanceof Error) {

@@ -14,6 +14,7 @@ import auth from "./src/config/auth";
 import userRouter from "./src/router/user-router";
 import productRouter from "./src/router/product-router";
 import categoryRouter from "./src/router/category-router";
+import addressRouter from "./src/router/address-router";
 
 const app = express();
 const PORT = config.port || 4000;
@@ -37,7 +38,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/users", userRouter);
 app.use("/api/products", productRouter);
 app.use("/api/category", categoryRouter);
-// app.use("/api/orders", orderRoutes);
+app.use("/api/address", addressRouter);
+// app.use("/api/order", orderRoutes);
 
 app.use(errorHandler);
 

@@ -35,11 +35,14 @@ class CategoryController {
   }
 
   async getCategoryById(req: Request, res: Response) {
-    console.log({req: req.params})
+    console.log({ req: req.params });
 
     try {
       const category = await categoryRepository.findbyId(req.params.id);
-      res.json({ category });
+      if (!category) {
+        return res.status(400).json({ message: "Category not found" });
+      }
+      res.status(200).json({ category });
     } catch (error) {
       if (error instanceof Error) {
         res.status(401).json({ error: error.message });
@@ -48,10 +51,10 @@ class CategoryController {
     }
   }
   async getCategoryBySlug(req: Request, res: Response) {
-    console.log({req: req.params})
+    console.log({ req: req.params });
     try {
       const category = await categoryRepository.findBySlug(req.params.slug);
-      res.json({ category });
+      res.status(200).json({ category });
     } catch (error) {
       if (error instanceof Error) {
         res.status(401).json({ error: error.message });

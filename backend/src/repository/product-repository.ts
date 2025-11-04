@@ -33,6 +33,23 @@ class ProductRepository {
     );
   }
 
+  async findByIds(ids: string[]) {
+    return await safeQuery(
+      () =>
+        prisma.product.findMany({
+          where: {
+            id: {
+              in: ids,
+            },
+          },
+          include: {
+            category: true,
+          },
+        }),
+      { model: "Product", operation: "findbyIds" }
+    );
+  }
+
   async findMany(filters: ProductFilterType) {
     const {
       page = 1,
@@ -159,8 +176,6 @@ class ProductRepository {
       { model: "Product", id, operation: "update" }
     );
   }
-
-  async generateMultipleUrls(id: string, count: number) {}
 
   async addImage(id: string, images: string[]) {
     return await safeQuery(
