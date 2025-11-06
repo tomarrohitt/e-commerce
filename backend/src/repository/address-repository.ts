@@ -1,16 +1,17 @@
-import { Prisma } from "../../generated/prisma/client";
+import { Prisma, Role } from "../../generated/prisma/client";
 import { prisma } from "../config/prisma";
 import {
   DatabaseError,
   safeQuery,
 } from "../middleware/prisma-error-middleware";
-import { ListAddressFilter } from "../types";
+import { ListAddressFilter, ValidateUser } from "../types";
+import { WhereReturnType } from "../utils/get-where";
 
 class AddressRepository {
   async create(userId: string, data: Omit<Prisma.AddressCreateInput, "user">) {
     return await safeQuery(
-      () => {
-        return prisma.address.create({
+      () =>
+        prisma.address.create({
           data: {
             ...data,
             user: {
@@ -19,19 +20,19 @@ class AddressRepository {
               },
             },
           },
-        });
-      },
+        }),
       { model: "Address", operation: "create" }
     );
   }
 
-  async findById(id: string) {
+  async findById(where: WhereReturnType) {
     return await safeQuery(
-      () =>
-        prisma.address.findUnique({
-          where: { id },
-        }),
-      { model: "Address", id, operation: "find" }
+      () => {
+        return prisma.address.findFirst({
+          where,
+        });
+      },
+      { model: "Address", id: where.id, operation: "find" }
     );
   }
 
@@ -87,7 +88,7 @@ class AddressRepository {
     };
   }
 
-  async update(id: string, data: Prisma.AddressUpdateInput) {
+  async update(where: WhereReturnType, data: Prisma.AddressUpdateInput) {
     return await safeQuery(
       () => {
         const { isDefault, ...safeData } = data;
@@ -100,22 +101,25 @@ class AddressRepository {
           );
         }
 
-        return prisma.address.update({
-          where: { id },
+        console.log({ where, data: safeData });
+        const address = prisma.address.update({
+          where,
           data: safeData,
         });
+
+        return address;
       },
-      { model: "Address", id, operation: "update" }
+      { model: "Address", id: where.id, operation: "update" }
     );
   }
 
-  async delete(id: string) {
+  async delete(where: WhereReturnType) {
     return await safeQuery(
       () =>
         prisma.address.delete({
-          where: { id },
+          where,
         }),
-      { model: "Address", id, operation: "delete" }
+      { model: "Address", id: where.id, operation: "delete" }
     );
   }
 
@@ -133,7 +137,7 @@ class AddressRepository {
           });
 
           await tx.address.update({
-            where: { id: addressId },
+            where: { id: addressId, userId },
             data: {
               isDefault: true,
             },
@@ -160,7 +164,7 @@ class AddressRepository {
   async findFirst(userId: string) {
     return await safeQuery(
       () =>
-        prisma.address.findMany({
+        prisma.address.findFirst({
           where: { userId },
         }),
       { model: "Address", id: userId, operation: "find" }

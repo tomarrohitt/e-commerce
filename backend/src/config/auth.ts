@@ -17,7 +17,19 @@ const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,
     cookieCache: {
-      enabled: false,
+      enabled: true,
+      maxAge: 5 * 60 * 60,
+    },
+  },
+
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        required: false,
+        defaultValue: "user",
+        input: false,
+      },
     },
   },
 

@@ -4,8 +4,12 @@ import { Response, NextFunction, Request } from "express";
 import auth from "../config/auth";
 import { Role } from "../../generated/prisma/enums";
 
-export function requireAdmin(req: Request, res: Response, next: NextFunction) {
-  if (req.user?.role !== Role.admin) {
+export async function requireAdmin(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  if (req.user.role !== Role.admin) {
     return res.status(403).json({ error: "Admin access required" });
   }
   next();

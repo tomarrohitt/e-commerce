@@ -9,7 +9,7 @@ declare global {
         name: string;
         image?: string | null;
         emailVerified?: boolean;
-        role?: Role;
+        role?: string | null;
       };
       session?: {
         id: string;

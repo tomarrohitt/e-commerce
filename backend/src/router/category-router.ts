@@ -1,20 +1,19 @@
 import { Router } from "express";
-import { requireAuth } from "../middleware/auth-middleware";
+import { requireAdmin, requireAuth } from "../middleware/auth-middleware";
 import categoryController from "../controller/category-controller";
 
 const categoryRouter = Router();
 
-categoryRouter.get("/", requireAuth, categoryController.listCategories);
-categoryRouter.post("/", requireAuth, categoryController.createCategory);
+categoryRouter.use(requireAuth);
 
-categoryRouter.delete("/:id", requireAuth, categoryController.deleteCategory);
-categoryRouter.patch("/:id", requireAuth, categoryController.updateCategory);
+categoryRouter.get("/", categoryController.listCategories);
+categoryRouter.get("/:id", categoryController.getCategoryById);
+categoryRouter.get("/slug/:slug", categoryController.getCategoryBySlug);
 
-categoryRouter.get("/:id", requireAuth, categoryController.getCategoryById);
-categoryRouter.get(
-  "/slug/:slug",
-  requireAuth,
-  categoryController.getCategoryBySlug
-);
+categoryRouter.use(requireAdmin);
+
+categoryRouter.post("/", categoryController.createCategory);
+categoryRouter.delete("/:id", categoryController.deleteCategory);
+categoryRouter.patch("/:id", categoryController.updateCategory);
 
 export default categoryRouter;

@@ -35,7 +35,7 @@ class ProductController {
       res.status(201).json(product);
     } catch (error) {
       if (error instanceof Error) {
-        res.status(401).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
       }
       res.status(500).json({ error, message: "Internal server error" });
     }
@@ -50,7 +50,7 @@ class ProductController {
       res.status(200).json(product);
     } catch (error) {
       if (error instanceof Error) {
-        res.status(401).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
       }
       res.status(500).json({ error, message: "Internal server error" });
     }
@@ -78,7 +78,7 @@ class ProductController {
       res.status(201).json(products);
     } catch (error) {
       if (error instanceof Error) {
-        res.status(401).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
       }
       res.status(500).json({ error, message: "Internal server error" });
     }
@@ -106,7 +106,7 @@ class ProductController {
       });
     } catch (error) {
       if (error instanceof Error) {
-        res.status(401).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
       }
       res.status(500).json({ error, message: "Internal server error" });
     }
@@ -133,7 +133,7 @@ class ProductController {
       });
     } catch (error) {
       if (error instanceof Error) {
-        res.status(401).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
       }
       res.status(500).json({ error, message: "Internal server error" });
     }
@@ -178,31 +178,36 @@ class ProductController {
       });
     } catch (error) {
       if (error instanceof Error) {
-        res.status(401).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
       }
       res.status(500).json({ error, message: "Internal server error" });
     }
   }
 
   async getProductUploadUrls(req: Request, res: Response) {
-    const { imageCount } = req.body;
-    const { id } = req.params;
+    try {
+      const { imageCount } = req.body;
+      const { id } = req.params;
 
-    if (!id || !imageCount) {
-      return res.status(400).json({
-        error: "productId and imageCount are required",
-      });
+      if (!id || !imageCount) {
+        return res.status(400).json({
+          error: "productId and imageCount are required",
+        });
+      }
+      if (imageCount < 3 || imageCount > 10) {
+        return res.status(400).json({
+          error: "Image count must be between 3 and 10",
+        });
+      }
+
+      const result = await generateMultipleUrls(id, imageCount);
+      res.status(200).json(result);
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(500).json({ error: error.message });
+      }
+      res.status(500).json({ error, message: "Internal server error" });
     }
-
-    // Validate image count (3-10 images)
-    if (imageCount < 3 || imageCount > 10) {
-      return res.status(400).json({
-        error: "Image count must be between 3 and 10",
-      });
-    }
-
-    const result = await generateMultipleUrls(id, imageCount);
-    res.status(200).json(result);
   }
 
   async addImage(req: Request, res: Response) {
@@ -232,10 +237,9 @@ class ProductController {
       });
     } catch (error) {
       if (error instanceof Error) {
-        res.status(401).json({ error: error.message });
-      } else {
-        res.status(500).json({ error, message: "Internal server error" });
+        return res.status(500).json({ error: error.message });
       }
+      res.status(500).json({ error, message: "Internal server error" });
     }
   }
 }

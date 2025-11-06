@@ -16,8 +16,10 @@ class ImageUploadController {
         fields: result.fields,
       });
     } catch (error) {
-      console.error("Error generating upload URL:", error);
-      return res.status(500).json({ error: "Failed to generate upload URL" });
+      if (error instanceof Error) {
+        return res.status(500).json({ error: error.message });
+      }
+      res.status(500).json({ error, message: "Internal server error" });
     }
   }
 
@@ -45,8 +47,10 @@ class ImageUploadController {
         image: key,
       });
     } catch (error) {
-      console.error("Error confirming upload:", error);
-      res.status(500).json({ error: "Failed to update profile" });
+      if (error instanceof Error) {
+        return res.status(500).json({ error: error.message });
+      }
+      res.status(500).json({ error, message: "Internal server error" });
     }
   }
 }

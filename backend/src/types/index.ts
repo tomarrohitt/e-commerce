@@ -39,3 +39,5 @@ export interface Cart {
   totalItems: number;
   totalPrice: number;
 }
+
+export type ValidateUser = { id: string; role: string };

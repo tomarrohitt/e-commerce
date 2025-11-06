@@ -4,7 +4,7 @@ export class DatabaseError extends Error {
   constructor(
     message: string,
     public statusCode: number = 500,
-    public errorCode?: string,
+    public errorCode?: string
   ) {
     super(message);
     this.name = "DatabaseError";
@@ -28,7 +28,7 @@ function getFieldLabel(field: string) {
 }
 
 function extractModelName(
-  error: Prisma.PrismaClientKnownRequestError,
+  error: Prisma.PrismaClientKnownRequestError
 ): string | null {
   const meta = error.meta as any;
 
@@ -59,8 +59,6 @@ export function handlePrismaError(error: unknown, context?: ErrorContext) {
     return error;
   }
 
-  //DUPLICATE FIELD
-
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     if (error.code === "P2002") {
       const meta = error.meta as { target?: string[] };
@@ -72,17 +70,15 @@ export function handlePrismaError(error: unknown, context?: ErrorContext) {
         return new DatabaseError(
           `${label} already exists. Please use a different ${label.toLowerCase()}.`,
           409,
-          "DUPLICATE_ENTRY",
+          "DUPLICATE_ENTRY"
         );
       }
       return new DatabaseError(
         "A record with these details already exists.",
         409,
-        "DUPLICATE_ENTRY",
+        "DUPLICATE_ENTRY"
       );
     }
-
-    // NOT FOUND ERRORS
 
     if (error.code === "P2025") {
       const modelName = context?.model || extractModelName(error) || "Record";
@@ -91,23 +87,23 @@ export function handlePrismaError(error: unknown, context?: ErrorContext) {
 
       if (id) {
         return new DatabaseError(
-          `${modelName} with ID '${id}' not found. It may have been deleted.`,
+          `${modelName} with not found. It may have been deleted.`,
           404,
-          "NOT_FOUND",
+          "NOT_FOUND"
         );
       }
       if (slug) {
         return new DatabaseError(
           `${modelName} with slug '${slug}' not found. It may have been deleted.`,
           404,
-          "NOT_FOUND",
+          "NOT_FOUND"
         );
       }
 
       return new DatabaseError(
         `${modelName} not found. It may have been deleted.`,
         404,
-        "NOT_FOUND",
+        "NOT_FOUND"
       );
     }
 
@@ -123,14 +119,14 @@ export function handlePrismaError(error: unknown, context?: ErrorContext) {
         return new DatabaseError(
           `${label} not found. Please select a valid ${label.toLowerCase()}.`,
           400,
-          "INVALID_REFERENCE",
+          "INVALID_REFERENCE"
         );
       }
 
       return new DatabaseError(
         "Invalid reference. The related does not exist.",
         400,
-        "INVALID_REFERENCE",
+        "INVALID_REFERENCE"
       );
     }
 
@@ -140,7 +136,7 @@ export function handlePrismaError(error: unknown, context?: ErrorContext) {
       return new DatabaseError(
         `Cannot delete this ${modelName.toLowerCase()} because it is being used by other records.`,
         400,
-        "RELATION_VIOLATION",
+        "RELATION_VIOLATION"
       );
     }
 
@@ -149,14 +145,14 @@ export function handlePrismaError(error: unknown, context?: ErrorContext) {
     return new DatabaseError(
       "A database error occurred. Please try again.",
       500,
-      error.code,
+      error.code
     );
   }
 }
 
 export async function safeQuery<T>(
   queryFn: () => Promise<T>,
-  context?: ErrorContext,
+  context?: ErrorContext
 ): Promise<T> {
   try {
     return await queryFn();

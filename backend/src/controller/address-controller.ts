@@ -5,6 +5,7 @@ import {
   listAddressSchema,
 } from "../lib/address-validation-schema";
 import addressRepository from "../repository/address-repository";
+import { getSecureWhere } from "../utils/get-where";
 
 class AddressController {
   async createAddress(req: Request, res: Response) {
@@ -25,7 +26,7 @@ class AddressController {
       const userAddress = await addressRepository.findFirst(req.user.id);
 
       let newData = { ...value };
-      if (userAddress.length === 0) {
+      if (!userAddress) {
         newData = {
           ...value,
           isDefault: true,
@@ -36,7 +37,7 @@ class AddressController {
       res.status(201).json(address);
     } catch (error) {
       if (error instanceof Error) {
-        res.status(401).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
       }
       res.status(500).json({ error, message: "Internal server error" });
     }
@@ -58,14 +59,19 @@ class AddressController {
         });
       }
 
-      const address = await addressRepository.update(req.params.id, value);
+      const where = getSecureWhere(req.params.id, {
+        id: req.user.id,
+        role: req.user.role!,
+      });
+
+      const address = await addressRepository.update(where, value);
       res.status(201).json({
         message: `Address with addressID:${req.params.id} has been updated successfully.`,
         address,
       });
     } catch (error) {
       if (error instanceof Error) {
-        res.status(401).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
       }
       res.status(500).json({ error, message: "Internal server error" });
     }
@@ -92,13 +98,19 @@ class AddressController {
             "Default address cannot be deleted. Set another address as default first.",
         });
       }
-      await addressRepository.delete(req.params.id);
+
+      const where = getSecureWhere(req.params.id, {
+        id: req.user.id,
+        role: req.user.role!,
+      });
+
+      await addressRepository.delete(where);
       res.status(201).json({
         message: `Address with addressID:${req.params.id} has been deleted successfully.`,
       });
     } catch (error) {
       if (error instanceof Error) {
-        res.status(401).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
       }
       res.status(500).json({ error, message: "Internal server error" });
     }
@@ -114,7 +126,26 @@ class AddressController {
       });
     } catch (error) {
       if (error instanceof Error) {
-        res.status(401).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
+      }
+      res.status(500).json({ error, message: "Internal server error" });
+    }
+  }
+  async setDefaultAddressForUser(req: Request, res: Response) {
+    try {
+      const { userId, addressId } = req.params;
+      const address = await addressRepository.setAsDefaultAddress(
+        userId,
+        addressId
+      );
+
+      res.status(200).json({
+        message: `Address ${addressId} has been set as default for user ${userId}.`,
+        address: address,
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(500).json({ error: error.message });
       }
       res.status(500).json({ error, message: "Internal server error" });
     }
@@ -124,12 +155,12 @@ class AddressController {
     try {
       const address = await addressRepository.getDefaultAddress(req.user.id);
       if (!address) {
-        return res.status(400).json({ message: "Address not found" });
+        return res.status(404).json({ message: "Address not found" });
       }
       res.status(200).json({ address });
     } catch (error) {
       if (error instanceof Error) {
-        res.status(401).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
       }
       res.status(500).json({ error, message: "Internal server error" });
     }
@@ -142,12 +173,29 @@ class AddressController {
       if (!addresses) {
         return res
           .status(400)
-          .json({ message: `Addresses not found with userId: ${req.user.id}` });
+          .json({ message: `Addresses not found with user` });
       }
       res.status(200).json({ addresses });
     } catch (error) {
       if (error instanceof Error) {
-        res.status(401).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
+      }
+      res.status(500).json({ error, message: "Internal server error" });
+    }
+  }
+  async findByUserIdAdmin(req: Request, res: Response) {
+    try {
+      console.log(req.params);
+      const addresses = await addressRepository.findByUserId(req.params.userId);
+      if (!addresses) {
+        return res.status(400).json({
+          message: `Addresses not found with userId: ${req.body.userId}`,
+        });
+      }
+      res.status(200).json({ addresses });
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(500).json({ error: error.message });
       }
       res.status(500).json({ error, message: "Internal server error" });
     }
@@ -155,7 +203,12 @@ class AddressController {
 
   async getAddressById(req: Request, res: Response) {
     try {
-      const address = await addressRepository.findById(req.params.id);
+      const where = getSecureWhere(req.params.id, {
+        id: req.user.id,
+        role: req.user.role!,
+      });
+
+      const address = await addressRepository.findById(where);
       if (!address) {
         return res.status(400).json({
           message: `Addresses not found with AddressID: ${req.params.id}`,
@@ -164,12 +217,13 @@ class AddressController {
       res.status(200).json(address);
     } catch (error) {
       if (error instanceof Error) {
-        res.status(401).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
       }
       res.status(500).json({ error, message: "Internal server error" });
     }
   }
-  async listAddress(req: Request, res: Response) {
+
+  async listAllAddresses(req: Request, res: Response) {
     try {
       const { error, value } = listAddressSchema.validate(req.query, {
         abortEarly: false,
@@ -195,7 +249,7 @@ class AddressController {
       res.status(201).json(addresses);
     } catch (error) {
       if (error instanceof Error) {
-        res.status(401).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
       }
       res.status(500).json({ error, message: "Internal server error" });
     }

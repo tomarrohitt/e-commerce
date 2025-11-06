@@ -15,6 +15,8 @@ import userRouter from "./src/router/user-router";
 import productRouter from "./src/router/product-router";
 import categoryRouter from "./src/router/category-router";
 import addressRouter from "./src/router/address-router";
+import adminAddressRouter from "./src/router/admin-address-router";
+import cartRouter from "./src/router/cart-router";
 
 const app = express();
 const PORT = config.port || 4000;
@@ -39,6 +41,9 @@ app.use("/api/users", userRouter);
 app.use("/api/products", productRouter);
 app.use("/api/category", categoryRouter);
 app.use("/api/address", addressRouter);
+app.use("/api/admin/address", adminAddressRouter);
+app.use("/api/cart", cartRouter);
+
 // app.use("/api/order", orderRoutes);
 
 app.use(errorHandler);

@@ -28,7 +28,7 @@ class CategoryController {
         .json({ message: "Category created successfully", category });
     } catch (error) {
       if (error instanceof Error) {
-        res.status(401).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
       }
       res.status(500).json({ error, message: "Internal server error" });
     }
@@ -57,7 +57,7 @@ class CategoryController {
       res.status(200).json({ category });
     } catch (error) {
       if (error instanceof Error) {
-        res.status(401).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
       }
       res.status(500).json({ error, message: "Internal server error" });
     }
@@ -69,7 +69,7 @@ class CategoryController {
       res.status(200).json({ categories });
     } catch (error) {
       if (error instanceof Error) {
-        res.status(401).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
       }
       res.status(500).json({ error, message: "Internal server error" });
     }
@@ -94,7 +94,7 @@ class CategoryController {
       res.json(category);
     } catch (error) {
       if (error instanceof Error) {
-        res.status(401).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
       }
       res.status(500).json({ error, message: "Internal server error" });
     }
@@ -108,7 +108,7 @@ class CategoryController {
       });
     } catch (error) {
       if (error instanceof Error) {
-        res.status(401).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
       }
       res.status(500).json({ error, message: "Internal server error" });
     }
