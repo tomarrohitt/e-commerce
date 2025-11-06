@@ -18,6 +18,16 @@ enum AddressType {
   billing
 }
 
+enum OrderStatus {
+  pending
+  paid
+  processing   
+  shipped      
+  delivered   
+  cancelled    
+  refunded     
+}
+
 
 model User {
   id            String    @id @default(cuid())
@@ -26,7 +36,6 @@ model User {
   emailVerified Boolean   @default(false) @map("email_verified")
   image         String?
   role          Role    @default(user)
-  password      String?
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime?  @updatedAt @map("updated_at")
 
@@ -125,7 +134,7 @@ model Order {
   id                    String @id @default(cuid())
   userId                String @map("user_id")
   totalAmount           Decimal @map("total_amount") @db.Decimal(10, 2)
-  status                String @default("pending")
+  status                OrderStatus @default(pending)
   paymentMethod         String? @map("payment_method")
   stripePaymentIntentId String? @map("stripe_payment_intent_id")
   shippingAddressId     String?     @map("shipping_address_id")
@@ -172,7 +181,7 @@ model Address {
   country   String
   isDefault Boolean  @default(false) @map("is_default")
   createdAt DateTime @default(now()) @map("created_at")
-    updatedAt             DateTime? @updatedAt @map("updated_at")
+  updatedAt             DateTime? @updatedAt @map("updated_at")
 
   
   user   User    @relation(fields: [userId], references: [id])

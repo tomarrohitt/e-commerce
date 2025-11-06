@@ -17,6 +17,7 @@ import categoryRouter from "./src/router/category-router";
 import addressRouter from "./src/router/address-router";
 import adminAddressRouter from "./src/router/admin-address-router";
 import cartRouter from "./src/router/cart-router";
+import orderRouter from "./src/router/order-router";
 
 const app = express();
 const PORT = config.port || 4000;
@@ -43,8 +44,7 @@ app.use("/api/category", categoryRouter);
 app.use("/api/address", addressRouter);
 app.use("/api/admin/address", adminAddressRouter);
 app.use("/api/cart", cartRouter);
-
-// app.use("/api/order", orderRoutes);
+app.use("/api/orders", orderRouter);
 
 app.use(errorHandler);
 

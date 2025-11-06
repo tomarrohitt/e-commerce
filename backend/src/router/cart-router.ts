@@ -10,7 +10,7 @@ cartRouter.post("/", cartController.addToCart);
 cartRouter.get("/", cartController.getCart);
 cartRouter.get("/count", cartController.getCartCount);
 cartRouter.get("/validate", cartController.validationCart);
-cartRouter.put("/:productId", cartController.updateCartItem);
+cartRouter.patch("/:productId", cartController.updateCartItem);
 cartRouter.delete("/:productId", cartController.removeFromCart);
 cartRouter.delete("/", cartController.clearCart);
 
