@@ -1,56 +1,41 @@
-// src/app/(protected)/orders/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import api from "@/lib/api";
-import toast from "react-hot-toast";
+import { orderService } from "@/lib/api";
 import { useAuth } from "@/contexts/auth-context";
-
-interface Order {
-  id: string;
-  totalAmount: number;
-  status: string;
-  createdAt: string;
-  orderItems: Array<{
-    id: string;
-    quantity: number;
-    priceAtPurchase: number;
-    product: {
-      id: string;
-      name: string;
-      images: string[];
-    };
-  }>;
-  shippingAddress: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  };
-}
+import { Order } from "@/types";
+// 1. Make sure you import the HOOK 'useQueryClient'
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 export default function OrdersPage() {
-  const { user } = useAuth();
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { isAuthenticated } = useAuth();
 
-  useEffect(() => {
-    loadOrders();
-  }, []);
+  // 2. Make sure you are CALLING the hook here to get the instance
+  const queryClient = useQueryClient();
 
-  const loadOrders = async () => {
-    try {
-      const response = await api.get("/orders");
-      setOrders(response.data.orders || []);
-    } catch (error: any) {
-      console.error("Failed to load orders:", error);
-      toast.error(error.error || "Failed to load orders");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: ordersData, isLoading: loading } = useQuery({
+    queryKey: ["orders"],
+    queryFn: () => orderService.getOrders(),
+    enabled: isAuthenticated,
+    initialData: { orders: [] }, // Adjust this to match your API response shape
+    staleTime: 0,
+  });
+
+  const { mutate: cancelOrder, isPending: isCancelling } = useMutation({
+    mutationFn: (orderId: string) => {
+      return orderService.cancelOrder(orderId);
+    },
+    onSuccess: () => {
+      toast.success("Order cancelled successfully");
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+    },
+    onError: (error: any) => {
+      toast.error(error.error || "Failed to cancel order");
+    },
+  });
+
+  const orders: Order[] = ordersData?.orders || [];
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
@@ -81,13 +66,10 @@ export default function OrdersPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">My Orders</h1>
         <p className="text-gray-600">View and track all your orders</p>
       </div>
-
-      {/* Orders List */}
       {orders.length === 0 ? (
         <div className="bg-white rounded-xl shadow-md p-12 text-center">
           <div className="text-6xl mb-4">📦</div>
@@ -151,7 +133,6 @@ export default function OrdersPage() {
                 </div>
               </div>
 
-              {/* Order Items */}
               <div className="p-6">
                 <div className="space-y-4 mb-4">
                   {order.orderItems.map((item) => (
@@ -159,7 +140,7 @@ export default function OrdersPage() {
                       key={item.id}
                       className="flex items-center space-x-4 py-3 border-b border-gray-100 last:border-0"
                     >
-                      <div className="w-16 h-16 bg-gradient-linear-br from-purple-400 to-indigo-600 rounded-lg flex items-center justify-center">
+                      <div className="w-16 h-16 bg-linear-to-br from-purple-400 to-indigo-600 rounded-lg flex items-center justify-center">
                         {item.product.images.length > 0 ? (
                           <img
                             src={item.product.images[0]}
@@ -189,7 +170,6 @@ export default function OrdersPage() {
                   ))}
                 </div>
 
-                {/* Shipping Address */}
                 <div className="bg-gray-50 rounded-lg p-4 mb-4">
                   <p className="text-sm font-semibold text-gray-700 mb-2">
                     Shipping Address:
@@ -202,7 +182,6 @@ export default function OrdersPage() {
                   </p>
                 </div>
 
-                {/* Actions */}
                 <div className="flex flex-wrap gap-3 mt-8">
                   <Link
                     href={`/orders/${order.id}`}
@@ -213,9 +192,8 @@ export default function OrdersPage() {
 
                   {order.status === "pending" && (
                     <button
-                      onClick={() => {
-                        console.log("Cancel order:", order.id);
-                      }}
+                      onClick={() => cancelOrder(order.id)}
+                      disabled={isCancelling}
                       className="text-center bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
                     >
                       Cancel Order

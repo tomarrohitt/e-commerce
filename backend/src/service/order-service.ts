@@ -136,7 +136,7 @@ class OrderService {
 
   async listAllOrders(options: {
     status?: OrderStatus;
-    userId?: string; // Filter by user
+    userId?: string;
     limit: number;
     offset: number;
     sortBy: string;

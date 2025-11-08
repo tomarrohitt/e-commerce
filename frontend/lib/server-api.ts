@@ -1,3 +1,4 @@
+import { useAuth } from "@/contexts/auth-context";
 import type { Category, Product } from "@/types";
 import { notFound } from "next/navigation";
 
@@ -48,7 +49,7 @@ export const serverProductService = {
       return res.json();
     } catch (error) {
       console.error("Error in serverProductService.getProduct:", error);
-      notFound(); // Show 404 on any error
+      notFound();
     }
   },
 };

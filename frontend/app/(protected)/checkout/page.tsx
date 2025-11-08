@@ -257,7 +257,7 @@ export default function CheckoutPage() {
             <div className="space-y-3 mb-6 max-h-64 overflow-y-auto">
               {cart.items.map((item) => (
                 <div key={item.productId} className="flex space-x-3">
-                  <div className="w-16 h-16 bg-gradient-linear-br from-purple-400 to-indigo-600 rounded-lg overflow-hidden shrink-0">
+                  <div className="w-16 h-16 bg-linear-to-br from-purple-400 to-indigo-600 rounded-lg overflow-hidden shrink-0">
                     {item.product.images[0] ? (
                       <img
                         src={item.product.images[0]}

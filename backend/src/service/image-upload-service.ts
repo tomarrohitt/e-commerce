@@ -90,7 +90,6 @@ export async function deleteImage(key: string): Promise<boolean> {
     });
 
     const result = await config.s3Client.send(command);
-    console.log(`Deleted image: ${key}`, { result });
     return true;
   } catch (error) {
     console.error(`Failed to delete image ${key}:`, error);
@@ -118,8 +117,6 @@ export async function deleteImages(
       response.Deleted?.map((obj) => obj.Key!).filter(Boolean) || [];
     const failed =
       response.Errors?.map((err) => err.Key!).filter(Boolean) || [];
-
-    console.log(`Deleted ${deleted.length} images, ${failed.length} failed`);
     return { deleted, failed };
   } catch (error) {
     console.error("Failed to delete images:", error);

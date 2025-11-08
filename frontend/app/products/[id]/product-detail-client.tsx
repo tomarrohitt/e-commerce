@@ -100,7 +100,7 @@ export default function ProductDetailsClient({
         {/* Images Section */}
         <div>
           {/* Main Image */}
-          <div className="aspect-square bg-gradient-linear-br from-purple-400 to-indigo-600 rounded-2xl overflow-hidden mb-4">
+          <div className="aspect-square bg-linear-to-br from-purple-400 to-indigo-600 rounded-2xl overflow-hidden mb-4">
             {product.images.length > 0 ? (
               <img
                 src={product.images[selectedImage]}

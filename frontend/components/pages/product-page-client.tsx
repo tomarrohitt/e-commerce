@@ -12,7 +12,6 @@ interface ProductPageClientProps {
 export default function ProductPageClient({
   categories,
 }: ProductPageClientProps) {
-  // Call the hook to get all the logic and state
   const {
     products,
     loadingProducts,
@@ -32,36 +31,25 @@ export default function ProductPageClient({
   return (
     <>
       {/* Hero Section */}
-      <section className="bg-gradient-linear-r from-purple-600 to-indigo-700 text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Welcome to E-Store
-            </h1>
-            <p className="text-xl md:text-2xl mb-8 text-purple-100">
-              Discover amazing products at unbeatable prices
-            </p>
-
-            {/* Search Bar */}
-            <form onSubmit={handleSearchSubmit} className="max-w-2xl mx-auto">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search for products..."
-                  className="flex-1 px-6 py-4 rounded-lg text-gray-900 focus:outline-none focus:ring-4 focus:ring-purple-300"
-                />
-                <button
-                  type="submit"
-                  className="bg-white text-purple-600 px-8 py-4 rounded-lg font-semibold hover:bg-purple-50 transition-colors"
-                >
-                  Search
-                </button>
-              </div>
-            </form>
+      <section className="bg-linear-to-r from-purple-600 to-indigo-700 text-white py-20">
+        {/* Search Bar */}
+        <form onSubmit={handleSearchSubmit} className="max-w-2xl mx-auto">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search for products..."
+              className="flex-1 px-6 py-4 rounded-lg focus:outline-none focus:ring-4 focus:ring-purple-300"
+            />
+            <button
+              type="submit"
+              className="bg-white text-purple-600 px-8 py-4 rounded-lg font-semibold hover:bg-purple-50 transition-colors"
+            >
+              Search
+            </button>
           </div>
-        </div>
+        </form>
       </section>
 
       {/* Categories Section */}

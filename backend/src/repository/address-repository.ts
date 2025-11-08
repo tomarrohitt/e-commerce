@@ -101,7 +101,6 @@ class AddressRepository {
           );
         }
 
-        console.log({ where, data: safeData });
         const address = prisma.address.update({
           where,
           data: safeData,
@@ -120,6 +119,16 @@ class AddressRepository {
           where,
         }),
       { model: "Address", id: where.id, operation: "delete" }
+    );
+  }
+
+  async addressCount(userId: string) {
+    return await safeQuery(
+      () =>
+        prisma.address.count({
+          where: { userId },
+        }),
+      { model: "Address", id: userId, operation: "count" }
     );
   }
 

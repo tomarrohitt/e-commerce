@@ -91,14 +91,12 @@ class CartService {
           images: product.images,
         },
       });
-
-      totalItems += quantity;
       totalPrice += itemTotal;
     }
 
     return {
       items,
-      totalItems,
+      totalItems: items.length,
       totalPrice,
     };
   }

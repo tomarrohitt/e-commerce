@@ -4,12 +4,10 @@ import productController from "../controller/product-controller";
 
 const productRouter = Router();
 
-productRouter.use(requireAuth);
-
 productRouter.get("/", productController.listProducts);
 productRouter.get("/:id", productController.getProduct);
 
-// productRouter.use(requireAdmin);
+productRouter.use(requireAuth, requireAdmin);
 
 productRouter.post("/", productController.createProduct);
 productRouter.delete("/:id", productController.deleteProduct);

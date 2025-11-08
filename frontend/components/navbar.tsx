@@ -50,19 +50,7 @@ export default function Navbar() {
             </button>
 
             {/* Dropdown Menu */}
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
-              <Link
-                href="/dashboard"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600"
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/orders"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600"
-              >
-                My Orders
-              </Link>
+            <div className="absolute right-[-10] top-10 w-38 bg-white rounded-lg shadow-lg py-2 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
               <Link
                 href="/profile"
                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600"
@@ -110,61 +98,6 @@ export default function Navbar() {
     );
   };
 
-  // 7. Helper for mobile auth buttons
-  const renderMobileAuthSection = () => {
-    if (isLoading) {
-      return (
-        // Changed w-80 to w-full
-        <div className="space-y-3 animate-pulse w-full">
-          <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-          <div className="h-8 bg-gray-200 rounded w-full"></div>
-        </div>
-      );
-    }
-
-    if (isAuthenticated) {
-      return (
-        <>
-          <Link
-            href="/dashboard"
-            className="block text-gray-700 hover:text-purple-600"
-          >
-            Dashboard
-          </Link>
-          <Link
-            href="/orders"
-            className="block text-gray-700 hover:text-purple-600"
-          >
-            My Orders
-          </Link>
-          <button
-            onClick={signOut}
-            className="block w-full text-left text-red-600 hover:text-red-700"
-          >
-            Sign Out
-          </button>
-        </>
-      );
-    }
-
-    return (
-      <>
-        <Link
-          href="/sign-in"
-          className="block text-gray-700 hover:text-purple-600"
-        >
-          Sign In
-        </Link>
-        <Link
-          href="/sign-up"
-          className="block bg-purple-600 text-white px-4 py-2 rounded-lg text-center"
-        >
-          Sign Up
-        </Link>
-      </>
-    );
-  };
-
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -182,16 +115,16 @@ export default function Navbar() {
               Home
             </Link>
             <Link
-              href="/products"
+              href="/dashboard"
               className="text-gray-700 hover:text-purple-600 transition-colors"
             >
-              Products
+              Dashboard
             </Link>
             <Link
-              href="/categories"
+              href="/orders"
               className="text-gray-700 hover:text-purple-600 transition-colors"
             >
-              Categories
+              My Orders
             </Link>
           </div>
 
@@ -222,36 +155,8 @@ export default function Navbar() {
 
             {renderAuthSection()}
           </div>
-
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden text-gray-700"
-          ></button>
         </div>
       </div>
-
-      {mobileMenuOpen && (
-        <div className="md:hidden border-t border-gray-200 bg-white">
-          <div className="px-4 py-3 space-y-3">
-            <Link
-              href="/"
-              className="block text-gray-700 hover:text-purple-600"
-            >
-              Home
-            </Link>
-            <Link
-              href="/cart"
-              className="block text-gray-700 hover:text-purple-600"
-            >
-              Cart
-            </Link>
-
-            <hr className="my-2" />
-
-            {renderMobileAuthSection()}
-          </div>
-        </div>
-      )}
     </nav>
   );
 }

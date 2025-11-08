@@ -24,29 +24,18 @@ const getAuthHeaders = (token?: string) => {
 // Request interceptor to add auth token if needed
 api.interceptors.request.use(
   (config) => {
-    // Better-auth uses cookies, but if you switch to Bearer tokens:
-    // const token = localStorage.getItem('token');
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
     return config;
   },
   (error) => {
     return Promise.reject(error);
   }
 );
-
-// Response interceptor for error handling
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     if (error.response) {
-      // Server responded with error
       const data = error.response.data as any;
-
-      // Handle specific status codes
       if (error.response.status === 401) {
-        // Unauthorized - redirect to login
         if (
           typeof window !== "undefined" &&
           !window.location.pathname.includes("/sign-in")
@@ -108,6 +97,14 @@ export const addressService = {
    */
   async getAddress(id: string) {
     const response = await api.get(`/address/${id}`);
+    return response.data;
+  },
+
+  /**
+   * Get address count for current user
+   */
+  async getAddressCount() {
+    const response = await api.get("/address/count");
     return response.data;
   },
 

@@ -139,8 +139,6 @@ class OrderController {
         stripUnknown: true,
       });
 
-      console.log({ error });
-
       if (error) {
         return res.status(400).json({
           error: error.details.map((detail) => ({

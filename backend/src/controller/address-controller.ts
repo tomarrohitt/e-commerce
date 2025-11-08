@@ -185,7 +185,6 @@ class AddressController {
   }
   async findByUserIdAdmin(req: Request, res: Response) {
     try {
-      console.log(req.params);
       const addresses = await addressRepository.findByUserId(req.params.userId);
       if (!addresses) {
         return res.status(400).json({
@@ -247,6 +246,18 @@ class AddressController {
         });
       }
       res.status(201).json(addresses);
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(500).json({ error: error.message });
+      }
+      res.status(500).json({ error, message: "Internal server error" });
+    }
+  }
+
+  async getAddressCount(req: Request, res: Response) {
+    try {
+      const count = await addressRepository.addressCount(req.user.id);
+      res.status(200).json({ count });
     } catch (error) {
       if (error instanceof Error) {
         return res.status(500).json({ error: error.message });

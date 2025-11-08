@@ -2,21 +2,44 @@
 "use client";
 
 import { useAuth } from "@/contexts/auth-context";
+import { useCart } from "@/contexts/cart-context";
+import { addressService, orderService } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  const { cartCount } = useCart();
+
+  const { data: orderSummary, isLoading: isLoadingOrderSummary } = useQuery({
+    queryKey: ["order-summary"],
+    queryFn: () => orderService.getOrderSummary(),
+    enabled: isAuthenticated,
+    initialData: { totalOrders: 0 },
+    staleTime: 0,
+  });
+
+  const { data: addressCount, isLoading: isLoadingAddressCount } = useQuery({
+    queryKey: ["address-count"],
+    queryFn: () => addressService.getAddressCount(),
+    enabled: isAuthenticated,
+
+    initialData: { total: 0 },
+    staleTime: 0,
+  });
+
+  const isLoading = isLoadingAddressCount || isLoadingOrderSummary;
 
   const stats = [
     {
       title: "Total Orders",
-      value: "0",
+      value: orderSummary.totalOrders,
       icon: "📦",
       href: "/orders",
     },
     {
       title: "Cart Items",
-      value: "0",
+      value: cartCount,
       icon: "🛒",
       href: "/cart",
     },
@@ -28,7 +51,7 @@ export default function DashboardPage() {
     },
     {
       title: "Addresses",
-      value: "0",
+      value: addressCount.count,
       icon: "📍",
       href: "/addresses",
     },
@@ -37,7 +60,7 @@ export default function DashboardPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Welcome Section */}
-      <div className="bg-gradient-linear-r from-purple-600 to-indigo-700 rounded-2xl p-8 text-white mb-8">
+      <div className="bg-linear-to-r from-purple-600 to-indigo-700 rounded-2xl p-8 text-white mb-8">
         <h1 className="text-3xl font-bold mb-2">
           Welcome back, {user?.name}! 👋
         </h1>
@@ -71,7 +94,7 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link
-            href="/products"
+            href="/"
             className="flex items-center space-x-3 p-4 rounded-lg border-2 border-gray-200 hover:border-purple-600 hover:bg-purple-50 transition-all"
           >
             <span className="text-2xl">🛍️</span>

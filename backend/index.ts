@@ -21,16 +21,31 @@ import orderRouter from "./src/router/order-router";
 
 const app = express();
 const PORT = config.port || 4000;
+const trustedOrigins = ["http://localhost:3000", "http://localhost:4000"];
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin!;
+  if (trustedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, X-CSRF-Token"
+  );
+  // optional: expose headers if needed
+  // res.setHeader("Access-Control-Expose-Headers", "...");
+  if (req.method === "OPTIONS") return res.sendStatus(200);
+  next();
+});
 
 app.use(helmet());
 app.use(compression());
 
-app.use(
-  cors({
-    origin: process.env.BETTER_AUTH_URL,
-    credentials: true,
-  })
-);
 app.all("/api/auth/*splat", toNodeHandler(auth));
 
 app.use(cookieParser());

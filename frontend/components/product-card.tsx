@@ -14,7 +14,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     <Link href={`/products/${product.id}`}>
       <div className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 h-full flex flex-col">
         {/* Image Section */}
-        <div className="relative h-48 bg-gradient-linear-br from-purple-400 to-indigo-600 overflow-hidden">
+        <div className="relative h-48 bg-lineaer-to-br from-purple-400 to-indigo-600 overflow-hidden">
           {product.images.length > 0 ? (
             <img
               src={product.images[0]}

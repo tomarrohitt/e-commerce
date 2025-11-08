@@ -1,11 +1,9 @@
 // src/app/layout.tsx (UPDATE)
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Toaster } from "react-hot-toast";
-import { CartProvider } from "@/contexts/cart-context"; // ✅ Add this
-import "./globals.css";
 import Providers from "@/components/provider";
-import Navbar from "@/components/navbar";
+import Navbar from "@//components/navbar";
+import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 

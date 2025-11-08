@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { requireAdmin, requireAuth } from "../middleware/auth-middleware";
+import { requireAuth } from "../middleware/auth-middleware";
 import addressController from "../controller/address-controller";
 
 const addressRouter = Router();
@@ -9,6 +9,7 @@ addressRouter.use(requireAuth);
 addressRouter.post("/", addressController.createAddress);
 
 addressRouter.get("/", addressController.findByUserId);
+addressRouter.get("/count", addressController.getAddressCount);
 
 addressRouter.get("/default", addressController.getDefaultAddress);
 

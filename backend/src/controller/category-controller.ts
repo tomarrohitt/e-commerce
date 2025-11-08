@@ -35,8 +35,6 @@ class CategoryController {
   }
 
   async getCategoryById(req: Request, res: Response) {
-    console.log({ req: req.params });
-
     try {
       const category = await categoryRepository.findbyId(req.params.id);
       if (!category) {
@@ -51,7 +49,6 @@ class CategoryController {
     }
   }
   async getCategoryBySlug(req: Request, res: Response) {
-    console.log({ req: req.params });
     try {
       const category = await categoryRepository.findBySlug(req.params.slug);
       res.status(200).json({ category });

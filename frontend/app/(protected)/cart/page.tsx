@@ -138,7 +138,7 @@ export default function CartPage() {
                 className="bg-white rounded-xl shadow-md p-6 flex space-x-4"
               >
                 <Link href={`/products/${item.productId}`} className="shrink-0">
-                  <div className="w-24 h-24 bg-gradient-linear-br from-purple-400 to-indigo-600 rounded-lg overflow-hidden">
+                  <div className="w-24 h-24 bg-linear-linear-br from-purple-400 to-indigo-600 rounded-lg overflow-hidden">
                     {item.product.images.length > 0 ? (
                       <img
                         src={item.product.images[0]}
