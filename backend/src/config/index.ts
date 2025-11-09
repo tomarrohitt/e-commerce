@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { S3Client } from "@aws-sdk/client-s3";
+import Stripe from "stripe";
 
 export const config = {
   port: process.env.PORT,
@@ -12,4 +13,8 @@ export const config = {
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
     },
   }),
+  stripe: new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: "2025-10-29.clover",
+  }),
+  stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
 };

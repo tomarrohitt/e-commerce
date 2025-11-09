@@ -7,9 +7,14 @@ import cartService from "./cart-service";
 import { ValidateUser } from "../types";
 import { getSecureWhere } from "../utils/get-where";
 import { OrderStatus } from "../../generated/prisma/client";
+import stripeService from "./stripe-service";
 
 class OrderService {
-  async createOrderFromCart(user: ValidateUser, shippingAddressId: string) {
+  async createOrderFromCart(
+    user: ValidateUser,
+    shippingAddressId: string,
+    paymentMethod: string
+  ) {
     const where = getSecureWhere(shippingAddressId, user);
     const address = await addressRepository.findById(where);
 
@@ -44,6 +49,20 @@ class OrderService {
           productRepository.updateStock(item.productId, -item.quantity)
         )
       );
+
+      if (paymentMethod === "stripe") {
+        const paymentIntent = await stripeService.createPaymentIntent(
+          order.id,
+          totalAmount,
+          user.id
+        );
+
+        return {
+          ...order,
+          clientSecret: paymentIntent.clientSecret,
+          paymentIntentId: paymentIntent.paymentIntentId,
+        };
+      }
 
       await cartRepository.clearCart(user.id);
 
@@ -172,6 +191,25 @@ class OrderService {
         currentPage,
       },
     };
+  }
+
+  async refundOrder(orderId: string, user: ValidateUser, amount?: number) {
+    const order = await this.getOrderById(orderId, user);
+
+    // Only admin can refund
+    if (user.role !== "admin") {
+      throw new Error("Only administrators can process refunds");
+    }
+
+    if (order.status === OrderStatus.refunded) {
+      throw new Error("Order has already been refunded");
+    }
+
+    if (!order.stripePaymentIntentId) {
+      throw new Error("Order has no payment to refund");
+    }
+
+    return await stripeService.refundPayment(orderId, amount);
   }
 }
 

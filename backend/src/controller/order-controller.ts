@@ -6,7 +6,9 @@ import {
   updateOrderStatusSchema,
   listOrdersSchema,
   listAdminOrdersSchema,
+  refundOrderSchema,
 } from "../lib/order-validation";
+import stripeService from "../service/stripe-service";
 
 class OrderController {
   async createOrder(req: Request, res: Response) {
@@ -30,7 +32,8 @@ class OrderController {
           id: req.user.id,
           role: req.user.role!,
         },
-        value.shippingAddressId
+        value.shippingAddressId,
+        value.paymentMethod
       );
 
       res.status(201).json({
@@ -212,6 +215,65 @@ class OrderController {
     } catch (error) {
       if (error instanceof Error) {
         return res.status(500).json({ error: error.message });
+      }
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+
+  async handleStripeWebhook(req: Request, res: Response) {
+    const signature = req.headers["stripe-signature"];
+
+    if (!signature) {
+      return res.status(400).json({ error: "No signature provided" });
+    }
+
+    try {
+      await stripeService.handleWebhook(
+        signature as string,
+        req.body // Raw body buffer
+      );
+
+      res.json({ received: true });
+    } catch (error) {
+      console.log("Webhook error", { error });
+      return res.status(400).json({
+        error: error instanceof Error ? error.message : "Webhook failed",
+      });
+    }
+  }
+
+  async refundOrder(req: Request, res: Response) {
+    try {
+      const { error, value } = refundOrderSchema.validate(req.body, {
+        abortEarly: false,
+        stripUnknown: true,
+      });
+
+      if (error) {
+        return res.status(400).json({
+          error: error.details.map((detail) => ({
+            field: detail.path[0],
+            message: detail.message,
+          })),
+        });
+      }
+
+      const refund = await orderService.refundOrder(
+        req.params.id,
+        {
+          id: req.user.id,
+          role: req.user.role!,
+        },
+        value.amount
+      );
+
+      res.status(200).json({
+        message: "Refund processed successfully",
+        refund,
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(400).json({ error: error.message });
       }
       res.status(500).json({ error: "Internal server error" });
     }

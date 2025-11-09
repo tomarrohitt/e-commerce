@@ -11,6 +11,10 @@ export const createOrderSchema = Joi.object({
     .default("stripe"),
 });
 
+export const refundOrderSchema = Joi.object({
+  amount: Joi.number().positive().precision(2).optional(),
+});
+
 export const updateOrderStatusSchema = Joi.object({
   status: Joi.string()
     .valid(...Object.values(OrderStatus))

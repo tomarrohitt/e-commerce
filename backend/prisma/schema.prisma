@@ -25,7 +25,9 @@ enum OrderStatus {
   shipped      
   delivered   
   cancelled    
-  refunded     
+  refunded  
+  partially_refunded   
+  payment_failed
 }
 
 

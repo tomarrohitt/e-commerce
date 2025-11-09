@@ -37,8 +37,7 @@ app.use((req, res, next) => {
     "Access-Control-Allow-Headers",
     "Content-Type, Authorization, X-CSRF-Token"
   );
-  // optional: expose headers if needed
-  // res.setHeader("Access-Control-Expose-Headers", "...");
+
   if (req.method === "OPTIONS") return res.sendStatus(200);
   next();
 });
@@ -47,6 +46,8 @@ app.use(helmet());
 app.use(compression());
 
 app.all("/api/auth/*splat", toNodeHandler(auth));
+
+app.use("/api/orders/webhook/stripe", orderRouter);
 
 app.use(cookieParser());
 
