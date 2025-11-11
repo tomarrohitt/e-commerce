@@ -1,33 +1,12 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  ReactNode,
-} from "react";
+import { createContext, useContext, ReactNode, useCallback } from "react";
 import { cartService } from "@/lib/api";
 import { useAuth } from "./auth-context";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Cart } from "../../backend/src/types/index";
 
-interface CartItem {
-  productId: string;
-  quantity: number;
-  addedAt: string;
-  product: {
-    id: string;
-    name: string;
-    price: number;
-    stockQuantity: number;
-    images: string[];
-  };
-}
-
-interface Cart {
-  items: CartItem[];
-  totalItems: number;
-  totalPrice: number;
-}
+// ... (Your CartItem and Cart interfaces are perfect) ...
 
 interface CartContextType {
   cart: Cart | null;
@@ -44,37 +23,29 @@ const CartContext = createContext<CartContextType>({
 });
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [cart, setCart] = useState<Cart | null>(null);
-  const [loading, setLoading] = useState(true);
-  const { isAuthenticated } = useAuth();
+  // 1. Get BOTH values from useAuth, and rename isLoading
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      refreshCart();
-    } else {
-      setCart(null);
-      setLoading(false);
-    }
-  }, [isAuthenticated]);
+  // 2. Rename the isLoading from useQuery
+  const { data: cart, isLoading: isCartLoading } = useQuery({
+    queryKey: ["cart"],
+    queryFn: () => cartService.getCart(),
+    enabled: isAuthenticated, // This is still correct
+    staleTime: 1000 * 60 * 5,
+  });
+  const refreshCart = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ["cart"] });
+  }, [queryClient]);
 
-  const refreshCart = async () => {
-    try {
-      setLoading(true);
-      const data = await cartService.getCart();
-      setCart(data);
-    } catch (error) {
-      console.error("Failed to load cart:", error);
-      setCart(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // 4. The REAL loading state is if auth OR the cart is loading
+  const loading = isAuthLoading || isCartLoading;
 
   return (
     <CartContext.Provider
       value={{
-        cart,
-        loading,
+        cart: cart || null,
+        loading, // 5. Pass the combined loading state
         refreshCart,
         cartCount: cart?.totalItems || 0,
       }}

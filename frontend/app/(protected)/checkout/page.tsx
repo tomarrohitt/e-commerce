@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/contexts/cart-context";
 import { addressService, orderService } from "@/lib/api";
 import toast from "react-hot-toast";
+import { useAuth } from "@/contexts/auth-context";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 interface Address {
   id: string;
@@ -20,70 +22,71 @@ interface Address {
 
 export default function CheckoutPage() {
   const router = useRouter();
+
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const { cart, loading: cartLoading } = useCart();
-  const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string>("");
   const [paymentMethod, setPaymentMethod] = useState<"stripe" | "cod">(
     "stripe"
   );
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
 
+  const { data: addressData, isLoading: addressesLoading } = useQuery({
+    queryKey: ["addresses"],
+    queryFn: addressService.getAddresses,
+    // 3. Add 'enabled' flag to wait for auth
+    enabled: isAuthenticated,
+  });
+
+  const addresses: Address[] = addressData?.addresses || [];
+
+  const { mutate: placeOrder, isPending: isSubmitting } = useMutation({
+    // ... mutationFn, onSuccess, onError (all correct) ...
+    mutationFn: (data: {
+      shippingAddressId: string;
+      paymentMethod: "stripe" | "cod";
+    }) => orderService.createOrder(data),
+
+    onSuccess: (response) => {
+      toast.success("Order placed successfully!");
+      if (paymentMethod === "stripe" && response.order.clientSecret) {
+        router.push(
+          `/checkout/payment?orderId=${response.order.id}&clientSecret=${response.order.clientSecret}`
+        );
+      } else {
+        router.push(`/orders/${response.order.id}`);
+      }
+    },
+    onError: (error: any) => {
+      toast.error(error.error || "Failed to place order");
+    },
+  });
+
+  // 4. This useEffect auto-selects the default address.
+  // This was in my original refactor but missing from your code.
   useEffect(() => {
-    loadAddresses();
-  }, []);
-
-  const loadAddresses = async () => {
-    try {
-      const response = await addressService.getAddresses();
-      setAddresses(response.addresses);
-
-      // Auto-select default address
-      const defaultAddress = response.addresses.find(
-        (a: Address) => a.isDefault
-      );
+    if (addresses.length > 0 && !selectedAddressId) {
+      const defaultAddress = addresses.find((a) => a.isDefault);
       if (defaultAddress) {
         setSelectedAddressId(defaultAddress.id);
       }
-    } catch (error: any) {
-      toast.error(error.error || "Failed to load addresses");
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [addressData?.addresses, selectedAddressId]);
 
   const handlePlaceOrder = async () => {
     if (!selectedAddressId) {
       toast.error("Please select a shipping address");
       return;
     }
-
-    try {
-      setSubmitting(true);
-
-      const response = await orderService.createOrder({
-        shippingAddressId: selectedAddressId,
-        paymentMethod,
-      });
-
-      toast.success("Order placed successfully!");
-
-      // If payment method is Stripe, redirect to payment page
-      if (paymentMethod === "stripe" && response.order.clientSecret) {
-        router.push(
-          `/checkout/payment?orderId=${response.order.id}&clientSecret=${response.order.clientSecret}`
-        );
-      } else {
-        // For COD, redirect to order confirmation
-        router.push(`/orders/${response.order.id}`);
-      }
-    } catch (error: any) {
-      toast.error(error.error || "Failed to place order");
-      setSubmitting(false);
-    }
+    placeOrder({
+      shippingAddressId: selectedAddressId,
+      paymentMethod,
+    });
   };
 
-  if (loading || cartLoading) {
+  // 5. Combine ALL loading states
+  const isLoading = isAuthLoading || addressesLoading || cartLoading;
+
+  if (isLoading || cartLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="animate-pulse">
@@ -312,10 +315,10 @@ export default function CheckoutPage() {
             {/* Place Order Button */}
             <button
               onClick={handlePlaceOrder}
-              disabled={!selectedAddressId || submitting}
+              disabled={!selectedAddressId || isSubmitting}
               className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed mb-3"
             >
-              {submitting ? "Processing..." : "Place Order"}
+              {isSubmitting ? "Processing..." : "Place Order"}
             </button>
 
             <p className="text-xs text-gray-500 text-center">

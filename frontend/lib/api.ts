@@ -1,6 +1,7 @@
 // src/lib/api.ts
 import axios, { AxiosError } from "axios";
 import type { PaginatedProducts, Category } from "@/types";
+import { CloudCog } from "lucide-react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -12,15 +13,6 @@ export const api = axios.create({
   },
 });
 
-const getAuthHeaders = (token?: string) => {
-  if (token) {
-    return {
-      Authorization: `Bearer ${token}`,
-    };
-  }
-  return {};
-};
-
 // Request interceptor to add auth token if needed
 api.interceptors.request.use(
   (config) => {
@@ -28,7 +20,7 @@ api.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 api.interceptors.response.use(
   (response) => response,
@@ -52,7 +44,7 @@ api.interceptors.response.use(
       // Something else happened
       return Promise.reject({ error: error.message });
     }
-  }
+  },
 );
 
 // src/lib/api.ts (ADD these functions at the end)
@@ -135,7 +127,7 @@ export const addressService = {
       state?: string;
       zipCode?: string;
       country?: string;
-    }
+    },
   ) {
     const response = await api.patch(`/address/${id}`, data);
     return response.data;
@@ -290,7 +282,9 @@ export const cartService = {
    * Update cart item quantity
    */
   async updateCartItem(productId: string, quantity: number) {
-    const response = await api.put(`/cart/${productId}`, { quantity }); // Changed from /cart/items/:id
+    const response = await api.patch(`/cart/${productId}`, { quantity }); // Changed from /cart/items/:id
+    console.log({ response });
+
     return response.data;
   },
 

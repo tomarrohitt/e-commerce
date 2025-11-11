@@ -9,16 +9,15 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 export default function OrdersPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
 
   // 2. Make sure you are CALLING the hook here to get the instance
   const queryClient = useQueryClient();
 
-  const { data: ordersData, isLoading: loading } = useQuery({
+  const { data: ordersData, isLoading: isDataLoading } = useQuery({
     queryKey: ["orders"],
     queryFn: () => orderService.getOrders(),
     enabled: isAuthenticated,
-    initialData: { orders: [] }, // Adjust this to match your API response shape
     staleTime: 0,
   });
 
@@ -49,6 +48,8 @@ export default function OrdersPage() {
     return colors[status.toLowerCase()] || "bg-gray-100 text-gray-800";
   };
 
+  const loading = isAuthLoading || isDataLoading;
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -70,7 +71,7 @@ export default function OrdersPage() {
         <h1 className="text-3xl font-bold text-gray-900 mb-2">My Orders</h1>
         <p className="text-gray-600">View and track all your orders</p>
       </div>
-      {orders.length === 0 ? (
+      {!loading && orders.length === 0 ? (
         <div className="bg-white rounded-xl shadow-md p-12 text-center">
           <div className="text-6xl mb-4">📦</div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">

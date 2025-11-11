@@ -14,7 +14,6 @@ import AddAddressModal from "@/components/address-modal"; // Import the modal
 export default function AddressesPage() {
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const queryClient = useQueryClient();
-  const router = useRouter(); // We don't use this, but I'll leave it in
 
   // 1. Add state to control the modal
   const [isModalOpen, setIsModalOpen] = useState(false);

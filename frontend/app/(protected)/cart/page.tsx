@@ -1,4 +1,3 @@
-// src/app/(protected)/cart/page.tsx (COMPLETE)
 "use client";
 import Link from "next/link";
 
@@ -13,6 +12,8 @@ export default function CartPage() {
   const { cart, loading, refreshCart } = useCart();
   const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set());
 
+  console.log(updatingItems);
+
   const handleUpdateQuantity = async (
     productId: string,
     newQuantity: number
@@ -23,7 +24,6 @@ export default function CartPage() {
       setUpdatingItems((prev) => new Set(prev).add(productId));
       await cartService.updateCartItem(productId, newQuantity);
       await refreshCart();
-      toast.success("Cart updated");
     } catch (error: any) {
       toast.error(error.error || "Failed to update cart");
     } finally {
@@ -40,7 +40,6 @@ export default function CartPage() {
       setUpdatingItems((prev) => new Set(prev).add(productId));
       await cartService.removeFromCart(productId);
       await refreshCart();
-      toast.success("Item removed from cart");
     } catch (error: any) {
       toast.error(error.error || "Failed to remove item");
     } finally {
@@ -58,7 +57,6 @@ export default function CartPage() {
     try {
       await cartService.clearCart();
       await refreshCart();
-      toast.success("Cart cleared");
     } catch (error: any) {
       toast.error(error.error || "Failed to clear cart");
     }
