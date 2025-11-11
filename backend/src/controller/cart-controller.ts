@@ -52,7 +52,7 @@ class CartController {
 
       await cartService.updateCartItem(
         req.user.id,
-        req.params.id,
+        req.params.productId,
         value.quantity
       );
       res.status(201).json({
@@ -67,7 +67,7 @@ class CartController {
   }
   async removeFromCart(req: Request, res: Response) {
     try {
-      await cartService.removeFromCard(req.user.id, req.params.id);
+      await cartService.removeFromCard(req.user.id, req.params.productId);
       res.status(204).json({
         message: "Item removed from cart",
       });

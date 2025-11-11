@@ -1,4 +1,3 @@
-import cors from "cors";
 import helmet from "helmet";
 import compression from "compression";
 
@@ -18,6 +17,9 @@ import addressRouter from "./src/router/address-router";
 import adminAddressRouter from "./src/router/admin-address-router";
 import cartRouter from "./src/router/cart-router";
 import orderRouter from "./src/router/order-router";
+import orderController from "./src/controller/order-controller";
+import { rabbitMq } from "./src/config/rabbitmq";
+import { eventPublisher } from "./src/events/publisher";
 
 const app = express();
 const PORT = config.port || 4000;
@@ -47,8 +49,11 @@ app.use(compression());
 
 app.all("/api/auth/*splat", toNodeHandler(auth));
 
-app.use("/api/orders/webhook/stripe", orderRouter);
-
+app.post(
+  "/api/webhook/stripe",
+  express.raw({ type: "application/json" }),
+  orderController.handleStripeWebhook
+);
 app.use(cookieParser());
 
 app.use(express.json());
@@ -64,9 +69,19 @@ app.use("/api/orders", orderRouter);
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT}`);
-});
+async function startServer() {
+  try {
+    await rabbitMq.connect();
+    await eventPublisher.initialize();
+
+    app.listen(PORT, () => {
+      logger.info(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    logger.error("Failed to start server. Shutting down.", { error });
+    process.exit(1);
+  }
+}
 
 const shutdown = async () => {
   logger.info("Shutting down gracefully...");
@@ -76,3 +91,5 @@ const shutdown = async () => {
 
 process.on("SIGTERM", shutdown);
 process.on("SIGINT", shutdown);
+
+startServer();

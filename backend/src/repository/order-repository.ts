@@ -1,22 +1,25 @@
-import { stat } from "fs";
 import { OrderStatus, Prisma } from "../../generated/prisma/client";
 import { prisma } from "../config/prisma";
 import { safeQuery } from "../middleware/prisma-error-middleware";
 
 class OrderRepository {
-  async create(data: {
-    userId: string;
-    totalAmount: number;
-    shippingAddressId: string;
-    items: {
-      productId: string;
-      quantity: number;
-      priceAtPurchase: number;
-    }[];
-  }) {
+  async create(
+    data: {
+      userId: string;
+      totalAmount: number;
+      shippingAddressId: string;
+      items: {
+        productId: string;
+        quantity: number;
+        priceAtPurchase: number;
+      }[];
+    },
+    tx?: Prisma.TransactionClient
+  ) {
+    const db = tx || prisma;
     return await safeQuery(
       () =>
-        prisma.order.create({
+        db.order.create({
           data: {
             userId: data.userId,
             totalAmount: data.totalAmount,
@@ -26,30 +29,35 @@ class OrderRepository {
               create: data.items,
             },
           },
-          include: {
-            orderItems: {
-              include: {
-                product: {
-                  select: {
-                    id: true,
-                    name: true,
-                    images: true,
-                  },
-                },
-              },
-            },
-            shippingAddress: true,
-          },
         }),
 
       { model: "Order", operation: "create" }
     );
   }
 
-  async findById(id: string) {
+  async findOrderForEvent(orderId: string) {
     return await safeQuery(
       () =>
         prisma.order.findUnique({
+          where: { id: orderId },
+          include: {
+            user: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+          },
+        }),
+      { model: "Order", operation: "findById" }
+    );
+  }
+
+  async findById(id: string, tx?: Prisma.TransactionClient) {
+    const db = tx || prisma;
+    return await safeQuery(
+      () =>
+        db.order.findUnique({
           where: { id },
           include: {
             orderItems: {
@@ -69,6 +77,27 @@ class OrderRepository {
                 id: true,
                 name: true,
                 email: true,
+              },
+            },
+          },
+        }),
+      { model: "Order", operation: "findById" }
+    );
+  }
+  async findByIdMin(id: string) {
+    return await safeQuery(
+      () =>
+        prisma.order.findUnique({
+          where: { id },
+          include: {
+            orderItems: {
+              include: {
+                product: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
               },
             },
           },
@@ -121,10 +150,15 @@ class OrderRepository {
     );
   }
 
-  async updatePaymentIntentId(id: string, paymentIntentId: string) {
+  async updatePaymentIntentId(
+    id: string,
+    paymentIntentId: string,
+    tx: Prisma.TransactionClient
+  ) {
+    const db = tx || prisma;
     return await safeQuery(
       () =>
-        prisma.order.update({
+        db.order.update({
           where: { id },
           data: {
             stripePaymentIntentId: paymentIntentId,
@@ -140,13 +174,6 @@ class OrderRepository {
       () =>
         prisma.order.findFirst({
           where: { stripePaymentIntentId: paymentIntentId },
-          include: {
-            orderItems: {
-              include: {
-                product: true,
-              },
-            },
-          },
         }),
       { model: "Order", operation: "findByPaymentIntentId" }
     );
@@ -234,6 +261,17 @@ class OrderRepository {
           where,
         }),
       { model: "Order", operation: "countAllOrders" }
+    );
+  }
+
+  async updateInvoiceUrl(orderId: string, invoiceUrl: string) {
+    return await safeQuery(
+      () =>
+        prisma.order.update({
+          where: { id: orderId },
+          data: { invoiceUrl },
+        }),
+      { model: "Order", operation: "updateInvoiceUrl" }
     );
   }
 }

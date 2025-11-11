@@ -40,4 +40,11 @@ export interface Cart {
   totalPrice: number;
 }
 
-export type ValidateUser = { id: string; role: string };
+export type ValidateUser = {
+  id: string;
+  email: string;
+  name: string;
+  image?: string | null;
+  emailVerified?: boolean;
+  role?: string | null;
+};

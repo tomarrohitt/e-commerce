@@ -164,10 +164,15 @@ class ProductRepository {
     );
   }
 
-  async updateStock(id: string, quantity: number) {
+  async updateStock(
+    id: string,
+    quantity: number,
+    tx?: Prisma.TransactionClient
+  ) {
+    const db = tx || prisma;
     return await safeQuery(
       () =>
-        prisma.product.update({
+        db.product.update({
           where: { id },
           data: {
             stockQuantity: { increment: quantity },

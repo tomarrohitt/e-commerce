@@ -59,10 +59,7 @@ class AddressController {
         });
       }
 
-      const where = getSecureWhere(req.params.id, {
-        id: req.user.id,
-        role: req.user.role!,
-      });
+      const where = getSecureWhere(req.params.id, req.user);
 
       const address = await addressRepository.update(where, value);
       res.status(201).json({
@@ -99,10 +96,7 @@ class AddressController {
         });
       }
 
-      const where = getSecureWhere(req.params.id, {
-        id: req.user.id,
-        role: req.user.role!,
-      });
+      const where = getSecureWhere(req.params.id, req.user);
 
       await addressRepository.delete(where);
       res.status(201).json({
@@ -202,10 +196,7 @@ class AddressController {
 
   async getAddressById(req: Request, res: Response) {
     try {
-      const where = getSecureWhere(req.params.id, {
-        id: req.user.id,
-        role: req.user.role!,
-      });
+      const where = getSecureWhere(req.params.id, req.user);
 
       const address = await addressRepository.findById(where);
       if (!address) {

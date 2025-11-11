@@ -2,17 +2,9 @@
 import { Router } from "express";
 import orderController from "../controller/order-controller";
 import { requireAdmin, requireAuth } from "../middleware/auth-middleware";
-import express from "express";
 
 const orderRouter = Router();
 
-orderRouter.post(
-  "/webhook/stripe",
-  express.raw({ type: "application/json" }), // Raw body for signature verification
-  orderController.handleStripeWebhook
-);
-
-// All routes require authentication
 orderRouter.use(requireAuth);
 
 // User routes

@@ -1,11 +1,21 @@
 import "dotenv/config";
 import { S3Client } from "@aws-sdk/client-s3";
 import Stripe from "stripe";
+import nodemailer from "nodemailer";
 
 export const config = {
   port: process.env.PORT,
   jwtSecret: process.env.JWT_SECRET as string,
   redisUrl: process.env.REDIS_URL as string,
+  emailProvider: nodemailer.createTransport({
+    host: process.env.SMTP_HOST!,
+    port: parseInt(process.env.SMTP_PORT!),
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER!,
+      pass: process.env.SMTP_PASS!,
+    },
+  }),
   s3Client: new S3Client({
     region: process.env.AWS_REGION!,
     credentials: {

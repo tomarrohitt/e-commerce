@@ -1,13 +1,21 @@
 import { config } from "../config";
 import { logger } from "../utils/logger";
 import orderRepository from "../repository/order-repository";
-import { OrderStatus } from "../../generated/prisma/client";
+import { OrderStatus, Prisma } from "../../generated/prisma/client";
 import Stripe from "stripe";
+import cartRepository from "../repository/cart-repository";
+import { eventPublisher, EventType } from "../events/publisher";
+import { randomUUID } from "crypto";
+import { TransactionClient } from "../../generated/prisma/internal/prismaNamespace";
 
 class StripeService {
-  async createPaymentIntent(orderId: string, amount: number, userId: string) {
+  async createPaymentIntent(
+    orderId: string,
+    userId: string,
+    tx: Prisma.TransactionClient
+  ) {
     try {
-      const order = await orderRepository.findById(orderId);
+      const order = await orderRepository.findById(orderId, tx);
 
       // 2. Validate the order
       if (!order) {
@@ -54,7 +62,12 @@ class StripeService {
         },
       });
 
-      await orderRepository.updatePaymentIntentId(orderId, paymentIntent.id);
+      await orderRepository.updatePaymentIntentId(
+        orderId,
+        paymentIntent.id,
+        tx
+      );
+      await cartRepository.clearCart(userId);
 
       logger.info(`Payment intent created for order ${orderId}`, {
         paymentIntentId: paymentIntent.id,
@@ -68,6 +81,9 @@ class StripeService {
       logger.error(`Failed to create payment intent for order ${orderId}`, {
         error,
       });
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      }
       throw new Error("Failed to create payment intent");
     }
   }
@@ -98,7 +114,7 @@ class StripeService {
           break;
 
         default:
-          logger.info(`Unhandled webhook event type: ${event.type}`);
+          break;
       }
 
       return { received: true };
@@ -124,7 +140,16 @@ class StripeService {
         paymentIntentId: paymentIntent.id,
       });
 
-      // TODO: Send confirmation email (next step)
+      await eventPublisher.publish({
+        eventId: randomUUID(),
+        eventType: EventType.ORDER_PAID,
+        timestamp: new Date(),
+        userId: order.userId,
+        data: {
+          orderId: order.id,
+          userId: order.userId,
+        },
+      });
     }
   }
 

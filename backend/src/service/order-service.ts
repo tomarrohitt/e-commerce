@@ -1,4 +1,3 @@
-// service/order-service.ts
 import addressRepository from "../repository/address-repository";
 import cartRepository from "../repository/cart-repository";
 import orderRepository from "../repository/order-repository";
@@ -8,6 +7,9 @@ import { ValidateUser } from "../types";
 import { getSecureWhere } from "../utils/get-where";
 import { OrderStatus } from "../../generated/prisma/client";
 import stripeService from "./stripe-service";
+import { eventPublisher, EventType } from "../events/publisher";
+import { randomUUID } from "crypto";
+import { prisma } from "../config/prisma";
 
 class OrderService {
   async createOrderFromCart(
@@ -31,40 +33,75 @@ class OrderService {
     const orderItems = cart.items.map((item) => ({
       productId: item.productId,
       quantity: item.quantity,
-      priceAtPurchase: item.product.price, // Lock price at order time
+      priceAtPurchase: item.product.price,
     }));
 
     const totalAmount = cart.totalPrice;
-
     try {
-      const order = await orderRepository.create({
-        userId: user.id,
-        totalAmount,
-        shippingAddressId,
-        items: orderItems,
-      });
-
-      await Promise.all(
-        orderItems.map((item) =>
-          productRepository.updateStock(item.productId, -item.quantity)
-        )
-      );
-
-      if (paymentMethod === "stripe") {
-        const paymentIntent = await stripeService.createPaymentIntent(
-          order.id,
-          totalAmount,
-          user.id
+      const { order, paymentIntent } = await prisma.$transaction(async (tx) => {
+        const createdOrder = await orderRepository.create(
+          {
+            userId: user.id,
+            totalAmount,
+            shippingAddressId,
+            items: orderItems,
+          },
+          tx
         );
 
+        await Promise.all(
+          orderItems.map((item) =>
+            productRepository.updateStock(item.productId, -item.quantity, tx)
+          )
+        );
+
+        let txPaymentIntent: {
+          clientSecret: string | null;
+          paymentIntentId: string;
+        } | null = null;
+
+        if (paymentMethod === "stripe") {
+          txPaymentIntent = await stripeService.createPaymentIntent(
+            createdOrder.id,
+            user.id,
+            tx
+          );
+        }
+
+        return { order: createdOrder, paymentIntent: txPaymentIntent };
+      });
+
+      await cartRepository.clearCart(user.id);
+      if (paymentIntent) {
+        const eventsOrderItems = cart.items.map((item) => ({
+          name: item.product.name,
+          quantity: item.quantity,
+          priceAtPurchase: item.product.price,
+        }));
+
+        await eventPublisher.publish({
+          eventId: randomUUID(),
+          eventType: EventType.ORDER_CREATED,
+          timestamp: new Date(),
+          userId: user.id,
+          data: {
+            userEmail: user.email,
+            userName: user.name,
+            orderId: order.id,
+            shippingAddress: address,
+            totalAmount: Number(order.totalAmount),
+            items: eventsOrderItems,
+          },
+        });
+      }
+
+      if (paymentIntent) {
         return {
           ...order,
           clientSecret: paymentIntent.clientSecret,
           paymentIntentId: paymentIntent.paymentIntentId,
         };
       }
-
-      await cartRepository.clearCart(user.id);
 
       return order;
     } catch (error) {
@@ -114,8 +151,12 @@ class OrderService {
     };
   }
 
-  async updateOrderStatus(orderId: string, status: OrderStatus) {
-    const order = await orderRepository.findById(orderId);
+  async updateOrderStatus(
+    orderId: string,
+    status: OrderStatus,
+    user: ValidateUser
+  ) {
+    const order = await orderRepository.findByIdMin(orderId);
 
     if (!order) {
       throw new Error("Order not found");
@@ -136,7 +177,22 @@ class OrderService {
       );
     }
 
-    return await orderRepository.updateStatus(orderId, status);
+    const updatedOrder = await orderRepository.updateStatus(orderId, status);
+
+    if (updatedOrder.status === OrderStatus.cancelled) {
+      await eventPublisher.publish({
+        eventId: randomUUID(),
+        eventType: EventType.ORDER_CANCELLED,
+        timestamp: new Date(),
+        userId: order.userId,
+        data: {
+          orderId: order.id,
+          userEmail: user.email,
+          userName: user.name,
+        },
+      });
+    }
+    return updatedOrder;
   }
 
   async getOrderSummary(user: ValidateUser) {

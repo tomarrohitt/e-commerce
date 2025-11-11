@@ -138,6 +138,7 @@ model Order {
   totalAmount           Decimal @map("total_amount") @db.Decimal(10, 2)
   status                OrderStatus @default(pending)
   paymentMethod         String? @map("payment_method")
+  invoiceUrl            String? @map("invoice_url")
   stripePaymentIntentId String? @map("stripe_payment_intent_id")
   shippingAddressId     String?     @map("shipping_address_id")
   createdAt             DateTime @default(now()) @map("created_at")

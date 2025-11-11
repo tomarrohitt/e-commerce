@@ -28,10 +28,7 @@ class OrderController {
       }
 
       const order = await orderService.createOrderFromCart(
-        {
-          id: req.user.id,
-          role: req.user.role!,
-        },
+        req.user,
         value.shippingAddressId,
         value.paymentMethod
       );
@@ -50,10 +47,7 @@ class OrderController {
 
   async getOrder(req: Request, res: Response) {
     try {
-      const order = await orderService.getOrderById(req.params.id, {
-        id: req.user.id,
-        role: req.user.role!,
-      });
+      const order = await orderService.getOrderById(req.params.id, req.user);
 
       res.status(200).json({ order });
     } catch (error) {
@@ -153,7 +147,8 @@ class OrderController {
 
       const order = await orderService.updateOrderStatus(
         req.params.id,
-        value.status as OrderStatus
+        value.status as OrderStatus,
+        req.user
       );
 
       res.status(200).json({
@@ -170,10 +165,7 @@ class OrderController {
 
   async cancelOrder(req: Request, res: Response) {
     try {
-      const order = await orderService.getOrderById(req.params.id, {
-        id: req.user.id,
-        role: req.user.role!,
-      });
+      const order = await orderService.getOrderById(req.params.id, req.user);
 
       if (order.userId !== req.user.id && req.user.role !== "admin") {
         return res
@@ -189,7 +181,8 @@ class OrderController {
 
       const updatedOrder = await orderService.updateOrderStatus(
         req.params.id,
-        OrderStatus.cancelled
+        OrderStatus.cancelled,
+        req.user
       );
 
       res.status(200).json({
@@ -206,10 +199,7 @@ class OrderController {
 
   async getOrderSummary(req: Request, res: Response) {
     try {
-      const summary = await orderService.getOrderSummary({
-        id: req.user.id,
-        role: req.user.role!,
-      });
+      const summary = await orderService.getOrderSummary(req.user);
 
       res.status(200).json(summary);
     } catch (error) {
@@ -260,10 +250,7 @@ class OrderController {
 
       const refund = await orderService.refundOrder(
         req.params.id,
-        {
-          id: req.user.id,
-          role: req.user.role!,
-        },
+        req.user,
         value.amount
       );
 
