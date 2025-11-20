@@ -3,7 +3,7 @@ import compression from "compression";
 
 import express from "express";
 import cookieParser from "cookie-parser";
-``;
+
 import { errorHandler } from "./src/middleware/error-middleware";
 import { logger } from "./src/utils/logger";
 import { prisma } from "./src/config/prisma";

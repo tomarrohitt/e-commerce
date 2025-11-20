@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@generated/orders"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id      String @id 
+  email   String @unique
+  name    String
+  
+  orders  Order[]
+
+  @@map("users")
+}
+
+model ProductCache {
+  id      String  @id 
+  name    String
+  price   Decimal
+  stock   Int
+  
+  @@map("products_cache")
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  userId        String      @map("user_id")
+  
+  status        OrderStatus @default(PENDING)
+  totalAmount   Decimal     @map("total_amount")
+
+  shippingAddress Json     
+  
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  user          User        @relation(fields: [userId], references: [id])
+  items         OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String  @id @default(cuid())
+  orderId     String  @map("order_id")
+  productId   String  @map("product_id") 
+  
+  name        String  
+  price       Decimal 
+  image       String?
+  quantity    Int
+
+  order       Order   @relation(fields: [orderId], references: [id])
+
+  @@map("order_items")
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model OutboxEvent {
+  id          String   @id @default(cuid())
+  aggregateId String   @map("aggregate_id")
+  eventType   String   @map("event_type")
+  payload     Json
+  createdAt   DateTime @default(now()) @map("created_at")
+  status      String   @default("PENDING")
+
+  @@index([status, createdAt])
+  @@map("outbox_events")
+}

@@ -1,0 +1,12 @@
+{
+  "extends": "../../packages/tsconfig/base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "paths": {
+      "@generated/identity": ["./node_modules/@generated/identity"]
+    }
+  },
+  "references": [{ "path": "../../packages/common" }],
+  "include": ["src"]
+}

@@ -62,7 +62,7 @@ export async function validateImagesExist(keys: string[]) {
         new HeadObjectCommand({
           Bucket: process.env.AWS_BUCKET_NAME!,
           Key: key,
-        })
+        }),
       );
       return { key, exists: true };
     } catch (error) {
@@ -75,7 +75,7 @@ export async function validateImagesExist(keys: string[]) {
 
   if (missingImages.length > 0) {
     throw new Error(
-      `Some images were not uploaded: ${missingImages.map((m) => m.key).join(", ")}`
+      `Some images were not uploaded: ${missingImages.map((m) => m.key).join(", ")}`,
     );
   }
 
@@ -89,7 +89,7 @@ export async function deleteImage(key: string): Promise<boolean> {
       Key: key,
     });
 
-    const result = await config.s3Client.send(command);
+    await config.s3Client.send(command);
     return true;
   } catch (error) {
     console.error(`Failed to delete image ${key}:`, error);
@@ -98,7 +98,7 @@ export async function deleteImage(key: string): Promise<boolean> {
 }
 
 export async function deleteImages(
-  keys: string[]
+  keys: string[],
 ): Promise<{ deleted: string[]; failed: string[] }> {
   if (keys.length === 0) return { deleted: [], failed: [] };
 

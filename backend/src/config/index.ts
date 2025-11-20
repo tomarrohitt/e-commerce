@@ -5,6 +5,7 @@ import nodemailer from "nodemailer";
 
 export const config = {
   port: process.env.PORT,
+  clientUrl: process.env.CLIENT_URL as string,
   jwtSecret: process.env.JWT_SECRET as string,
   redisUrl: process.env.REDIS_URL as string,
   emailProvider: nodemailer.createTransport({

@@ -1,0 +1,9 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/common" },
+    { "path": "apps/identity" },
+    { "path": "apps/orders" },
+    { "path": "apps/api-gateway" }
+  ]
+}

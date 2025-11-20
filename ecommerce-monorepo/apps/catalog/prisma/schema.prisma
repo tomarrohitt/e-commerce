@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@generated/catalog"
+}
+datasource db {
+  provider = "postgresql"
+}
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  stock       Int      @default(0)
+  sku         String   @unique
+  images      String[]
+  isActive    Boolean  @default(true)
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  categoryId  String?  @map("category_id")
+  category    Category? @relation(fields: [categoryId], references: [id])
+
+  @@map("products")
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  products  Product[]
+
+  @@map("categories")
+}
+
+model OutboxEvent {
+  id          String   @id @default(cuid())
+  aggregateId String   @map("aggregate_id")
+  eventType   String   @map("event_type")
+  payload     Json
+  createdAt   DateTime @default(now()) @map("created_at")
+  status      String   @default("PENDING")
+
+  @@index([status, createdAt])
+  @@map("outbox_events")
+}

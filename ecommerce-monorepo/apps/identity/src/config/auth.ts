@@ -1,28 +1,25 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-
 import { prisma } from "./prisma";
 import { authHooks } from "../middleware/validation-middleware";
-import { eventPublisher, EventType } from "../events/publisher";
-import { randomUUID } from "crypto";
-import { config } from ".";
-import { AddressAggregateArgs } from "../../generated/prisma/models/Address";
+// import { eventPublisher } from "../events/publisher"; // TODO: Re-implement with RabbitMQ later
+import { EventType } from "@generated/identity";
 
 const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
-
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
   },
+
   session: {
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,
     cookieCache: {
       enabled: true,
-      maxAge: 5 * 60 * 60,
+      maxAge: 24 * 60 * 60,
     },
   },
 
@@ -37,13 +34,6 @@ const auth = betterAuth({
     },
   },
 
-  socialProviders: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    },
-  },
-
   hooks: authHooks,
 
   emailVerification: {
@@ -51,24 +41,37 @@ const auth = betterAuth({
     autoSignInAfterVerification: true,
     expiresIn: 86400,
     sendVerificationEmail: async ({ user, url }) => {
-      const newUrl =
-        url.split("&")[0] + "&callbackURL=http://localhost:3000/dashboard";
+      const newUrl = url.split("&")[0] + "&callbackURL=/";
 
-      await eventPublisher.publish({
-        eventId: randomUUID(),
-        eventType: EventType.USER_REGISTERED,
-        timestamp: new Date(),
-        userId: user.id,
+      await prisma.outboxEvent.create({
         data: {
-          name: user.name,
-          email: user.email,
-          verificationLink: newUrl,
+          aggregateId: user.id,
+          eventType: EventType.USER_REGISTERED,
+          payload: {
+            userId: user.id,
+            name: user.name,
+            email: user.email,
+            verificationLink: newUrl,
+          },
         },
       });
+
+      console.log("TODO: Publish RabbitMQ Event: USER_REGISTERED", {
+        email: user.email,
+        link: newUrl,
+      });
+
+      // TODO: Replace with RabbitMQ Publisher
+      /*
+      await eventPublisher.publish({
+        eventType: EventType.USER_REGISTERED,
+        userId: user.id,
+        data: { name: user.name, email: user.email, verificationLink: newUrl },
+      });
+      */
     },
   },
-  trustedOrigins: [config.clientUrl],
+  trustedOrigins: [process.env.CLIENT_URL || "http://localhost:3000"],
 });
 
 export default auth;
-export type Session = typeof auth.$Infer.Session;

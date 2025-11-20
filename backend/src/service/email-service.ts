@@ -1,5 +1,4 @@
 // service/email-service.ts
-import nodemailer from "nodemailer";
 import { logger } from "../utils/logger";
 import { config } from "../config";
 import {
@@ -7,8 +6,6 @@ import {
   OrderCreatedEvent,
   UserRegisteredEvent,
 } from "../events/publisher";
-import orderRepository from "../repository/order-repository";
-import { prisma } from "../config/prisma";
 
 export interface OrderDetails {
   id: string;
@@ -39,6 +36,7 @@ class EmailService {
 
   async sendVerificationEmail(event: UserRegisteredEvent) {
     const { name, email, verificationLink } = event.data;
+    console.log("Sent the mail");
     try {
       const html = `
         <div style="font-family: Arial, sans-serif; line-height: 1.6;">

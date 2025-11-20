@@ -1,0 +1,20 @@
+{
+  "name": "ecommerce-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc -b",
+    "dev": "turbo run dev"
+  },
+  "devDependencies": {
+    "prettier": "latest",
+    "prisma": "6.19.0",
+    "turbo": "^2.6.1",
+    "typescript": "^5.0.0"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "dependencies": {
+    "@prisma/client": "6.19.0",
+    "tsconfig-paths": "^4.2.0"
+  }
+}
