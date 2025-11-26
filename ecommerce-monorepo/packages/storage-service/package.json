@@ -1,0 +1,21 @@
+{
+  "name": "@ecommerce/storage-service",
+  "version": "0.0.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "dev": "tsc -b tsconfig.json --watch",
+    "build": "tsc -b tsconfig.json"
+  },
+  "dependencies": {
+    "@aws-sdk/s3-presigned-post": "^3.937.0",
+    "dotenv": "^17.2.3"
+  }
+}

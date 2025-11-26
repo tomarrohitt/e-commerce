@@ -3,8 +3,16 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "tsc -b",
-    "dev": "turbo run dev"
+    "setup": "pnpm install && pnpm run build:common && pnpm run build:storage-service && pnpm run prisma:generate && pnpm run build:identity && pnpm run build:gateway",
+    "build:common": "cd packages/common && npx tsc -b",
+    "build:storage-service": "cd packages/storage-service && npx tsc -b",
+    "build:identity": "cd apps/identity && npx tsc -b",
+    "build:gateway": "cd apps/api-gateway && npx tsc -b",
+    "build": "pnpm run build:common && pnpm run build:identity && pnpm run build:gateway",
+    "prisma:generate": "pnpm --filter identity-service prisma:generate && pnpm --filter cart-service prisma:generate && pnpm --filter catalog-service prisma:generate",
+    "dev": "turbo run dev",
+    "start:identity": "cd apps/identity && node dist/index.js",
+    "start:gateway": "cd apps/api-gateway && node dist/index.js"
   },
   "devDependencies": {
     "prettier": "latest",

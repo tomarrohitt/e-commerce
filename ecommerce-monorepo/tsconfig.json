@@ -3,7 +3,8 @@
   "references": [
     { "path": "packages/common" },
     { "path": "apps/identity" },
-    { "path": "apps/orders" },
-    { "path": "apps/api-gateway" }
+    { "path": "apps/api-gateway" },
+    { "path": "apps/catalog" },
+    { "path": "apps/cart" }
   ]
 }

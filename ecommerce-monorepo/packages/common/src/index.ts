@@ -3,9 +3,26 @@ export * from "./errors/bad-request-error";
 export * from "./errors/not-found-error";
 export * from "./errors/not-authorized-error";
 export * from "./errors/db-error";
+export * from "./errors/request-validation-error";
+export * from "./errors/forbidden-error";
+
 export * from "./middlewares/error-handler";
+export * from "./middlewares/current-user";
+export * from "./middlewares/require-admin";
+
 export * from "./utils/prisma-handler";
+export * from "./utils/auth-utils";
+export * from "./utils/input-util";
+export * from "./utils/response-util";
 
 export * from "./services/redis-service";
 export * from "./services/circuit-breaker-service";
 export * from "./services/event-bus-service";
+
+export * from "./events/outbox-processor";
+
+export * from "./types/user-types";
+export * from "./types/prisma-types";
+export * from "./types/cart-types";
+export * from "./types/outbox-types";
+export * from "./types/event-types";

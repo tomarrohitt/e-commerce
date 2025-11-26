@@ -3,10 +3,8 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
-    "paths": {
-      "@generated/identity": ["./node_modules/@generated/identity"]
-    }
+    "typeRoots": ["./src/types", "../../node_modules/@types"]
   },
   "references": [{ "path": "../../packages/common" }],
-  "include": ["src"]
+  "include": ["src/**/*"]
 }

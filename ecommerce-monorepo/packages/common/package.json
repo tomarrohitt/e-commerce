@@ -1,17 +1,22 @@
 {
   "name": "@ecommerce/common",
   "version": "0.0.0",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
   "scripts": {
-    "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/index.ts",
-    "build": "prisma generate && tsc -p tsconfig.json",
-    "start": "node dist/index.js"
+    "dev": "tsc -b tsconfig.json --watch",
+    "build": "tsc -b tsconfig.json"
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.8",
-    "@types/express": "^4.17.17",
-    "typescript": "^5.0.0"
+    "@types/express": "^4.17.17"
   },
   "dependencies": {
     "amqplib": "^0.10.9",

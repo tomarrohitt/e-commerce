@@ -1,25 +1,45 @@
-# Use this for any service (replace SERVICE_PATH)
-FROM node:22-slim
+FROM node:22-slim AS base
+
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
+
+FROM base AS builder
 WORKDIR /app
 
-# pnpm available
-RUN npm install -g pnpm@9
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json .npmrc ./
+COPY packages/tsconfig ./packages/tsconfig
 
-# Copy lockfiles & workspace config first (cache-friendly)
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 
-# Copy everything that build needs (packages + apps)
-COPY packages ./packages
-COPY apps ./apps
-# If you have other top-level files needed for build, copy them too
-COPY tsconfig.* ./
+COPY packages/common/package.json packages/common/tsconfig.json ./packages/common/
+COPY apps/api-gateway/package.json apps/api-gateway/tsconfig.json ./apps/api-gateway/
 
-# Install only what's required (workspace-aware)
 RUN pnpm install --frozen-lockfile
 
-# Build only the target service by path (avoid relying on package name)
-# Replace ./apps/api-gateway with the path to the service folder in the repo
-RUN pnpm --filter ./apps/api-gateway build
+COPY packages/common/src ./packages/common/src
+COPY apps/api-gateway/src ./apps/api-gateway/src
 
-# Run the service (again, use path selector)
-CMD ["pnpm", "--filter", "./apps/api-gateway", "start"]
+RUN pnpm --filter @ecommerce/common build
+
+
+RUN pnpm --filter api-gateway build
+
+RUN pnpm prune --prod
+
+FROM base AS runner
+WORKDIR /app
+
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/node_modules ./node_modules
+
+COPY --from=builder /app/packages/common/dist ./packages/common/dist
+COPY --from=builder /app/packages/common/package.json ./packages/common/
+
+COPY --from=builder /app/apps/api-gateway/node_modules ./apps/api-gateway/node_modules
+COPY --from=builder /app/apps/api-gateway/dist ./apps/api-gateway/dist
+COPY --from=builder /app/apps/api-gateway/package.json ./apps/api-gateway/
+
+WORKDIR /app/apps/api-gateway
+
+EXPOSE 4000
+
+CMD ["node", "dist/index.js"]

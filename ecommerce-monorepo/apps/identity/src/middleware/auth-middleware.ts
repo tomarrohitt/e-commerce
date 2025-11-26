@@ -1,82 +1,109 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { fromNodeHeaders } from "better-auth/node";
-
+import { IncomingHttpHeaders } from "http";
+import { calculateTTL, redis, UserContext } from "@ecommerce/common";
 import auth from "../config/auth";
-import { prisma } from "../config/prisma";
-import { redisService, SessionCache } from "@ecommerce/common";
 
-interface UserResponse {
-  id: string;
-  email: string;
-  name: string;
-  role: string;
-}
+export class IdentityAuthMiddleware {
+  private static async refreshSessionFromDb(
+    token: string,
+    headers: IncomingHttpHeaders
+  ): Promise<UserContext | null> {
+    const session = await auth.api.getSession({
+      headers: fromNodeHeaders(headers),
+    });
 
-class AuthMiddleware {
-  async setSession(req: Request, res: Response) {
+    if (!session || new Date(session.session.expiresAt) < new Date()) {
+      return null;
+    }
+
+    const userData: UserContext = {
+      id: session.user.id,
+      email: session.user.email,
+      role: session.user.role || "user",
+      sessionId: session.session.id,
+      name: session.user.name,
+      image: session.user.image || "",
+    };
+
+    const ttl = calculateTTL(session.session.expiresAt);
+    await redis.saveSessionDualLayer(token, userData, ttl);
+
+    return userData;
+  }
+
+  static async validateToken(
+    headers: IncomingHttpHeaders
+  ): Promise<{ valid: boolean; data?: UserContext; error?: string }> {
     try {
-      const sessionData = await auth.api.getSession({
-        headers: fromNodeHeaders(req.headers),
-      });
-
-      if (!sessionData || !sessionData.session || !sessionData.user) {
-        return res.status(401).json({ valid: false });
+      // 1. Extract Token
+      let token = headers.authorization?.replace("Bearer ", "");
+      if (!token && headers.cookie) {
+        const match = headers.cookie.match(
+          /better-auth\.session_token=([^;]+)/
+        );
+        token = match ? match[1] : undefined;
       }
 
-      const sessionCache: SessionCache = {
-        userId: sessionData.user.id,
-        email: sessionData.user.email,
-        role: sessionData.user.role || "user",
-        sessionId: sessionData.session.id,
-      };
+      if (!token) return { valid: false, error: "No token provided" };
 
-      await redisService.setSession(
-        sessionData.session.id,
-        sessionCache,
-        60 * 60 * 24 * 7
-      );
+      const shouldSkipCache = headers["x-skip-cache"] === "true";
 
-      res.json({
-        valid: true,
-        session: sessionCache,
-      });
+      if (!shouldSkipCache) {
+        const cachedSession = await redis.getSessionByToken(token);
+        if (cachedSession) {
+          return { valid: true, data: cachedSession };
+        }
+      }
+
+      const freshSession = await this.refreshSessionFromDb(token, headers);
+
+      if (!freshSession) {
+        return { valid: false, error: "Invalid or expired session" };
+      }
+
+      return { valid: true, data: freshSession };
     } catch (error) {
-      console.error("Session validation error:", error);
-      res.status(401).json({ error: "Session validation failed" });
+      console.error("Token validation error:", error);
+      return { valid: false, error: "Validation failed" };
     }
   }
 
-  async validateSession(req: Request, res: Response) {
-    const { userId } = req.params;
+  static async authenticate(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    const validation = await IdentityAuthMiddleware.validateToken(req.headers);
 
-    try {
-      const cachedUser = await redisService.get<UserResponse>(`user:${userId}`);
-      if (cachedUser) {
-        return res.json(cachedUser);
-      }
-
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          role: true,
-        },
+    if (!validation.valid || !validation.data) {
+      res.status(401).json({
+        error: "unauthorized",
+        message: validation.error || "Authentication failed",
       });
+      return;
+    }
 
-      if (!user) {
-        return res.status(404).json({ error: "User not found" });
+    req.user = validation.data;
+    next();
+  }
+
+  static authorize(...allowedRoles: string[]) {
+    return (req: Request, res: Response, next: NextFunction): void => {
+      if (!req.user) {
+        res
+          .status(401)
+          .json({ error: "unauthorized", message: "Auth required" });
+        return;
       }
 
-      await redisService.set(`user:${userId}`, user, 60 * 60 * 24 * 7);
-
-      res.json(user);
-    } catch (error) {
-      console.error(`Failed to fetch user ${userId}:`, error);
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+      if (!allowedRoles.includes(req.user.role)) {
+        res
+          .status(403)
+          .json({ error: "forbidden", message: "Insufficient permissions" });
+        return;
+      }
+      next();
+    };
   }
 }
-
-export const authMiddleware = new AuthMiddleware();

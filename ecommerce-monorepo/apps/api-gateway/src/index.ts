@@ -1,49 +1,79 @@
 import "dotenv/config";
 import express from "express";
 import cookieParser from "cookie-parser";
-import { redisService } from "@ecommerce/common";
+import { createProxyMiddleware, fixRequestBody } from "http-proxy-middleware";
+import { conditionalAuth } from "./middleware/auth-router";
+import { routeConfigs } from "./config/routes";
+import { ClientRequest, ServerResponse } from "http";
+import { Request } from "express";
+import { GatewayAuthMiddleware } from "./middleware/auth-middleware";
+import { requestLogger } from "./middleware/logger";
+import { errorHandler } from "@ecommerce/common";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
 app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.get("/validate", async (req, res) => {
-  let sessionId = req.cookies?.["better-auth.session_token"];
-
-  if (!sessionId && req.headers.authorization) {
-    sessionId = req.headers.authorization.replace("Bearer ", "");
+const onProxyReq = (
+  proxyReq: ClientRequest,
+  req: Request,
+  res: ServerResponse
+) => {
+  const user = req.user;
+  if (user) {
+    proxyReq.setHeader("x-user-id", user.id);
+    proxyReq.setHeader("x-user-email", user.email);
+    proxyReq.setHeader("x-user-role", user.role);
+    proxyReq.setHeader("x-user-image", user.image || "");
+    proxyReq.setHeader("x-user-name", encodeURIComponent(user.name || ""));
+    proxyReq.setHeader("x-user-session-id", user.sessionId);
+    proxyReq.setHeader(
+      "x-internal-secret",
+      process.env.INTERNAL_SERVICE_SECRET || ""
+    );
   }
+  fixRequestBody(proxyReq, req);
+};
 
-  if (!sessionId) {
-    return res.status(401).send();
+app.use(requestLogger);
+
+app.get("/api/validate", GatewayAuthMiddleware.authenticate, (req, res) => {
+  const user = req.user;
+
+  if (!user) {
+    return res.status(401).json({
+      success: false,
+      errors: [{ message: "Unauthorized: No authentication token provided" }],
+    });
   }
-
-  try {
-    // 2. Validate against Redis
-    const session = await redisService.getSession(sessionId);
-
-    console.log({ session });
-
-    if (!session) {
-      return res.status(401).send();
-    }
-
-    await redisService.setSession(sessionId, session, 3600);
-
-    // 4. Return User Context as Headers
-    // Nginx will grab these and pass them to the final microservice
-    res.set("x-user-id", session.userId);
-    res.set("x-user-email", session.email);
-    res.set("x-user-role", session.role);
-
-    return res.status(200).send();
-  } catch (error) {
-    console.error("Auth Check Failed:", error);
-    return res.status(500).send();
-  }
+  res.json({
+    valid: true,
+    user,
+  });
 });
 
+routeConfigs.forEach((routeConfig) => {
+  app.use(
+    routeConfig.path,
+    conditionalAuth,
+    createProxyMiddleware({
+      target: routeConfig.target,
+      changeOrigin: true,
+      pathRewrite: (_, req) => {
+        return req.originalUrl;
+      },
+      on: {
+        proxyReq: onProxyReq,
+      },
+    })
+  );
+});
+
+app.use(errorHandler);
+
 app.listen(PORT, () => {
-  console.log(`🛡️ Auth Service running on port ${PORT}`);
+  console.log(`Gateway running on port ${PORT}`);
 });

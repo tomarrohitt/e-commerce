@@ -1,29 +1,36 @@
 import { EventEmitter } from "events";
+import { EventBusService } from "./event-bus-service";
 
-interface CircuitBreakerOptions {
-  failureThreshold: number; // How many failures before opening
-  resetTimeout: number; // How long to wait before retrying (ms)
-  fallback?: (error: Error) => any; // Optional global fallback
+export interface CircuitBreakerOptions {
+  failureThreshold: number;
+  resetTimeout: number;
+  halfOpenRequests?: number; // How many requests to try in HALF_OPEN state
+  fallback?: (error: Error) => any;
+  onStateChange?: (state: CircuitBreakerState) => void;
 }
+
+export type CircuitBreakerState = "CLOSED" | "OPEN" | "HALF_OPEN";
 
 export class CircuitBreaker extends EventEmitter {
   private failures = 0;
-  private lastFailureTime = 0;
-  private state: "CLOSED" | "OPEN" | "HALF_OPEN" = "CLOSED";
-
+  private consecutiveSuccesses = 0;
+  private state: CircuitBreakerState = "CLOSED";
   private nextAttemptTime = 0;
 
   constructor(private options: CircuitBreakerOptions) {
     super();
+
+    // Attach listener for monitoring
+    if (options.onStateChange) {
+      this.on("stateChanged", options.onStateChange);
+    }
   }
 
   async execute<T>(fn: () => Promise<T>): Promise<T> {
     if (this.state === "OPEN") {
-      // Check if we should try a probe request
       if (Date.now() > this.nextAttemptTime) {
         this.transition("HALF_OPEN");
       } else {
-        // Circuit is strictly open, return failure or fallback
         const error = new Error("Circuit breaker is OPEN");
         if (this.options.fallback) {
           return this.options.fallback(error);
@@ -38,7 +45,6 @@ export class CircuitBreaker extends EventEmitter {
       return result;
     } catch (error: any) {
       // CRITICAL: Only trip on 5xx errors or network failures
-      // Ignore 4xx errors (Bad Request, Unauthorized) as they are not system failures
       if (this.shouldTripBreaker(error)) {
         this.onFailure();
       }
@@ -48,42 +54,81 @@ export class CircuitBreaker extends EventEmitter {
 
   private onSuccess(): void {
     this.failures = 0;
+    this.consecutiveSuccesses++;
+
     if (this.state === "HALF_OPEN") {
-      this.transition("CLOSED");
-      console.log("Circuit Breaker closed (recovered)");
+      const threshold = this.options.halfOpenRequests || 1;
+      if (this.consecutiveSuccesses >= threshold) {
+        this.transition("CLOSED");
+        this.consecutiveSuccesses = 0;
+        console.log("✅ Circuit Breaker CLOSED (recovered)");
+      }
     }
   }
 
   private onFailure(): void {
     this.failures++;
-    this.lastFailureTime = Date.now();
+    this.consecutiveSuccesses = 0;
 
     if (this.state === "HALF_OPEN") {
       this.transition("OPEN");
-      this.nextAttemptTime = Date.now() + this.options.resetTimeout;
+      this.scheduleReset();
     } else if (this.failures >= this.options.failureThreshold) {
       this.transition("OPEN");
-      this.nextAttemptTime = Date.now() + this.options.resetTimeout;
+      this.scheduleReset();
     }
   }
 
-  private transition(newState: "CLOSED" | "OPEN" | "HALF_OPEN"): void {
+  private scheduleReset(): void {
+    this.nextAttemptTime = Date.now() + this.options.resetTimeout;
+  }
+
+  private transition(newState: CircuitBreakerState): void {
+    const oldState = this.state;
     this.state = newState;
-    this.emit("stateChanged", newState);
+    this.emit("stateChanged", { from: oldState, to: newState });
 
     if (newState === "OPEN") {
-      console.warn("Circuit Breaker OPENED");
+      console.warn(`⚠️ Circuit Breaker OPENED (failures: ${this.failures})`);
     }
   }
 
-  // Helper to distinguish System Errors vs User Errors
   private shouldTripBreaker(error: any): boolean {
-    if (error.response && error.response.status) {
+    // Axios error with status code
+    if (error.response?.status) {
       const status = error.response.status;
+      // 4xx errors are client errors, don't trip breaker
       if (status >= 400 && status < 500) {
         return false;
       }
     }
+
+    // Network errors, timeouts, 5xx errors should trip
     return true;
+  }
+
+  getState(): CircuitBreakerState {
+    return this.state;
+  }
+
+  getMetrics() {
+    return {
+      state: this.state,
+      failures: this.failures,
+      consecutiveSuccesses: this.consecutiveSuccesses,
+      nextAttemptTime: this.nextAttemptTime,
+    };
+  }
+
+  // Manual control (for testing or emergency)
+  reset(): void {
+    this.failures = 0;
+    this.consecutiveSuccesses = 0;
+    this.transition("CLOSED");
+  }
+
+  forceOpen(): void {
+    this.transition("OPEN");
+    this.scheduleReset();
   }
 }

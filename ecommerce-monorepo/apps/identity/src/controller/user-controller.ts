@@ -1,34 +1,37 @@
 import { Request, Response } from "express";
-import { prisma } from "../config/prisma"; // Ensure path is correct relative to file
-import { userEventLog } from "../events/user-event"; // Ensure path is correct
+import { prisma } from "../config/prisma";
+import { userEventLog } from "../events/user-event";
+import { redis } from "@ecommerce/common";
 
 class UserController {
   async update(req: Request, res: Response) {
+    const { name } = req.body;
+
     try {
-      const { name, image } = req.body;
-
-      const userId = (req as any).user?.id;
-
-      if (!userId) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-
       const updatedUser = await prisma.$transaction(async (tx) => {
         const user = await tx.user.update({
-          where: { id: userId },
+          where: { id: req.user?.id },
           data: {
             name,
-            image,
           },
         });
 
-        await userEventLog.queueUserUpdated(tx, {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-        });
+        // await userEventLog.queueUserUpdated(tx, {
+        //   id: user.id,
+        //   email: user.email,
+        //   name: user.name,
+        // });
 
         return user;
+      });
+
+      await redis.updateSessionData(req.user.sessionId, {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        image: updatedUser.image,
+        sessionId: req.user.sessionId,
+        name: updatedUser.name,
       });
 
       res.json(updatedUser);

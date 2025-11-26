@@ -1,62 +1,56 @@
 import { Request, Response } from "express";
-import { avatarService } from "../service/avatar-service";
-import { BadRequestError, NotFoundError } from "@ecommerce/common";
-import { prisma } from "../config/prisma";
+import { fromNodeHeaders } from "better-auth/node";
+import auth from "../config/auth";
+import {
+  deleteImage,
+  generatePresignedUrls,
+  StoragePrefix,
+} from "@ecommerce/storage-service";
+import { BadRequestError } from "@ecommerce/common";
 
-export const getUploadUrl = async (req: Request, res: Response) => {
-  const user = (req as any).user;
+class ImageUploadController {
+  async getUploadUrl(req: Request, res: Response) {
+    if (!req.user || !req.user.id) {
+      throw new BadRequestError("User ID missing from request context.");
+    }
+    const result = (await generatePresignedUrls(
+      StoragePrefix.USER_PROFILE,
+      req.user.id
+    )) as { url: string; fields: Record<string, string>; key: string };
 
-  if (!user) throw new NotFoundError("User not found");
-
-  const result = await avatarService.getAvatarUploadUrl(user.id);
-
-  res.status(200).json({
-    uploadUrl: result.url,
-    fields: result.fields,
-    key: result.key,
-  });
-};
-
-export const confirmUpload = async (req: Request, res: Response) => {
-  const { key } = req.body;
-
-  // 2. CAST TO ANY
-  const user = (req as any).user;
-
-  if (!user) throw new NotFoundError("User not found");
-
-  const userId = user.id;
-
-  if (!userId) throw new NotFoundError("User not found");
-  if (!key) throw new BadRequestError("Key is required");
-
-  // 1. Security Check: Ensure the key belongs to this user folder
-  if (!key.includes(userId)) {
-    throw new BadRequestError("Invalid image key for this user");
+    return res.status(200).json({
+      success: true,
+      message: "Presigned URL generated successfully.",
+      data: {
+        uploadUrl: result.url,
+        fields: result.fields,
+      },
+    });
   }
 
-  // 2. Verify file exists in S3
-  const exists = await avatarService.validateImageExists(key);
-  if (!exists) {
-    throw new BadRequestError("Image upload failed or file not found");
+  async confirmUpload(req: Request, res: Response) {
+    const { key } = req.body;
+
+    if (!key) {
+      throw new BadRequestError("Image key is required in the body.");
+    }
+
+    if (req.user?.image) {
+      deleteImage(req.user.image);
+    }
+    await auth.api.updateUser({
+      body: {
+        image: key,
+      },
+      headers: fromNodeHeaders(req.headers),
+    });
+
+    res.json({
+      success: true,
+      message: "Profile image updated successfully.",
+      data: { image: key },
+    });
   }
+}
 
-  // 3. Delete old image if it exists
-  if (user.image) {
-    // Fire and forget - don't await this
-    avatarService.deleteImage(user.image).catch(console.error);
-  }
-
-  // 4. Update User in DB
-  const updatedUser = await prisma.user.update({
-    where: { id: userId },
-    data: { image: key },
-  });
-
-  // 5. TODO: Publish event (We will add this later)
-
-  res.json({
-    success: true,
-    image: updatedUser.image,
-  });
-};
+export default new ImageUploadController();

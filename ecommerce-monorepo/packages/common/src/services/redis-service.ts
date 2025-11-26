@@ -1,15 +1,28 @@
 import Redis, { Redis as RedisClient } from "ioredis";
+import { UserContext } from "../types/user-types";
 
-export interface SessionCache {
-  userId: string;
-  email: string;
-  role: string;
-  sessionId: string;
-}
-
-class RedisService {
+export class RedisService {
   private client: RedisClient;
   private isConnected = false;
+
+  // LUA SCRIPT: "Pointer Resolution"
+  // This runs inside Redis. It is atomic and requires only 1 network hop.
+  private getSessionScript = `
+    local tokenKey = KEYS[1]
+    
+    -- 1. Get the Pointer (Layer 1)
+    local pointerRaw = redis.call("GET", tokenKey)
+    if not pointerRaw then return nil end
+    
+    -- 2. Decode JSON to get Session ID (using Redis cjson library)
+    local pointer = cjson.decode(pointerRaw)
+    local sessionId = pointer.sessionId
+    
+    -- 3. Get the Actual Data (Layer 2)
+    -- We assume the session data key is format "session:{id}"
+    local session = redis.call("GET", "session:" .. sessionId)
+    return session
+  `;
 
   constructor() {
     this.client = new Redis(process.env.REDIS_URL!, {
@@ -42,25 +55,33 @@ class RedisService {
     }
   }
 
-  async getSession(sessionId: string): Promise<SessionCache | null> {
-    const data = await this.client.get(`session:${sessionId}`);
-    return data ? JSON.parse(data) : null;
+  async getSessionByToken(token: string): Promise<UserContext | null> {
+    try {
+      const result = await this.client.eval(
+        this.getSessionScript,
+        1,
+        `token:${token}`
+      );
+
+      return result ? JSON.parse(result as string) : null;
+    } catch (error) {
+      console.error("Redis Lua Script Error:", error);
+      return null;
+    }
   }
 
-  async setSession(
-    sessionId: string,
-    session: SessionCache,
-    ttl: number = 3600
+  async saveSessionDualLayer(
+    token: string,
+    session: UserContext,
+    ttl: number = 7 * 24 * 60 * 60
   ): Promise<void> {
-    await this.client.setex(
-      `session:${sessionId}`,
-      ttl,
-      JSON.stringify(session)
-    );
-  }
+    const sessionId = session.sessionId;
+    const pipeline = this.client.pipeline();
+    pipeline.set(`token:${token}`, JSON.stringify({ sessionId }), "EX", ttl);
 
-  async deleteSession(sessionId: string): Promise<void> {
-    await this.client.del(`session:${sessionId}`);
+    pipeline.set(`session:${sessionId}`, JSON.stringify(session), "EX", ttl);
+
+    await pipeline.exec();
   }
 
   async get<T>(key: string): Promise<T | null> {
@@ -78,18 +99,36 @@ class RedisService {
       typeof value === "string" ? value : JSON.stringify(value);
 
     if (ttl) {
-      await this.client.setex(key, ttl, stringValue);
+      await this.client.set(key, stringValue, "EX", ttl);
     } else {
       await this.client.set(key, stringValue);
     }
   }
 
+  async updateSessionData(
+    sessionId: string,
+    session: UserContext,
+    ttl: number = 7 * 24 * 60 * 60
+  ): Promise<void> {
+    await this.client.set(
+      `session:${sessionId}`,
+      JSON.stringify(session),
+      "EX",
+      ttl
+    );
+  }
+
   async delete(key: string): Promise<void> {
     await this.client.del(key);
   }
+
+  async deleteToken(token: string): Promise<void> {
+    await this.client.del(`token:${token}`);
+  }
+
   getClient(): RedisClient {
     return this.client;
   }
 }
 
-export const redisService = new RedisService();
+export const redis = new RedisService();

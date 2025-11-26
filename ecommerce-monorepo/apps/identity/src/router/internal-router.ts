@@ -1,7 +1,7 @@
 import express from "express";
-import { authMiddleware } from "../middleware/auth-middleware";
+import { IdentityAuthMiddleware } from "../middleware/auth-middleware";
 
-const router = express.Router();
+const internalRouter = express.Router();
 
 const INTERNAL_SECRET = process.env.INTERNAL_SERVICE_SECRET;
 
@@ -28,16 +28,32 @@ const requireInternalAuth = (
   next();
 };
 
-router.post(
+internalRouter.post(
   "/validate-session",
   requireInternalAuth,
-  authMiddleware.setSession
+  async (req, res) => {
+    try {
+      const result = await IdentityAuthMiddleware.validateToken(req.headers);
+
+      if (result.valid && result.data) {
+        return res.json({
+          valid: true,
+          data: result.data,
+        });
+      }
+
+      return res.status(401).json({
+        valid: false,
+        error: result.error || "Invalid session",
+      });
+    } catch (error) {
+      console.error("Internal validate-session error:", error);
+      return res.status(500).json({
+        valid: false,
+        error: "Internal error",
+      });
+    }
+  }
 );
 
-router.get(
-  "/users/:userId",
-  requireInternalAuth,
-  authMiddleware.validateSession
-);
-
-export default router;
+export default internalRouter;

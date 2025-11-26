@@ -1,4 +1,4 @@
-import { redisService } from "@ecommerce/common";
+import { redis } from "@ecommerce/common";
 
 export class UserEventLog {
   async queueUserCreated(
@@ -22,7 +22,7 @@ export class UserEventLog {
     tx: any,
     user: { id: string; email: string; name: string }
   ) {
-    await redisService.delete(`user:${user.id}`);
+    await redis.delete(`user:${user.id}`);
 
     await tx.outboxEvent.create({
       data: {
@@ -39,7 +39,7 @@ export class UserEventLog {
   }
 
   async queueUserDeleted(tx: any, userId: string) {
-    await redisService.delete(`user:${userId}`);
+    await redis.delete(`user:${userId}`);
 
     await tx.outboxEvent.create({
       data: {

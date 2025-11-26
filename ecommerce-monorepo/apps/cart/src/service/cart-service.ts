@@ -1,0 +1,194 @@
+import {
+  CartItemWithProduct,
+  BadRequestError,
+  NotFoundError,
+} from "@ecommerce/common";
+import cartRepository from "../repository/cart-repository";
+import productReplicasRepository from "../repository/product-replicas-repository";
+
+class CartService {
+  async addItem(userId: string, productId: string, quantity: number) {
+    const product = await productReplicasRepository.findbyId(productId);
+
+    if (!product) {
+      throw new NotFoundError("Product not found");
+    }
+
+    if (!product.isActive) {
+      throw new BadRequestError("Product is not available");
+    }
+
+    // Check 1: Simple check - Requesting more than exists in total
+    if (quantity > product.stock) {
+      throw new BadRequestError(
+        `We only have ${product.stock} items in stock.`
+      );
+    }
+
+    const existingItem = await cartRepository.getItem(userId, productId);
+
+    if (existingItem) {
+      const newTotalQuantity = existingItem.quantity + quantity;
+
+      // Check 2: Cumulative check
+      if (newTotalQuantity > product.stock) {
+        // Calculate remaining capacity for this user
+        const remainingAllowed = product.stock - existingItem.quantity;
+
+        // Case A: Cart is already full for this item
+        if (remainingAllowed <= 0) {
+          throw new BadRequestError(
+            `You already have the maximum available stock (${product.stock}) in your cart.`
+          );
+        }
+
+        // Case B: Cart has space, but they asked for too much
+        throw new BadRequestError(
+          `You have ${existingItem.quantity} in your cart. You can only add ${remainingAllowed} more.`
+        );
+      }
+
+      await cartRepository.updateQuantity(userId, productId, newTotalQuantity);
+    } else {
+      await cartRepository.addItem(userId, productId, quantity);
+    }
+  }
+
+  async getCart(userId: string) {
+    const cartItems = await cartRepository.getAllItems(userId);
+
+    if (cartItems.length === 0) {
+      return { items: [], totalItems: 0, totalPrice: 0 };
+    }
+
+    const productIds = cartItems.map((item) => item.productId);
+    const products = await productReplicasRepository.findByIds(productIds);
+
+    const productMap = new Map(products.map((p) => [p.id, p]));
+
+    const items: CartItemWithProduct[] = [];
+    let totalPrice = 0;
+    let totalItems = 0;
+    for (const cartItem of cartItems) {
+      const product = productMap.get(cartItem.productId);
+
+      if (!product) {
+        await cartRepository.removeItem(userId, cartItem.productId);
+        continue;
+      }
+
+      if (product.stock === 0) {
+        items.push({
+          ...cartItem,
+          product: {
+            id: product.id,
+            name: product.name,
+            price: product.price.toNumber(),
+            images: product.image ? [product.image] : [],
+            stockQuantity: product.stock,
+          },
+        });
+        continue;
+      }
+
+      let quantity = cartItem.quantity;
+      if (product.stock < quantity) {
+        quantity = product.stock;
+        await cartRepository.updateQuantity(
+          userId,
+          cartItem.productId,
+          quantity
+        );
+      }
+
+      const itemTotal = product.price.toNumber() * quantity;
+
+      items.push({
+        productId: cartItem.productId,
+        quantity,
+        addedAt: cartItem.addedAt,
+        product: {
+          id: product.id,
+          name: product.name,
+          price: product.price.toNumber(),
+          stockQuantity: product.stock,
+          images: product.image ? [product.image] : [],
+        },
+      });
+
+      totalPrice += itemTotal;
+      totalItems += quantity;
+    }
+
+    return {
+      items,
+      totalItems,
+      totalPrice,
+    };
+  }
+
+  async updateCartItem(userId: string, productId: string, quantity: number) {
+    const existingItem = await cartRepository.getItem(userId, productId);
+
+    if (!existingItem) {
+      throw new NotFoundError("Item not in cart");
+    }
+
+    const product = await productReplicasRepository.findbyId(productId);
+
+    if (!product) {
+      throw new NotFoundError("Product not found");
+    }
+
+    if (!product.isActive) {
+      throw new BadRequestError("Product is no longer available");
+    }
+
+    if (quantity > product.stock) {
+      throw new BadRequestError(
+        `Cannot update to ${quantity}. Only ${product.stock} items left in stock.`
+      );
+    }
+
+    await cartRepository.updateQuantity(userId, productId, quantity);
+  }
+  async validateCart(
+    userId: string
+  ): Promise<{ valid: boolean; errors: string[] }> {
+    const cart = await this.getCart(userId);
+    const errors: string[] = [];
+
+    if (cart.items.length === 0) {
+      return { valid: false, errors: ["Cart is empty"] };
+    }
+
+    for (const item of cart.items) {
+      if (item.product.stockQuantity === 0) {
+        errors.push(`"${item.product.name}" is out of stock.`);
+      } else if (item.quantity > item.product.stockQuantity) {
+        errors.push(
+          `"${item.product.name}" only has ${item.product.stockQuantity} items left in stock.`
+        );
+      }
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors,
+    };
+  }
+
+  async removeFromCard(userId: string, productId: string) {
+    await cartRepository.removeItem(userId, productId);
+  }
+
+  async clearCart(userId: string) {
+    await cartRepository.clearCart(userId);
+  }
+
+  async getCartItemCount(userId: string) {
+    return await cartRepository.getItemCount(userId);
+  }
+}
+
+export default new CartService();

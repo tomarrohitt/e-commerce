@@ -1,0 +1,8 @@
+# Ignore all node_modules in all directories
+**/node_modules
+**/dist
+**/.git
+**/.DS_Store
+
+# Keep the lockfile
+!pnpm-lock.yaml

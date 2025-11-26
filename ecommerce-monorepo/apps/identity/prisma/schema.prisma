@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../node_modules/@generated/identity"
 }
 
 
@@ -14,20 +13,18 @@ enum Role {
 }
 
 
+enum EventType {
+  USER_REGISTERED 
+  USER_UPDATED    
+  ORDER_CREATED   
+  ORDER_UPDATED   
+}
+
 enum EventStatus {
   PENDING
   PUBLISHED
   FAILED
 }
-
-enum EventType {
-  USER_REGISTERED @map("user.registered")
-  USER_UPDATED    @map("user.updated")
-  ORDER_CREATED   @map("order.created")
-  ORDER_UPDATED   @map("order.updated")
-}
-
-
 
 model User {
   id            String    @id @default(uuid())
@@ -93,6 +90,8 @@ model Verification {
   @@map("verifications")
 }
 
+
+
 model OutboxEvent {
   id          String      @id @default(uuid())
   aggregateId String      @map("aggregate_id")
@@ -100,8 +99,11 @@ model OutboxEvent {
   payload     Json
   status      EventStatus @default(PENDING)
   createdAt   DateTime    @default(now()) @map("created_at")
+  publishedAt DateTime?   @map("published_at")
   retries     Int         @default(0)
-
+  error       String?     // Store last error message
+  
   @@index([status, createdAt])
-  @@map("outbox")
+  @@index([aggregateId])
+  @@map("outbox_events")
 }
