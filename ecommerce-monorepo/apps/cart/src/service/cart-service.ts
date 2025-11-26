@@ -18,7 +18,6 @@ class CartService {
       throw new BadRequestError("Product is not available");
     }
 
-    // Check 1: Simple check - Requesting more than exists in total
     if (quantity > product.stock) {
       throw new BadRequestError(
         `We only have ${product.stock} items in stock.`
@@ -29,20 +28,15 @@ class CartService {
 
     if (existingItem) {
       const newTotalQuantity = existingItem.quantity + quantity;
-
-      // Check 2: Cumulative check
       if (newTotalQuantity > product.stock) {
-        // Calculate remaining capacity for this user
         const remainingAllowed = product.stock - existingItem.quantity;
 
-        // Case A: Cart is already full for this item
         if (remainingAllowed <= 0) {
           throw new BadRequestError(
             `You already have the maximum available stock (${product.stock}) in your cart.`
           );
         }
 
-        // Case B: Cart has space, but they asked for too much
         throw new BadRequestError(
           `You have ${existingItem.quantity} in your cart. You can only add ${remainingAllowed} more.`
         );

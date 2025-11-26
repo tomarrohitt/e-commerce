@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "amqplib": "^0.10.9",
-    "express": "^4.18.2",
+    "exprOpen ess": "^4.18.2",
     "ioredis": "^5.8.2"
   }
 }

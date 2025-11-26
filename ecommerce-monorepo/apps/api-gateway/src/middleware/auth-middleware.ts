@@ -2,26 +2,37 @@ import { Request, Response, NextFunction } from "express";
 import axios from "axios";
 import {
   extractToken,
-  redis,
+  redis, // Changed to redis (standard naming)
   UserContext,
   NotAuthorizedError,
   DatabaseOpError,
+  HttpClient,
+  CircuitBreakerOpenError,
 } from "@ecommerce/common";
 
-const IDENTITY_SERVICE_URL =
-  "http://localhost:4001/api/internal/validate-session";
+const IDENTITY_PATH = "/api/internal/validate-session";
 const INTERNAL_SERVICE_SECRET = process.env.INTERNAL_SERVICE_SECRET;
 const TOKEN_CACHE_TTL = 3600;
+
+interface IdentityResponse {
+  valid: boolean;
+  data?: UserContext;
+  error?: string;
+}
+
+const identityClient = new HttpClient(
+  "http://localhost:4001",
+  "IdentityService"
+);
 
 async function validateWithIdentityService(
   token: string
 ): Promise<UserContext> {
   try {
-    const response = await axios.post(
-      IDENTITY_SERVICE_URL,
+    const response = await identityClient.post<IdentityResponse>(
+      IDENTITY_PATH,
       {},
       {
-        timeout: 5000,
         headers: {
           "Content-Type": "application/json",
           "x-internal-secret": INTERNAL_SERVICE_SECRET,
@@ -30,13 +41,17 @@ async function validateWithIdentityService(
         },
       }
     );
-
-    if (response.data.valid) {
-      return response.data.data;
+    if (response.valid && response.data) {
+      return response.data;
     }
 
     throw new NotAuthorizedError();
-  } catch (error) {
+  } catch (error: any) {
+    if (error instanceof CircuitBreakerOpenError) {
+      console.error("[Auth] Identity Circuit Open - Fast Failing");
+      throw new DatabaseOpError("Login temporarily unavailable");
+    }
+
     if (axios.isAxiosError(error)) {
       if (error.response?.status === 401) {
         throw new NotAuthorizedError();
@@ -68,9 +83,11 @@ export class GatewayAuthMiddleware {
       }
 
       const userData = await validateWithIdentityService(token);
+
       redis
         .saveSessionDualLayer(token, userData, TOKEN_CACHE_TTL)
         .catch((err) => console.warn("[Gateway] Redis save failed:", err));
+
       req.user = userData;
       next();
     } catch (error) {

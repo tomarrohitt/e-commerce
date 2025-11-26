@@ -11,13 +11,20 @@ import {
 import { prisma } from "./config/prisma";
 import productRouter from "./router/product-router";
 import categoryRouter from "./router/category-router";
+import { EventStatus } from "@prisma/client";
 
 const eventBus = new EventBusService({
   serviceName: "catalog-service",
   exchangeName: "ecommerce.events",
 });
 
-const outboxProcessor = new OutboxProcessor(prisma, eventBus, 50, 500);
+const outboxProcessor = new OutboxProcessor(
+  prisma,
+  eventBus,
+  EventStatus,
+  50,
+  500
+);
 
 const app = express();
 const PORT = process.env.PORT || 4002;

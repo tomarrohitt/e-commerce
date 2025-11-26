@@ -1,12 +1,14 @@
 import "dotenv/config";
 import "express-async-errors";
-
 import express from "express";
-
-import { currentUser, errorHandler, EventBusService } from "@ecommerce/common";
-import cartRouter from "./router/cart-router";
-import { prisma } from "./config/prisma";
+import { EventBusService, errorHandler, currentUser } from "@ecommerce/common";
 import { ProductConsumer } from "./events/product-consumer";
+import cartRouter from "./router/cart-router";
+
+const app = express();
+const PORT = process.env.PORT || 4003;
+
+const SERVICE_MODE = process.env.SERVICE_MODE || "ALL";
 
 const eventBus = new EventBusService({
   serviceName: "cart-service",
@@ -15,38 +17,29 @@ const eventBus = new EventBusService({
 
 const productConsumer = new ProductConsumer(eventBus);
 
-const app = express();
-const PORT = process.env.PORT || 4002;
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-app.use(currentUser);
-
-app.use("/api/cart", cartRouter);
-
-app.use(errorHandler);
-
-async function startServer() {
+async function start() {
   try {
     await eventBus.connect();
-    await productConsumer.start();
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  } catch (error) {
-    console.error("Failed to start server. Shutting down.", { error });
+
+    if (SERVICE_MODE === "WORKER" || SERVICE_MODE === "ALL") {
+      console.log("👷 Cart Worker: Starting Event Consumer...");
+      await productConsumer.start();
+    }
+
+    if (SERVICE_MODE === "API" || SERVICE_MODE === "ALL") {
+      app.use(express.json());
+      app.use(currentUser);
+      app.use("/api/cart", currentUser, cartRouter);
+      app.use(errorHandler);
+
+      app.listen(PORT, () => {
+        console.log(`🛒 Cart API running on port ${PORT}`);
+      });
+    }
+  } catch (err) {
+    console.error("Failed to start Cart Service", err);
     process.exit(1);
   }
 }
 
-const shutdown = async () => {
-  console.log("Shutting down gracefully...");
-  await prisma.$disconnect();
-  process.exit(0);
-};
-
-process.on("SIGTERM", shutdown);
-process.on("SIGINT", shutdown);
-
-startServer();
+start();

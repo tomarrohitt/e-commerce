@@ -5,15 +5,17 @@ export * from "./errors/not-authorized-error";
 export * from "./errors/db-error";
 export * from "./errors/request-validation-error";
 export * from "./errors/forbidden-error";
+export * from "./errors/circuit-breaker-error";
 
 export * from "./middlewares/error-handler";
 export * from "./middlewares/current-user";
-export * from "./middlewares/require-admin";
 
 export * from "./utils/prisma-handler";
-export * from "./utils/auth-utils";
+export * from "./utils/auth-util";
 export * from "./utils/input-util";
 export * from "./utils/response-util";
+export * from "./utils/retry-util";
+export * from "./utils/http-client";
 
 export * from "./services/redis-service";
 export * from "./services/circuit-breaker-service";

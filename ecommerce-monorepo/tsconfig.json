@@ -5,6 +5,7 @@
     { "path": "apps/identity" },
     { "path": "apps/api-gateway" },
     { "path": "apps/catalog" },
-    { "path": "apps/cart" }
+    { "path": "apps/cart" },
+    { "path": "apps/email" }
   ]
 }

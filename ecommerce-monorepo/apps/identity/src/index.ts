@@ -4,10 +4,30 @@ import cookieParser from "cookie-parser";
 import { toNodeHandler } from "better-auth/node";
 import auth from "./config/auth";
 import userRouter from "./router/user-router";
-import { errorHandler, currentUser } from "@ecommerce/common";
+import {
+  errorHandler,
+  currentUser,
+  OutboxProcessor,
+  EventBusService,
+} from "@ecommerce/common";
 import { prisma } from "./config/prisma";
 import internalRouter from "./router/internal-router";
+import { EventStatus } from "@prisma/client";
+import { addressRouter } from "./router/address-router";
+import { adminRouter } from "./router/admin-router";
 
+const eventBus = new EventBusService({
+  serviceName: "identity-service",
+  exchangeName: "ecommerce.events",
+});
+
+const outboxProcessor = new OutboxProcessor(
+  prisma,
+  eventBus,
+  EventStatus,
+  50,
+  500
+);
 const app = express();
 const PORT = process.env.PORT || 4001;
 
@@ -21,13 +41,17 @@ app.use(currentUser);
 
 app.use("/api/internal", internalRouter);
 app.use("/api/user", userRouter);
+app.use("/api/addresses", addressRouter);
+app.use("/api/admin", adminRouter);
 
 app.use(errorHandler);
 
 async function startServer() {
   try {
+    await eventBus.connect();
     app.listen(PORT, () => {
-      console.log(`Identity Service running on port ${PORT}`);
+      console.log(`Catalog Service running on ${PORT}`);
+      outboxProcessor.start();
     });
   } catch (error) {
     console.error("Failed to start server:", error);

@@ -7,6 +7,14 @@ datasource db {
   provider = "postgresql"
 }
 
+enum EventStatus {
+  PENDING
+  PROCESSED
+  FAILED
+}
+
+
+
 
 model Product {
   id          String   @id @default(cuid())
@@ -39,15 +47,19 @@ model Category {
   @@map("categories")
 }
 
+
 model OutboxEvent {
-  id          String   @id @default(cuid())
-  aggregateId String   @map("aggregate_id")
+  id          String      @id @default(uuid())
+  aggregateId String      @map("aggregate_id")
   eventType   String   @map("event_type")
   payload     Json
-  createdAt   DateTime @default(now()) @map("created_at")
-  status      String   @default("PENDING")
-
+  status      EventStatus @default(PENDING)
+  createdAt   DateTime    @default(now()) @map("created_at")
+  publishedAt DateTime?   @map("published_at")
+  retries     Int         @default(0)
+  error       String?     // Store last error message
+  
   @@index([status, createdAt])
+  @@index([aggregateId])
   @@map("outbox_events")
 }
-

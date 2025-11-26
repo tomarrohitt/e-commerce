@@ -2,8 +2,8 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 import { authHooks } from "../middleware/validation-middleware";
-import { EventType } from "@prisma/client";
-// import { eventPublisher } from "../events/publisher"; // TODO: Re-implement with RabbitMQ later
+import { UserEventType } from "@ecommerce/common";
+import { dispatchUserEvent } from "../service/outbox-dispatcher";
 
 const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -11,13 +11,12 @@ const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
-    sendResetPassword: async ({ user, url, token }, request) => {
-      // await sendEmail({
-      //   to: user.email,
-      //   subject: "Reset your password",
-      //   text: `Click the link to reset your password: ${url}`,
-      // });
+    requireEmailVerification: false,
+    autoSignInAfterVerification: false,
+    sendResetPassword: async ({ user, url }) => {
+      await dispatchUserEvent(UserEventType.FORGOT_PASSWORD, user, {
+        link: url,
+      });
     },
   },
   baseURL: process.env.BASE_URL,
@@ -45,45 +44,27 @@ const auth = betterAuth({
 
   emailVerification: {
     sendOnSignUp: true,
+    sendOnSignIn: true,
     autoSignInAfterVerification: true,
     expiresIn: 86400,
     sendVerificationEmail: async ({ user, url }) => {
-      const newUrl = url.split("&")[0] + "&callbackURL=/";
-
-      await prisma.outboxEvent.create({
-        data: {
-          aggregateId: user.id,
-          eventType: EventType.USER_REGISTERED,
-          payload: {
-            userId: user.id,
-            name: user.name,
-            email: user.email,
-            verificationLink: newUrl,
-          },
-        },
-      });
-
-      console.log("TODO: Publish RabbitMQ Event: USER_REGISTERED", {
-        email: user.email,
-        link: newUrl,
-      });
+      const link = url.split("&")[0] + "&callbackURL=/";
+      await dispatchUserEvent(UserEventType.REGISTERED, user, { link });
+    },
+    async afterEmailVerification(user) {
+      await dispatchUserEvent(UserEventType.VERIFIED, user);
     },
   },
   trustedOrigins: [process.env.CLIENT_URL || ""],
-  // rateLimit: {
-  //   window: 60,
-  //   max: 100,
-  //   customRules: {
-  //     "/sign-in/email": {
-  //       window: 10,
-  //       max: 3,
-  //     },
-  //     "/sign-up/email": {
-  //       window: 10,
-  //       max: 3,
-  //     },
-  //   },
-  // },
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user, ctx) => {
+          ctx?.context.adapter;
+        },
+      },
+    },
+  },
 });
 
 export default auth;

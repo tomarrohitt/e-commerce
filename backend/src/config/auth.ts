@@ -6,7 +6,6 @@ import { authHooks } from "../middleware/validation-middleware";
 import { eventPublisher, EventType } from "../events/publisher";
 import { randomUUID } from "crypto";
 import { config } from ".";
-import { AddressAggregateArgs } from "../../generated/prisma/models/Address";
 
 const auth = betterAuth({
   database: prismaAdapter(prisma, {

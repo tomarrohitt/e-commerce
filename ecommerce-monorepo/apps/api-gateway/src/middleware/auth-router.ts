@@ -31,19 +31,21 @@ export const conditionalAuth = async (
   }
 
   if (rule.protected) {
-    await GatewayAuthMiddleware.authenticate(req, res, () => {});
-
-    if (res.headersSent) return;
-
-    if (rule.adminOnly) {
-      const user = req.user;
-      if (!user?.id) {
-        return next(new ForbiddenError("Unauthorized: Auth required"));
+    const onAuthComplete = (err?: any) => {
+      if (err) {
+        return next(err);
       }
-      if (user?.role !== "admin") {
-        return next(new ForbiddenError("Admin access required"));
+      if (rule.adminOnly) {
+        const user = req.user;
+        if (user?.role !== "admin") {
+          return next(new ForbiddenError("Admin access required"));
+        }
       }
-    }
+      next();
+    };
+
+    await GatewayAuthMiddleware.authenticate(req, res, onAuthComplete);
+    return;
   }
 
   next();

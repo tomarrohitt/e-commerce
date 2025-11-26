@@ -21,7 +21,16 @@ export const routeConfigs: RouteConfig[] = [
     target: process.env.IDENTITY_SERVICE_URL!,
     rules: [{ method: "ALL", protected: true }],
   },
-
+  {
+    path: "/api/addresses",
+    target: process.env.IDENTITY_SERVICE_URL!,
+    rules: [{ method: "ALL", protected: true }],
+  },
+  {
+    path: "/api/admin",
+    target: process.env.IDENTITY_SERVICE_URL!,
+    rules: [{ method: "ALL", protected: true, adminOnly: true }],
+  },
   {
     path: "/api/products",
     target: process.env.CATALOG_SERVICE_URL!,

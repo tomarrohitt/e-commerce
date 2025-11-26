@@ -13,16 +13,10 @@ enum Role {
 }
 
 
-enum EventType {
-  USER_REGISTERED 
-  USER_UPDATED    
-  ORDER_CREATED   
-  ORDER_UPDATED   
-}
 
 enum EventStatus {
   PENDING
-  PUBLISHED
+  PROCESSED
   FAILED
 }
 
@@ -33,6 +27,7 @@ model User {
   emailVerified Boolean   @default(false) @map("email_verified")
   image         String?
   role          Role      @default(user)
+  addresses     Address[] 
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime? @updatedAt @map("updated_at")
 
@@ -85,23 +80,45 @@ model Verification {
   value      String
   expiresAt  DateTime @map("expires_at")
   createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime? @updatedAt @map("updated_at")
+
 
   @@unique([identifier, value])
   @@map("verifications")
 }
 
+model Address {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  name        String? 
+  
+  isDefault   Boolean  @default(false)  @map("is_default")
+  street      String
+  city        String
+  state       String
+  zipCode     String   @map("zip_code")
+  country     String
+  
+  phoneNumber String?  @map("phone_number") 
 
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("addresses")
+  @@index([userId])
+}
 
 model OutboxEvent {
   id          String      @id @default(uuid())
   aggregateId String      @map("aggregate_id")
-  eventType   EventType   @map("event_type")
+  eventType   String   @map("event_type")
   payload     Json
   status      EventStatus @default(PENDING)
   createdAt   DateTime    @default(now()) @map("created_at")
   publishedAt DateTime?   @map("published_at")
   retries     Int         @default(0)
-  error       String?     // Store last error message
+  error       String?    
   
   @@index([status, createdAt])
   @@index([aggregateId])

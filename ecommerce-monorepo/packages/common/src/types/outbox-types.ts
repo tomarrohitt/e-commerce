@@ -10,14 +10,14 @@ export interface OutboxRecord {
 export interface OutboxPrismaClient {
   outboxEvent: {
     findMany: (args: {
-      where: { status: string };
+      where: { status: any };
       take: number;
       orderBy: { createdAt: "asc" | "desc" };
     }) => Promise<OutboxRecord[]>;
 
     update: (args: {
       where: { id: string };
-      data: { status: string };
+      data: { status: any };
     }) => Promise<OutboxRecord>;
   };
 }

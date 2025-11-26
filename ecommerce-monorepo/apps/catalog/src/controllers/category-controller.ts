@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import {
   CreateCategoryInput,
   createCategorySchema,
-  updateCategorySchema,
 } from "../lib/validation-schema";
 import categoryRepository from "../repository/category-repository";
 import { generateSlug, validateAndThrow } from "@ecommerce/common";

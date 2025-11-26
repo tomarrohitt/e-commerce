@@ -5,9 +5,6 @@ export function extractToken(req: Request): string | null {
   if (authHeader?.startsWith("Bearer ")) {
     return authHeader.substring(7);
   }
-
-  console.log({ authHeader });
-
   const cookieToken =
     req.cookies?.["better-auth.session_token"] ||
     req.cookies?.auth_token ||

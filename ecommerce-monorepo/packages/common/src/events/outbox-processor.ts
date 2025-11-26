@@ -8,6 +8,7 @@ export class OutboxProcessor {
   constructor(
     private prisma: OutboxPrismaClient,
     private eventBus: EventBusService,
+    private EventStatus: { PENDING: string; PROCESSED: string; FAILED: string },
     private batchSize = 50,
     private pollInterval = 500
   ) {}
@@ -29,7 +30,7 @@ export class OutboxProcessor {
   private async processBatch() {
     try {
       const events = await this.prisma.outboxEvent.findMany({
-        where: { status: "PENDING" },
+        where: { status: this.EventStatus.PENDING },
         take: this.batchSize,
         orderBy: { createdAt: "asc" },
       });
@@ -53,7 +54,7 @@ export class OutboxProcessor {
             await this.eventBus.publish(dbEvent.eventType, eventPayload);
             await this.prisma.outboxEvent.update({
               where: { id: dbEvent.id },
-              data: { status: "PROCESSED" },
+              data: { status: this.EventStatus.PROCESSED },
             });
           } catch (err) {
             console.error(`Failed to publish event ${dbEvent.id}`, err);
