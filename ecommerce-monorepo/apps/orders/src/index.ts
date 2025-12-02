@@ -6,10 +6,10 @@ import {
   currentUser,
   errorHandler,
   EventBusService,
+  LoggerFactory,
   OutboxProcessor,
 } from "@ecommerce/common";
 import { prisma } from "./config/prisma";
-import { EventStatus } from "@prisma/client";
 import { env } from "./config/env";
 import orderRouter from "./router/order-router";
 import adminRouter from "./router/admin-router";
@@ -19,18 +19,17 @@ import { OrderCreatedListener } from "./events/order-created-listener";
 import { PaymentConsumer } from "./events/payment-consumer";
 import { checkStaleOrders } from "./workers/order-timeout";
 
+const logger = LoggerFactory.create("OrderService");
+
 const eventBus = new EventBusService({
   serviceName: "order-service",
-  exchangeName: "ecommerce.events",
+  url: env.RABBITMQ_URL,
 });
 
-const outboxProcessor = new OutboxProcessor(
-  prisma,
-  eventBus,
-  EventStatus,
-  50,
-  500,
-);
+const outboxProcessor = new OutboxProcessor(prisma, eventBus, {
+  batchSize: 50,
+  pollInterval: 500,
+});
 
 const stockConsumer = new StockConsumer(eventBus);
 const paymentConsumer = new PaymentConsumer(eventBus);
@@ -61,12 +60,13 @@ async function startServer() {
     await stockConsumer.start();
     await paymentListener.start();
     await paymentConsumer.start();
+    // setInterval(checkStaleOrders, 1 * 1000);
     app.listen(PORT, () => {
       console.log(`Order Service running on ${PORT}`);
       outboxProcessor.start();
     });
   } catch (error) {
-    console.error("Failed to start server. Shutting down.", { error });
+    logger.error("Failed to start server. Shutting down.", { error });
     process.exit(1);
   }
 }

@@ -1,14 +1,16 @@
 import express from "express";
 import { EmailConsumer } from "./events/email-consumer";
-import { EventBusService } from "@ecommerce/common";
+import { EventBusService, LoggerFactory } from "@ecommerce/common";
 import { env } from "./config/env";
 
 const app = express();
 const PORT = env.PORT;
 
+const logger = LoggerFactory.create("EmailService");
+
 const eventBus = new EventBusService({
   serviceName: "email-service",
-  exchangeName: "ecommerce.events",
+  url: env.RABBITMQ_URL,
 });
 
 const emailConsumer = new EmailConsumer(eventBus);
@@ -24,7 +26,7 @@ async function start() {
       console.log(`📧 Email Service running on ${PORT}`);
     });
   } catch (error) {
-    console.error("Email Service failed to start:", error);
+    logger.error("Email Service failed to start:", error);
     process.exit(1);
   }
 }

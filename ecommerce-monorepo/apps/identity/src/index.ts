@@ -9,27 +9,27 @@ import {
   currentUser,
   OutboxProcessor,
   EventBusService,
+  LoggerFactory,
 } from "@ecommerce/common";
 import { prisma } from "./config/prisma";
 import internalRouter from "./router/internal-router";
-import { EventStatus } from "@prisma/client";
 import { addressRouter } from "./router/address-router";
 import { adminUserRouter } from "./router/user-admin-router";
 import { env } from "./config/env";
 import { adminAddressRouter } from "./router/address-admin-router";
 
+const logger = LoggerFactory.create("IdentityService");
+
 const eventBus = new EventBusService({
   serviceName: "identity-service",
-  exchangeName: "ecommerce.events",
+  url: env.RABBITMQ_URL,
 });
 
-const outboxProcessor = new OutboxProcessor(
-  prisma,
-  eventBus,
-  EventStatus,
-  50,
-  500,
-);
+const outboxProcessor = new OutboxProcessor(prisma, eventBus, {
+  batchSize: 50,
+  pollInterval: 500,
+});
+
 const app = express();
 const PORT = env.PORT || 4001;
 
@@ -57,7 +57,7 @@ async function startServer() {
       outboxProcessor.start();
     });
   } catch (error) {
-    console.error("Failed to start server:", error);
+    logger.error("Failed to start server:", error);
     process.exit(1);
   }
 }

@@ -2,18 +2,27 @@ import { Request, Response, NextFunction } from "express";
 import axios from "axios";
 import {
   extractToken,
-  redis,
   UserContext,
   NotAuthorizedError,
   DatabaseOpError,
   HttpClient,
   CircuitBreakerOpenError,
+  RedisService,
+  LoggerFactory,
 } from "@ecommerce/common";
 import { env } from "../config/env";
+
+const redis = new RedisService({
+  url: env.REDIS_URL,
+  maxRetries: 3,
+  retryDelay: 50,
+});
 
 const IDENTITY_PATH = "/api/internal/validate-session";
 const INTERNAL_SERVICE_SECRET = env.INTERNAL_SERVICE_SECRET;
 const TOKEN_CACHE_TTL = 3600;
+
+const logger = LoggerFactory.create("GatewayService");
 
 interface IdentityResponse {
   valid: boolean;
@@ -21,13 +30,17 @@ interface IdentityResponse {
   error?: string;
 }
 
-const identityClient = new HttpClient(
-  env.IDENTITY_SERVICE_URL,
-  "IdentityService"
-);
+const identityClient = new HttpClient({
+  baseURL: env.IDENTITY_SERVICE_URL,
+  serviceName: "IdentityService",
+  circuitBreaker: {
+    failureThreshold: 3,
+    resetTimeout: 10000,
+  },
+});
 
 async function validateWithIdentityService(
-  token: string
+  token: string,
 ): Promise<UserContext> {
   try {
     const response = await identityClient.post<IdentityResponse>(
@@ -40,7 +53,7 @@ async function validateWithIdentityService(
           Cookie: `better-auth.session_token=${token}`,
           "x-skip-cache": "true",
         },
-      }
+      },
     );
     if (response.valid && response.data) {
       return response.data;
@@ -49,7 +62,7 @@ async function validateWithIdentityService(
     throw new NotAuthorizedError();
   } catch (error: any) {
     if (error instanceof CircuitBreakerOpenError) {
-      console.error("[Auth] Identity Circuit Open - Fast Failing");
+      logger.error("[Auth] Identity Circuit Open - Fast Failing");
       throw new DatabaseOpError("Login temporarily unavailable");
     }
 
@@ -57,7 +70,7 @@ async function validateWithIdentityService(
       if (error.response?.status === 401) {
         throw new NotAuthorizedError();
       }
-      console.error("Identity service error:", error.message);
+      logger.error("Identity service error:", error.message);
     }
 
     throw new DatabaseOpError("Authentication service unavailable");
@@ -68,7 +81,7 @@ export class GatewayAuthMiddleware {
   static async authenticate(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const token = extractToken(req);

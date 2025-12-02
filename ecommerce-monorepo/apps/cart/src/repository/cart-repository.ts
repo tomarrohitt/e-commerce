@@ -1,4 +1,11 @@
-import { redis, CartItem } from "@ecommerce/common";
+import { CartItem, RedisService } from "@ecommerce/common";
+import { env } from "../config/env";
+
+const redis = new RedisService({
+  url: env.REDIS_URL,
+  maxRetries: 3,
+  retryDelay: 50,
+});
 
 class CartRepository {
   private getCartKey(userId: string): string {
@@ -12,7 +19,7 @@ class CartRepository {
   async addItem(
     userId: string,
     productId: string,
-    quantity: number
+    quantity: number,
   ): Promise<void> {
     const key = this.getCartKey(userId);
 
@@ -52,7 +59,7 @@ class CartRepository {
   async updateQuantity(
     userId: string,
     productId: string,
-    quantity: number
+    quantity: number,
   ): Promise<void> {
     const key = this.getCartKey(userId);
 

@@ -2,10 +2,13 @@ import {
   EventBusService,
   OrderEventType,
   OrderCreatedEvent,
-  withRetry, // 👈 Import this
+  withRetry,
+  LoggerFactory,
 } from "@ecommerce/common";
 import { stripeService } from "../services/stripe-service";
 import { prisma } from "../config/prisma";
+
+const logger = LoggerFactory.create("IdentityService");
 
 export class OrderCreatedListener {
   constructor(private eventBus: EventBusService) {}
@@ -33,8 +36,6 @@ export class OrderCreatedListener {
         },
         { retries: 3, delay: 500 },
       );
-
-      // 2. Update DB (Success Path)
       await prisma.order.update({
         where: { id: orderId },
         data: { paymentId: payment.id },
@@ -54,30 +55,20 @@ export class OrderCreatedListener {
         },
       });
     } catch (error: any) {
-      // --- ERROR HANDLING STRATEGY ---
-
-      // A. NON-RETRYABLE ERRORS (Fatal)
-      // If it's a Bad Request (e.g., Invalid Currency, Amount too small),
-      // there is no point returning it to RabbitMQ. Fail the order.
       if (error.type === "StripeInvalidRequestError") {
-        console.error(
-          `[Async Payment] ❌ Fatal Stripe Error: ${error.message}`,
-        );
+        logger.error(`[Async Payment] ❌ Fatal Stripe Error: ${error.message}`);
 
         await prisma.outboxEvent.create({
           data: {
             aggregateId: orderId,
             eventType: OrderEventType.PAYMENT_INTENT_FAILED,
-            payload: { orderId, userId, reason: error.message },
+            payload: { orderId, userId },
           },
         });
-        return; // Stop here. Don't throw (RabbitMQ will ACK).
+        return;
       }
 
-      // B. RETRYABLE ERRORS (Network / Server Errors)
-      // If we got here, 'withRetry' already tried 3 times and failed.
-      // Now we throw to RabbitMQ to handle the "Long Retry" (Backoff).
-      console.error(
+      logger.error(
         `[Async Payment] 🔄 Stripe unavailable after retries. Re-queueing.`,
       );
       throw error;

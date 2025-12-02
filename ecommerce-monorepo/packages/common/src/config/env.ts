@@ -6,3 +6,4 @@ const schema = z.object({
 });
 
 export const env = validateEnv(schema);
+export type EnvConfig = z.infer<typeof schema>;

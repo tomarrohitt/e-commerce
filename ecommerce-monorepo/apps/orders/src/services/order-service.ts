@@ -111,7 +111,11 @@ class OrderService {
       );
     }
 
-    return await orderRepository.updateStatus(orderId, OrderStatus.CANCELLED);
+    return await orderRepository.updateStatus(
+      orderId,
+      OrderStatus.CANCELLED,
+      "User requested cancellation",
+    );
   }
 
   async getPaymentStatus(orderId: string, userId: string) {
@@ -134,15 +138,11 @@ class OrderService {
   }
 
   async processPaymentReversal(paymentId: string) {
-    console.log(`[Payment] Attempting reversal for ${paymentId}`);
     try {
       await stripeService.cancelPaymentIntent(paymentId);
-      console.log(`[Payment] Authorization Voided.`);
     } catch (error: any) {
       if (error.code === "payment_intent_unexpected_state") {
-        console.log(`[Payment] Payment was captured. Issuing Refund...`);
         await stripeService.refundPayment(paymentId);
-        console.log(`[Payment] Refund Issued.`);
       } else {
         console.warn(`[Payment] Reversal warning: ${error.message}`);
       }

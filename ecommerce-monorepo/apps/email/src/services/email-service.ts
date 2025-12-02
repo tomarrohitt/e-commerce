@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import {
+  LoggerFactory,
   OrderCancelledEvent,
   OrderCreatedEvent,
   UserForgotPasswordEvent,
@@ -8,6 +9,8 @@ import {
 } from "@ecommerce/common";
 import { env } from "../config/env";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
+
+const logger = LoggerFactory.create("EmailService");
 
 class EmailService {
   private transporter: nodemailer.Transporter;
@@ -115,7 +118,7 @@ class EmailService {
       });
       console.log(`[Email] Sent to ${to} (ID: ${info.messageId})`);
     } catch (error) {
-      console.error(`[Email] Failed to send to ${to}`, error);
+      logger.error(`[Email] Failed to send to ${to}`, error);
       throw error;
     }
   }

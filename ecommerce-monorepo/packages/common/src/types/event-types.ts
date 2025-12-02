@@ -102,15 +102,11 @@ export interface ProductDeletedData {
   deletedAt: string;
 }
 
-export interface StockChangedData {
-  id: string;
-  stockQuantity: number;
+export interface StockChangedData extends ProductCreatedData {
   previousStock: number;
 }
 
-export interface PriceChangedData {
-  id: string;
-  price: string;
+export interface PriceChangedData extends ProductCreatedData {
   previousPrice: string;
 }
 
@@ -185,12 +181,18 @@ export interface OrderCreatedData {
   createdAt: string;
 }
 
+export interface OrderItemRestockData {
+  productId: string;
+  quantity: number;
+}
+
 export interface OrderCancelledData {
   orderId: string;
   userId: string;
   userEmail: string;
   userName: string;
   reason?: string;
+  items: OrderItemRestockData[];
 }
 
 export interface PaymentIntentCreatedData {

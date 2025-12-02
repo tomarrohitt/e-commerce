@@ -3,6 +3,7 @@ import {
   validateAndThrow,
   BadRequestError,
   sendSuccess,
+  LoggerFactory,
 } from "@ecommerce/common";
 import { orderService } from "../services/order-service";
 import { OrderStatus } from "@prisma/client";
@@ -12,6 +13,8 @@ import {
 } from "../lib/order-validation-schema";
 import { orderRepository } from "../repository/order-repository";
 import { stripeService } from "../services/stripe-service";
+
+const logger = LoggerFactory.create("IdentityService");
 
 class OrderController {
   // POST /api/orders
@@ -111,7 +114,7 @@ class OrderController {
             await orderRepository.updateStatus(order.id, OrderStatus.PAID);
           }
         } else {
-          console.error(
+          logger.error(
             `[Stripe] ❌ No order found for Payment ID: ${paymentId}`,
           );
         }
@@ -120,7 +123,7 @@ class OrderController {
       // Respond to Stripe immediately
       return sendSuccess(res, { received: true });
     } catch (err: any) {
-      console.error(`Webhook Error: ${err.message}`);
+      logger.error(`Webhook Error: ${err.message}`);
       throw new BadRequestError(`Webhook Error: ${err.message}`);
     }
   }

@@ -1,11 +1,14 @@
 import "dotenv/config";
 import { z, ZodType } from "zod";
+import { LoggerFactory } from "../services/logger-service";
+
+const logger = LoggerFactory.create("OrderService");
 
 export function validateEnv<T>(schema: ZodType<T>): T {
   const parsed = schema.safeParse(process.env);
 
   if (parsed.error) {
-    console.error("Invalid environment variables:");
+    logger.error("Invalid environment variables:");
     console.log({ errors: parsed.error });
     process.exit(1);
   }
@@ -37,7 +40,6 @@ export const servicesUrlEnv = {
   CATALOG_SERVICE_URL: z.string(),
   CART_SERVICE_URL: z.string(),
   ORDERS_SERVICE_URL: z.string(),
-  INTERNAL_SERVICE_SECRET: z.string(),
 };
 
 export const awsEnv = {

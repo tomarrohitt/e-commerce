@@ -131,16 +131,17 @@ class OrderRepository {
     return { orders, total };
   }
 
-  async updateStatus(id: string, status: OrderStatus) {
+  async updateStatus(id: string, status: OrderStatus, reason?: string) {
     return await safeQuery(
       async () => {
         return await prisma.$transaction(async (tx) => {
           const order = await tx.order.update({
             where: { id },
             data: { status },
+            include: { items: true },
           });
 
-          if (status === "CANCELLED") {
+          if (status === OrderStatus.CANCELLED) {
             await tx.outboxEvent.create({
               data: {
                 eventType: OrderEventType.CANCELLED,
@@ -149,6 +150,11 @@ class OrderRepository {
                   orderId: order.id,
                   userId: order.userId,
                   paymentId: order.paymentId,
+                  items: order.items.map((item) => ({
+                    productId: item.productId,
+                    quantity: item.quantity,
+                  })),
+                  reason: reason,
                 },
               },
             });

@@ -1,64 +1,107 @@
 import amqp, { Channel, ChannelModel } from "amqplib";
 import { Event, EventBusConfig } from "../types/event-types";
-import { env } from "../config/env";
+import { EVENT_BUS_DEFAULTS } from "../constants";
+import { ILogger, LoggerFactory } from "./logger-service";
 
-export class EventBusService {
+export interface IEventBusService {
+  connect(): Promise<void>;
+  publish<T>(routingKey: string, event: Event<T>): Promise<void>;
+  subscribe<T>(
+    queueName: string,
+    routingKeys: string[],
+    handler: (event: Event<T>) => Promise<void>,
+    options?: SubscribeOptions,
+  ): Promise<void>;
+  disconnect(): Promise<void>;
+  isConnected(): boolean;
+}
+
+export interface SubscribeOptions {
+  maxRetries?: number;
+  retryDelay?: number;
+  deadLetterExchange?: string;
+}
+
+export class EventBusService implements IEventBusService {
   private connection: ChannelModel | null = null;
   private channel: Channel | null = null;
-  private isConnected = false;
+  private connected = false;
+  private reconnectAttempts = 0;
+
+  private reconnecting = false;
+  private reconnectTimeout: NodeJS.Timeout | null = null;
 
   private readonly config: Required<EventBusConfig>;
-
-  private reconnectAttempts = 0;
+  private readonly logger: ILogger;
 
   constructor(config: EventBusConfig = {}) {
     this.config = {
       serviceName: config.serviceName || "unknown-service",
-      url: config.url || env.RABBITMQ_URL,
-      exchangeName: config.exchangeName || "ecommerce.events",
-      dlqExchange: config.dlqExchange || "dlq.exchange",
-      dlqQueue: config.dlqQueue || "dlq.queue",
-      prefetchCount: config.prefetchCount || 10,
-      maxReconnectAttempts: config.maxReconnectAttempts || 10,
-      reconnectDelay: config.reconnectDelay || 5000,
+      url: config.url || EVENT_BUS_DEFAULTS.EXCHANGE_NAME,
+      exchangeName: config.exchangeName || EVENT_BUS_DEFAULTS.EXCHANGE_NAME,
+      dlqExchange: config.dlqExchange || EVENT_BUS_DEFAULTS.DLQ_EXCHANGE,
+      dlqQueue: config.dlqQueue || EVENT_BUS_DEFAULTS.DLQ_QUEUE,
+      prefetchCount: config.prefetchCount ?? EVENT_BUS_DEFAULTS.PREFETCH_COUNT,
+      maxReconnectAttempts:
+        config.maxReconnectAttempts ??
+        EVENT_BUS_DEFAULTS.MAX_RECONNECT_ATTEMPTS,
+      reconnectDelay:
+        config.reconnectDelay ?? EVENT_BUS_DEFAULTS.RECONNECT_DELAY,
     };
+
+    this.logger = LoggerFactory.create(`EventBus:${this.config.serviceName}`);
   }
 
   async connect(): Promise<void> {
-    if (this.isConnected) return;
+    if (this.connected) {
+      this.logger.debug("Already connected");
+      return;
+    }
 
     try {
       this.connection = await amqp.connect(this.config.url);
 
-      this.connection.on("error", (err) => {
-        console.error("RabbitMQ connection error:", err);
-        this.handleDisconnect();
-      });
-
-      this.connection.on("close", () => {
-        console.warn("RabbitMQ connection closed");
-        this.handleDisconnect();
-      });
+      this.setupConnectionHandlers();
 
       this.channel = await this.connection.createChannel();
-
       await this.channel.prefetch(this.config.prefetchCount);
 
-      await this.channel.assertExchange(this.config.exchangeName, "topic", {
-        durable: true,
-      });
-
+      await this.setupExchanges();
       await this.setupDLQ();
 
-      this.isConnected = true;
+      this.connected = true;
       this.reconnectAttempts = 0;
+      this.reconnecting = false;
     } catch (error) {
-      console.error("Event Bus connection failed:", error);
+      this.logger.error("Event Bus connection failed", error);
       this.handleDisconnect();
+      throw error;
     }
   }
 
-  private async setupDLQ() {
+  private setupConnectionHandlers(): void {
+    if (!this.connection) return;
+
+    this.connection.on("error", (err) => {
+      this.logger.error("Connection error", err);
+      this.handleDisconnect();
+    });
+
+    this.connection.on("close", () => {
+      this.logger.warn("Connection closed");
+      this.handleDisconnect();
+    });
+  }
+
+  private async setupExchanges(): Promise<void> {
+    if (!this.channel) return;
+
+    await this.channel.assertExchange(this.config.exchangeName, "topic", {
+      durable: true,
+    });
+  }
+
+  private async setupDLQ(): Promise<void> {
     if (!this.channel) return;
 
     await this.channel.assertExchange(this.config.dlqExchange, "fanout", {
@@ -68,7 +111,7 @@ export class EventBusService {
     await this.channel.assertQueue(this.config.dlqQueue, {
       durable: true,
       arguments: {
-        "x-message-ttl": 7 * 24 * 60 * 60 * 1000,
+        "x-message-ttl": EVENT_BUS_DEFAULTS.DLQ_TTL,
       },
     });
 
@@ -79,22 +122,48 @@ export class EventBusService {
     );
   }
 
-  private handleDisconnect() {
-    this.isConnected = false;
+  private handleDisconnect(): void {
+    this.connected = false;
 
-    if (this.reconnectAttempts < this.config.maxReconnectAttempts) {
-      this.reconnectAttempts++;
-      console.log(
-        `Reconnecting in ${this.config.reconnectDelay}ms... (Attempt ${this.reconnectAttempts})`,
-      );
-      setTimeout(() => this.connect(), this.config.reconnectDelay);
-    } else {
-      console.error("Max reconnection attempts reached");
+    if (this.reconnecting) {
+      this.logger.debug("Reconnection already in progress");
+      return;
     }
+
+    if (this.reconnectAttempts >= this.config.maxReconnectAttempts) {
+      this.logger.error("Max reconnection attempts reached", {
+        attempts: this.reconnectAttempts,
+        max: this.config.maxReconnectAttempts,
+      });
+      return;
+    }
+
+    this.reconnecting = true;
+    this.reconnectAttempts++;
+
+    const delay = this.config.reconnectDelay * this.reconnectAttempts;
+
+    this.logger.info("Scheduling reconnection", {
+      attempt: this.reconnectAttempts,
+      delay,
+    });
+
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+    }
+
+    this.reconnectTimeout = setTimeout(async () => {
+      try {
+        await this.connect();
+      } catch (error) {
+        this.logger.error("Reconnection attempt failed", error);
+        this.reconnecting = false;
+      }
+    }, delay);
   }
 
   async publish<T>(routingKey: string, event: Event<T>): Promise<void> {
-    if (!this.channel || !this.isConnected) {
+    if (!this.channel || !this.connected) {
       throw new Error("Event Bus not connected");
     }
 
@@ -114,15 +183,16 @@ export class EventBusService {
       );
 
       if (!published) {
-        console.warn(`RabbitMQ buffer full. Waiting for drain...`);
+        this.logger.warn("RabbitMQ buffer full, waiting for drain");
         await new Promise<void>((resolve) => {
           this.channel!.once("drain", resolve);
         });
       }
-
-      console.log(`Published: ${routingKey} [${event.eventId}]`);
     } catch (error) {
-      console.error(`Failed to publish ${routingKey}:`, error);
+      this.logger.error("Failed to publish event", error, {
+        routingKey,
+        eventId: event.eventId,
+      });
       throw error;
     }
   }
@@ -131,22 +201,20 @@ export class EventBusService {
     queueName: string,
     routingKeys: string[],
     handler: (event: Event<T>) => Promise<void>,
-    options?: {
-      maxRetries?: number;
-      retryDelay?: number;
-    },
+    options: SubscribeOptions = {},
   ): Promise<void> {
     if (!this.channel) {
       throw new Error("Event Bus not connected");
     }
 
-    const maxRetries = options?.maxRetries || 3;
+    const maxRetries = options.maxRetries ?? EVENT_BUS_DEFAULTS.MAX_RETRIES;
+    const dlxExchange = options.deadLetterExchange ?? this.config.dlqExchange;
 
     await this.channel.assertQueue(queueName, {
       durable: true,
       arguments: {
-        "x-dead-letter-exchange": this.config.dlqExchange,
-        ...(options?.retryDelay && {
+        "x-dead-letter-exchange": dlxExchange,
+        ...(options.retryDelay && {
           "x-message-ttl": options.retryDelay,
         }),
       },
@@ -162,16 +230,23 @@ export class EventBusService {
         if (!msg) return;
 
         try {
-          const event = JSON.parse(msg.content.toString());
+          const event = JSON.parse(msg.content.toString()) as Event<T>;
 
           await handler(event);
           this.channel!.ack(msg);
         } catch (error) {
-          console.error(`Error processing ${queueName}:`, error);
+          this.logger.error("Error processing event", error, {
+            queue: queueName,
+          });
+
           const retries = (msg.properties.headers?.["x-retry-count"] || 0) + 1;
 
           if (retries < maxRetries) {
-            console.log(`🔄 Retrying (${retries}/${maxRetries})...`);
+            this.logger.info("Retrying event", {
+              retry: retries,
+              maxRetries,
+            });
+
             this.channel!.publish(
               this.config.exchangeName,
               msg.fields.routingKey,
@@ -187,7 +262,9 @@ export class EventBusService {
 
             this.channel!.ack(msg);
           } else {
-            console.error(`💀 Max retries reached. Sending to DLQ`);
+            this.logger.error("Max retries reached, sending to DLQ", {
+              queue: queueName,
+            });
             this.channel!.nack(msg, false, false);
           }
         }
@@ -198,18 +275,32 @@ export class EventBusService {
     );
   }
 
-  getChannel(): Channel | null {
-    return this.channel;
+  isConnected(): boolean {
+    return this.connected;
   }
 
   async disconnect(): Promise<void> {
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+      this.reconnectTimeout = null;
+    }
+
     if (this.channel) {
       await this.channel.close();
+      this.channel = null;
     }
+
     if (this.connection) {
       await this.connection.close();
+      this.connection = null;
     }
-    this.isConnected = false;
-    console.log("Disconnected from Event Bus");
+
+    this.connected = false;
+    this.reconnecting = false;
+    this.logger.info("Disconnected from Event Bus");
+  }
+
+  getChannel(): Channel | null {
+    return this.channel;
   }
 }

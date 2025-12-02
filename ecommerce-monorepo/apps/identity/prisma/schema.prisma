@@ -2,7 +2,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-
 datasource db {
   provider = "postgresql"
 }
@@ -12,10 +11,9 @@ enum Role {
   admin
 }
 
-
-
 enum EventStatus {
   PENDING
+  PROCESSING
   PROCESSED
   FAILED
 }
@@ -27,24 +25,24 @@ model User {
   emailVerified Boolean   @default(false) @map("email_verified")
   image         String?
   role          Role      @default(user)
-  addresses     Address[] 
+  addresses     Address[]
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime? @updatedAt @map("updated_at")
 
-  sessions      Session[]
-  accounts      Account[]
-  
+  sessions Session[]
+  accounts Account[]
+
   @@map("users")
 }
 
 model Session {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  expiresAt DateTime @map("expires_at")
-  token     String   @unique
-  ipAddress String?  @map("ip_address")
-  userAgent String?  @map("user_agent")
-  createdAt DateTime @default(now()) @map("created_at")
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  expiresAt DateTime  @map("expires_at")
+  token     String    @unique
+  ipAddress String?   @map("ip_address")
+  userAgent String?   @map("user_agent")
+  createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -63,7 +61,7 @@ model Account {
   refreshToken String?   @map("refresh_token")
   idToken      String?   @map("id_token")
   expiresAt    DateTime? @map("expires_at")
-  password     String?   
+  password     String?
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime? @updatedAt @map("updated_at")
 
@@ -75,51 +73,50 @@ model Account {
 }
 
 model Verification {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
   identifier String
   value      String
-  expiresAt  DateTime @map("expires_at")
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime? @updatedAt @map("updated_at")
-
+  expiresAt  DateTime  @map("expires_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime? @updatedAt @map("updated_at")
 
   @@unique([identifier, value])
   @@map("verifications")
 }
 
 model Address {
-  id          String   @id @default(cuid())
-  userId      String   @map("user_id")
-  name        String? 
-  
-  isDefault   Boolean  @default(false)  @map("is_default")
-  street      String
-  city        String
-  state       String
-  zipCode     String   @map("zip_code")
-  country     String
-  
-  phoneNumber String?  @map("phone_number") 
+  id     String  @id @default(cuid())
+  userId String  @map("user_id")
+  name   String?
 
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isDefault Boolean @default(false) @map("is_default")
+  street    String
+  city      String
+  state     String
+  zipCode   String  @map("zip_code")
+  country   String
 
-  @@map("addresses")
+  phoneNumber String? @map("phone_number")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
+  @@map("addresses")
 }
 
 model OutboxEvent {
   id          String      @id @default(uuid())
   aggregateId String      @map("aggregate_id")
-  eventType   String   @map("event_type")
+  eventType   String      @map("event_type")
   payload     Json
   status      EventStatus @default(PENDING)
   createdAt   DateTime    @default(now()) @map("created_at")
   publishedAt DateTime?   @map("published_at")
   retries     Int         @default(0)
-  error       String?    
-  
+  error       String?
+
   @@index([status, createdAt])
   @@index([aggregateId])
   @@map("outbox_events")

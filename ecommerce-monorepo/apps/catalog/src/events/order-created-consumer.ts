@@ -3,8 +3,11 @@ import {
   OrderEventType,
   ProductEventType,
   OrderCreatedEvent,
+  LoggerFactory,
 } from "@ecommerce/common";
 import { prisma } from "../config/prisma";
+
+const logger = LoggerFactory.create("CatalogService");
 
 export class OrderCreatedConsumer {
   constructor(private eventBus: EventBusService) {}
@@ -28,7 +31,6 @@ export class OrderCreatedConsumer {
           const product = await tx.product.findUnique({
             where: { id: item.productId },
           });
-
           if (!product || product.stockQuantity < item.quantity) {
             throw new Error(
               `Product ${product?.name || item.productId} is out of stock`,
@@ -39,9 +41,6 @@ export class OrderCreatedConsumer {
           const orderPrice = Number(item.price);
 
           if (Math.abs(dbPrice - orderPrice) > 0.01) {
-            console.error(
-              `🚨 FRAUD DETECTED: Order ${orderId} requested ${orderPrice} but real price is ${dbPrice}`,
-            );
             throw new Error(
               `Price mismatch for ${product.name}. Real price: ${dbPrice}`,
             );
@@ -63,11 +62,13 @@ export class OrderCreatedConsumer {
                 sku: updatedProduct.sku,
                 stockQuantity: updatedProduct.stockQuantity,
                 isActive: updatedProduct.isActive,
+                images: updatedProduct.images,
+                categoryId: updatedProduct.categoryId,
+                createdAt: updatedProduct.createdAt.toISOString(),
               },
             },
           });
         }
-
         await tx.outboxEvent.create({
           data: {
             eventType: ProductEventType.STOCK_RESERVED,
@@ -76,23 +77,18 @@ export class OrderCreatedConsumer {
           },
         });
       });
-    } catch (error: unknown) {
-      let err: string;
-      if (error instanceof Error) {
-        console.error(`[Catalog] ❌ Stock failed: ${error.message}`);
-        err = error.message;
-      } else {
-        console.error(`[Catalog] ❌ Stock failed: ${error}`);
-        err = String(error);
-      }
+    } catch (error: any) {
+      const errorMessage = error.message || "Stock Reservation Failed";
+      logger.error(`[Catalog] ❌ Stock failed: ${errorMessage}`);
 
-      await this.eventBus.publish(ProductEventType.STOCK_FAILED, {
-        eventId: crypto.randomUUID(),
-        eventType: ProductEventType.STOCK_FAILED,
-        timestamp: new Date().toISOString(),
+      await prisma.outboxEvent.create({
         data: {
-          orderId,
-          reason: err,
+          eventType: ProductEventType.STOCK_FAILED,
+          aggregateId: orderId,
+          payload: {
+            orderId,
+            reason: errorMessage,
+          },
         },
       });
     }

@@ -4,8 +4,12 @@ import {
   Event,
   ProductCreatedData,
   ProductDeletedData,
+  LoggerFactory,
 } from "@ecommerce/common";
 import { prisma } from "../config/prisma";
+
+const logger = LoggerFactory.create("CartService");
+
 export class ProductConsumer {
   constructor(private eventBus: EventBusService) {}
 
@@ -20,11 +24,11 @@ export class ProductConsumer {
             case ProductEventType.UPDATED:
             case ProductEventType.STOCK_CHANGED:
             case ProductEventType.PRICE_CHANGED:
-              await this.handleProductSync(event.data as ProductCreatedData);
+              await this.handleProductSync(event.data);
               break;
 
             case ProductEventType.DELETED:
-              await this.handleProductDelete(event.data as ProductDeletedData);
+              await this.handleProductDelete(event.data);
               break;
 
             case ProductEventType.STOCK_RESERVED:
@@ -37,7 +41,7 @@ export class ProductConsumer {
               );
           }
         } catch (err) {
-          console.error(`[Cart] Error processing event ${event.eventId}:`, err);
+          logger.error(`[Cart] Error processing event ${event.eventId}:`, err);
           throw err;
         }
       },
@@ -65,7 +69,6 @@ export class ProductConsumer {
         isActive: data.isActive,
       },
     });
-    console.log(`[Cart] Synced Replica: product ${data.id}`);
   }
 
   private async handleProductDelete(data: ProductDeletedData) {
@@ -73,8 +76,6 @@ export class ProductConsumer {
       await prisma.productReplica.delete({
         where: { id: data.id },
       });
-
-      console.log(`[Cart] 🗑️ Deleted Replica: product ${data.id}`);
     } catch (error) {
       console.log(`[Cart] Product already deleted or not found.`);
     }

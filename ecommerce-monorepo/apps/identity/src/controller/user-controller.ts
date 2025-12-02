@@ -1,7 +1,15 @@
 import { Request, Response } from "express";
 import { prisma } from "../config/prisma";
-import { userEventLog } from "../events/user-event";
-import { redis } from "@ecommerce/common";
+import { LoggerFactory, RedisService } from "@ecommerce/common";
+import { env } from "../config/env";
+
+const logger = LoggerFactory.create("IdentityService");
+
+const redis = new RedisService({
+  url: env.REDIS_URL,
+  maxRetries: 3,
+  retryDelay: 50,
+});
 
 class UserController {
   async update(req: Request, res: Response) {
@@ -36,7 +44,7 @@ class UserController {
 
       res.json(updatedUser);
     } catch (error) {
-      console.error("Update profile failed:", error);
+      logger.error("Update profile failed:", error);
       res.status(500).json({ error: "Failed to update profile" });
     }
   }

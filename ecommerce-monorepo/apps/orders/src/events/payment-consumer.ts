@@ -15,21 +15,12 @@ export class PaymentConsumer {
       "order-service-payment-updates",
       [OrderEventType.PAYMENT_INTENT_FAILED, OrderEventType.CANCELLED],
       async (event: Event) => {
-        console.log(
-          `[Payment Worker] Processing ${event.eventType} for ${event.aggregateId}`,
-        );
         if (event.eventType === OrderEventType.PAYMENT_INTENT_FAILED) {
-          const { orderId, reason } = event.data;
-          console.log(
-            `[Payment] ❌ Marking Order ${orderId} as FAILED: ${reason}`,
-          );
+          const { orderId } = event.data;
           await orderRepository.updateStatus(orderId, OrderStatus.CANCELLED);
         } else if (event.eventType === OrderEventType.CANCELLED) {
-          const { paymentId, orderId } = event.data;
+          const { paymentId } = event.data;
           if (paymentId) {
-            console.log(
-              `[Payment] 💸 Processing async reversal for Order ${orderId}`,
-            );
             await orderService.processPaymentReversal(paymentId);
           }
         }

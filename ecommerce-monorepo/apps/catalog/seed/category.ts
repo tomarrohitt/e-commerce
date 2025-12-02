@@ -1,12 +1,14 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
-import { generateSlug } from "@ecommerce/common";
+import { generateSlug, LoggerFactory } from "@ecommerce/common";
 
 const connectionString =
   "postgresql://postgres:password@localhost:5432/catalog";
 
 const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ adapter });
+
+const logger = LoggerFactory.create("CatalogService");
 
 const categories = [
   { name: "Electronics" },
@@ -182,5 +184,5 @@ async function main() {
 }
 
 main()
-  .catch((e) => console.error(e))
+  .catch((e) => logger.error(e))
   .finally(async () => await prisma.$disconnect());

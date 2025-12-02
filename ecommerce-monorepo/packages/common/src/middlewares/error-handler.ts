@@ -1,26 +1,43 @@
 import { Request, Response, NextFunction } from "express";
 import { CustomError } from "../errors/custom-error";
+import { LoggerFactory } from "../services/logger-service";
+import { ErrorResponse } from "../types/error-types";
+
+const logger = LoggerFactory.create("ErrorHandler");
 
 export const errorHandler = (
   err: Error,
-  _req: Request,
+  req: Request,
   res: Response,
   _next: NextFunction,
-) => {
-  console.error("🔥 GLOBAL ERROR CATCHER:", err);
+): void => {
+  logger.error("Request error", err, {
+    method: req.method,
+    path: req.path,
+    ip: req.ip,
+    userAgent: req.get("user-agent"),
+  });
+
   if (err instanceof CustomError) {
-    return res.status(err.statusCode).json({
+    const response: ErrorResponse = {
       success: false,
       errors: err.serializeErrors(),
-    });
+      timestamp: new Date().toISOString(),
+    };
+
+    res.status(err.statusCode).json(response);
+    return;
   }
 
-  console.error("---------------------------------");
-  console.error("UNEXPECTED ERROR:", err);
-  console.error("---------------------------------");
-
-  res.status(500).json({
-    success: false,
-    errors: [{ message: "Something went wrong" }],
+  logger.error("Unexpected error", err, {
+    stack: err.stack,
   });
+
+  const response: ErrorResponse = {
+    success: false,
+    errors: [{ message: "An unexpected error occurred" }],
+    timestamp: new Date().toISOString(),
+  };
+
+  res.status(500).json(response);
 };

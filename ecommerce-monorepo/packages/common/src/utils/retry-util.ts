@@ -1,34 +1,81 @@
-interface RetryOptions {
+import { LoggerFactory } from "../services/logger-service";
+
+const logger = LoggerFactory.create("RetryUtil");
+
+export interface RetryOptions {
   retries?: number;
   delay?: number;
   backoff?: boolean;
+  onRetry?: (attempt: number, error: Error) => void;
+  shouldRetry?: (error: Error) => boolean;
 }
 
-export async function withRetry<T>(
-  operation: () => Promise<T>,
-  options: RetryOptions = {}
-): Promise<T> {
-  const { retries = 3, delay = 200, backoff = true } = options;
+export class RetryUtil {
+  static async withRetry<T>(
+    operation: () => Promise<T>,
+    options: RetryOptions = {},
+  ): Promise<T> {
+    const {
+      retries = 3,
+      delay = 200,
+      backoff = true,
+      onRetry,
+      shouldRetry,
+    } = options;
 
-  for (let attempt = 1; attempt <= retries; attempt++) {
-    try {
-      return await operation();
-    } catch (error) {
-      const isLastAttempt = attempt === retries;
+    let lastError: Error;
 
-      if (isLastAttempt) {
-        throw error;
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        return await operation();
+      } catch (error) {
+        lastError = error as Error;
+        if (shouldRetry && !shouldRetry(lastError)) {
+          throw lastError;
+        }
+
+        const isLastAttempt = attempt === retries;
+
+        if (isLastAttempt) {
+          throw lastError;
+        }
+
+        const waitTime = backoff ? delay * attempt : delay;
+
+        logger.info("Retrying operation", {
+          attempt,
+          totalRetries: retries,
+          waitTime,
+        });
+
+        if (onRetry) {
+          onRetry(attempt, lastError);
+        }
+
+        await this.sleep(waitTime);
       }
-
-      const waitTime = backoff ? delay * attempt : delay;
-      console.info(
-        "Retry",
-        `Operation failed (Attempt ${attempt}/${retries}). Retrying in ${waitTime}ms...`
-      );
-
-      await new Promise((resolve) => setTimeout(resolve, waitTime));
     }
+
+    throw lastError!;
   }
 
-  throw new Error("Unreachable code");
+  private static sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  static calculateBackoff(
+    attempt: number,
+    baseDelay: number = 100,
+    maxDelay: number = 10000,
+  ): number {
+    const exponentialDelay = Math.min(
+      baseDelay * Math.pow(2, attempt),
+      maxDelay,
+    );
+    const jitter = Math.random() * 0.3 * exponentialDelay;
+    return Math.floor(exponentialDelay + jitter);
+  }
 }
+
+// Backward compatibility
+export const withRetry = RetryUtil.withRetry.bind(RetryUtil);

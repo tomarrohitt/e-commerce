@@ -6,31 +6,32 @@ import {
   currentUser,
   errorHandler,
   EventBusService,
+  LoggerFactory,
   OutboxProcessor,
 } from "@ecommerce/common";
 import { prisma } from "./config/prisma";
 import productRouter from "./router/product-router";
 import categoryRouter from "./router/category-router";
-import { EventStatus } from "@prisma/client";
 import { env } from "./config/env";
 import productAdminRouter from "./router/product-admin-router";
 import categoryAdminRouter from "./router/category-admin-router";
-import { OrderCreatedConsumer } from "./events/order-consumer";
+import { OrderCreatedConsumer } from "./events/order-created-consumer";
+import { OrderCancelledConsumer } from "./events/order-cancelled-consumer";
+
+const logger = LoggerFactory.create("CatalogService");
 
 const eventBus = new EventBusService({
   serviceName: "catalog-service",
-  exchangeName: "ecommerce.events",
+  url: env.RABBITMQ_URL,
 });
 
-const outboxProcessor = new OutboxProcessor(
-  prisma,
-  eventBus,
-  EventStatus,
-  50,
-  500,
-);
+const outboxProcessor = new OutboxProcessor(prisma, eventBus, {
+  batchSize: 50,
+  pollInterval: 500,
+});
 
 const orderConsumer = new OrderCreatedConsumer(eventBus);
+const orderCancelledConsumer = new OrderCancelledConsumer(eventBus);
 
 const app = express();
 const PORT = env.PORT;
@@ -55,9 +56,10 @@ async function startServer() {
       console.log(`Catalog Service running on ${PORT}`);
       outboxProcessor.start();
       orderConsumer.start();
+      orderCancelledConsumer.start();
     });
   } catch (error) {
-    console.error("Failed to start server. Shutting down.", { error });
+    logger.error("Failed to start server. Shutting down.", { error });
     process.exit(1);
   }
 }

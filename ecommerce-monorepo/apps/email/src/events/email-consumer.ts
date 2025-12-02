@@ -3,8 +3,11 @@ import {
   Event,
   OrderEventType,
   UserEventType,
+  LoggerFactory,
 } from "@ecommerce/common";
 import emailService from "../services/email-service";
+
+const logger = LoggerFactory.create("EmailService");
 
 export class EmailConsumer {
   constructor(private eventBus: EventBusService) {}
@@ -40,10 +43,10 @@ export class EmailConsumer {
               break;
           }
         } catch (error) {
-          console.error("Failed to process email event", error);
+          logger.error("Failed to process email event", error);
           throw error;
         }
-      }
+      },
     );
   }
 }

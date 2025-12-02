@@ -9,15 +9,12 @@ export class OrderCreatedConsumer {
       "cart-service-order-listener",
       [OrderEventType.CREATED],
       async (event: Event) => {
-        console.log(
-          `[Cart] Order ${event.aggregateId} created. Clearing cart.`
-        );
-        const userId = (event.data as any).userId;
+        const userId = event.data.userId;
 
         if (userId) {
           await cartRepository.clearCart(userId);
         }
-      }
+      },
     );
   }
 }

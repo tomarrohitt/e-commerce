@@ -1,14 +1,17 @@
 import express from "express";
 import { IdentityAuthMiddleware } from "../middleware/auth-middleware";
 import { env } from "../config/env";
+import { LoggerFactory } from "@ecommerce/common";
+
+const logger = LoggerFactory.create("IdentityService");
 
 const internalRouter = express.Router();
 
 const INTERNAL_SECRET = env.INTERNAL_SERVICE_SECRET;
 
 if (!INTERNAL_SECRET) {
-  console.error(
-    "FATAL: INTERNAL_SERVICE_SECRET is not set. Internal APIs are insecure."
+  logger.error(
+    "FATAL: INTERNAL_SERVICE_SECRET is not set. Internal APIs are insecure.",
   );
   process.exit(1);
 }
@@ -16,7 +19,7 @@ if (!INTERNAL_SECRET) {
 const requireInternalAuth = (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction
+  next: express.NextFunction,
 ) => {
   const secret = req.headers["x-internal-secret"];
 
@@ -48,13 +51,13 @@ internalRouter.post(
         error: result.error || "Invalid session",
       });
     } catch (error) {
-      console.error("Internal validate-session error:", error);
+      logger.error("Internal validate-session error:", error);
       return res.status(500).json({
         valid: false,
         error: "Internal error",
       });
     }
-  }
+  },
 );
 
 export default internalRouter;

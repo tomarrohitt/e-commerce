@@ -1,10 +1,17 @@
 import "express-async-errors";
 import express from "express";
-import { EventBusService, errorHandler, currentUser } from "@ecommerce/common";
+import {
+  EventBusService,
+  errorHandler,
+  currentUser,
+  LoggerFactory,
+} from "@ecommerce/common";
 import { ProductConsumer } from "./events/product-consumer";
 import cartRouter from "./router/cart-router";
 import { env } from "./config/env";
 import { OrderCreatedConsumer } from "./events/order-consumer";
+
+const logger = LoggerFactory.create("CartService");
 
 const app = express();
 const PORT = env.PORT || 4003;
@@ -13,7 +20,7 @@ const SERVICE_MODE = env.SERVICE_MODE || "ALL";
 
 const eventBus = new EventBusService({
   serviceName: "cart-service",
-  exchangeName: "ecommerce.events",
+  url: env.RABBITMQ_URL,
 });
 
 const productConsumer = new ProductConsumer(eventBus);
@@ -40,7 +47,7 @@ async function start() {
       });
     }
   } catch (err) {
-    console.error("Failed to start Cart Service", err);
+    logger.error("Failed to start Cart Service", err);
     process.exit(1);
   }
 }

@@ -1,9 +1,10 @@
 import { redis } from "@ecommerce/common";
+import { Prisma } from "@prisma/client";
 
 export class UserEventLog {
   async queueUserCreated(
-    tx: any,
-    user: { id: string; email: string; name: string }
+    tx: Prisma.TransactionClient,
+    user: { id: string; email: string; name: string },
   ) {
     await tx.outboxEvent.create({
       data: {
@@ -19,8 +20,8 @@ export class UserEventLog {
   }
 
   async queueUserUpdated(
-    tx: any,
-    user: { id: string; email: string; name: string }
+    tx: Prisma.TransactionClient,
+    user: { id: string; email: string; name: string },
   ) {
     await redis.delete(`user:${user.id}`);
 
@@ -38,7 +39,7 @@ export class UserEventLog {
     });
   }
 
-  async queueUserDeleted(tx: any, userId: string) {
+  async queueUserDeleted(tx: Prisma.TransactionClient, userId: string) {
     await redis.delete(`user:${userId}`);
 
     await tx.outboxEvent.create({

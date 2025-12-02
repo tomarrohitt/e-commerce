@@ -4,7 +4,7 @@ import {
   DeleteObjectsCommand,
   HeadObjectCommand,
 } from "@aws-sdk/client-s3";
-import { s3Client, AWS_BUCKET_NAME } from "../config/aws"; // Import from config
+import { s3Client, AWS_BUCKET_NAME } from "../config/aws";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const URL_EXPIRATION = 600; // 10 minutes
@@ -33,7 +33,7 @@ async function createPresignedPostConfig(key: string) {
 export async function generatePresignedUrls(
   prefix: StoragePrefix,
   recordId: string,
-  count: number = 1
+  count: number = 1,
 ) {
   const promises = Array.from({ length: count }, async (_, index) => {
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e5)}`;
@@ -57,7 +57,7 @@ export async function deleteImage(key: string): Promise<boolean> {
       new DeleteObjectCommand({
         Bucket: AWS_BUCKET_NAME,
         Key: key,
-      })
+      }),
     );
     return true;
   } catch (error) {
@@ -68,7 +68,7 @@ export async function deleteImage(key: string): Promise<boolean> {
 }
 
 export async function deleteImages(
-  keys: string[]
+  keys: string[],
 ): Promise<{ deleted: string[]; failed: string[] }> {
   if (keys.length === 0) return { deleted: [], failed: [] };
 
@@ -80,7 +80,7 @@ export async function deleteImages(
           Objects: keys.map((key) => ({ Key: key })),
           Quiet: false, // Return list of deleted objects
         },
-      })
+      }),
     );
 
     const deleted =
@@ -103,13 +103,13 @@ export async function validateImagesExist(keys: string[]) {
           new HeadObjectCommand({
             Bucket: AWS_BUCKET_NAME,
             Key: key,
-          })
+          }),
         );
         return null; // Exists
       } catch {
         return key; // Does not exist
       }
-    })
+    }),
   );
 
   const missing = checks.filter((key): key is string => key !== null);
@@ -117,7 +117,7 @@ export async function validateImagesExist(keys: string[]) {
   if (missing.length > 0) {
     // 🛑 Throw Clean Error using your System
     throw new Error(
-      `Validation failed: The following images were not uploaded: ${missing.join(", ")}`
+      `Validation failed: The following images were not uploaded: ${missing.join(", ")}`,
     );
   }
 

@@ -77,9 +77,9 @@ model OrderAddress {
   @@map("order_addresses")
 }
 
-// --- RELIABILITY (The Outbox) ---
 enum EventStatus {
   PENDING
+  PROCESSING
   PROCESSED
   FAILED
 }

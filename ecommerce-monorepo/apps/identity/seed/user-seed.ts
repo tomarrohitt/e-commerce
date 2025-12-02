@@ -1,8 +1,11 @@
 import axios from "axios";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { LoggerFactory } from "@ecommerce/common";
 
 const GATEWAY_URL = "http://localhost:4000";
+
+const logger = LoggerFactory.create("IdentityService");
 
 const connectionString =
   "postgresql://postgres:password@localhost:5432/identity";
@@ -67,14 +70,14 @@ async function main() {
             "Content-Type": "application/json",
             Origin: "http://localhost:4000",
           },
-        }
+        },
       );
 
       const cookies = signUpResponse.headers["set-cookie"];
       if (!cookies) throw new Error("No cookies returned from Sign Up");
 
       const cookieHeader = cookies.find((c) =>
-        c.includes("better-auth.session_token")
+        c.includes("better-auth.session_token"),
       );
 
       if (!cookieHeader) {
@@ -103,7 +106,7 @@ async function main() {
               Cookie: cookieHeader,
               Origin: "http://localhost:4000",
             },
-          }
+          },
         );
       }
 
@@ -116,11 +119,11 @@ async function main() {
       }
     } catch (error: any) {
       if (error.response) {
-        console.error(
-          `   ❌ Failed: ${error.response.status} - ${JSON.stringify(error.response.data)}`
+        logger.error(
+          `   ❌ Failed: ${error.response.status} - ${JSON.stringify(error.response.data)}`,
         );
       } else {
-        console.error(`   ❌ Error: ${error.message}`);
+        logger.error(`   ❌ Error: ${error.message}`);
       }
     }
   }
