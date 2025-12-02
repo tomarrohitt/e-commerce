@@ -1,3 +1,5 @@
+import { env } from "./env";
+
 export interface RouteRule {
   method: string;
   protected: boolean;
@@ -13,47 +15,73 @@ export interface RouteConfig {
 export const routeConfigs: RouteConfig[] = [
   {
     path: "/api/auth",
-    target: process.env.IDENTITY_SERVICE_URL!,
+    target: env.IDENTITY_SERVICE_URL,
     rules: [{ method: "ALL", protected: false }],
   },
   {
     path: "/api/user",
-    target: process.env.IDENTITY_SERVICE_URL!,
+    target: env.IDENTITY_SERVICE_URL,
     rules: [{ method: "ALL", protected: true }],
   },
   {
     path: "/api/addresses",
-    target: process.env.IDENTITY_SERVICE_URL!,
+    target: env.IDENTITY_SERVICE_URL,
     rules: [{ method: "ALL", protected: true }],
   },
   {
-    path: "/api/admin",
-    target: process.env.IDENTITY_SERVICE_URL!,
+    path: "/api/admin/user",
+    target: env.IDENTITY_SERVICE_URL,
+    rules: [{ method: "ALL", protected: true, adminOnly: true }],
+  },
+  {
+    path: "/api/admin/addresses",
+    target: env.IDENTITY_SERVICE_URL,
     rules: [{ method: "ALL", protected: true, adminOnly: true }],
   },
   {
     path: "/api/products",
-    target: process.env.CATALOG_SERVICE_URL!,
-    rules: [
-      { method: "GET", protected: false },
-      { method: "POST", protected: true, adminOnly: true },
-      { method: "PATCH", protected: true, adminOnly: true },
-      { method: "DELETE", protected: true, adminOnly: true },
-    ],
+    target: env.CATALOG_SERVICE_URL,
+    rules: [{ method: "GET", protected: false }],
   },
+
   {
     path: "/api/category",
-    target: process.env.CATALOG_SERVICE_URL!,
-    rules: [
-      { method: "GET", protected: false },
-      { method: "POST", protected: true, adminOnly: true },
-      { method: "PATCH", protected: true, adminOnly: true },
-      { method: "DELETE", protected: true, adminOnly: true },
-    ],
+    target: env.CATALOG_SERVICE_URL,
+    rules: [{ method: "GET", protected: false }],
+  },
+  {
+    path: "/api/admin/products",
+    target: env.CATALOG_SERVICE_URL,
+    rules: [{ method: "ALL", protected: true, adminOnly: true }],
+  },
+  {
+    path: "/api/admin/category",
+    target: env.CATALOG_SERVICE_URL,
+    rules: [{ method: "ALL", protected: true, adminOnly: true }],
   },
   {
     path: "/api/cart",
-    target: process.env.CART_SERVICE_URL!,
+    target: env.CART_SERVICE_URL,
     rules: [{ method: "ALL", protected: true }],
+  },
+  {
+    path: "/api/orders",
+    target: env.ORDERS_SERVICE_URL,
+    rules: [{ method: "ALL", protected: true }],
+  },
+  {
+    path: "/api/orders",
+    target: env.ORDERS_SERVICE_URL,
+    rules: [{ method: "ALL", protected: true }],
+  },
+  {
+    path: "/api/admin/orders",
+    target: env.ORDERS_SERVICE_URL,
+    rules: [{ method: "ALL", protected: true, adminOnly: true }],
+  },
+  {
+    path: "/api/orders/webhook",
+    target: env.ORDERS_SERVICE_URL,
+    rules: [{ method: "POST", protected: false }],
   },
 ];

@@ -1,4 +1,4 @@
-import { NotFoundError, safeQuery, BadRequestError } from "@ecommerce/common";
+import { safeQuery, BadRequestError } from "@ecommerce/common";
 import { prisma } from "../config/prisma";
 import {
   CreateCategoryInput,

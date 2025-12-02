@@ -3,10 +3,11 @@ import { CustomError } from "../errors/custom-error";
 
 export const errorHandler = (
   err: Error,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction,
 ) => {
+  console.error("🔥 GLOBAL ERROR CATCHER:", err);
   if (err instanceof CustomError) {
     return res.status(err.statusCode).json({
       success: false,

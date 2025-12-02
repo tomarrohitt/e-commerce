@@ -5,7 +5,7 @@ import productRepository from "../repository/product-repository";
 import cartService from "./cart-service";
 import { ValidateUser } from "../types";
 import { getSecureWhere } from "../utils/get-where";
-import { OrderStatus } from "../../generated/prisma/client";
+import { OrderStatus } from "@prisma/client";
 import stripeService from "./stripe-service";
 import { eventPublisher, EventType } from "../events/publisher";
 import { randomUUID } from "crypto";

@@ -1,5 +1,6 @@
 import amqp, { Channel, ChannelModel } from "amqplib";
 import { Event, EventBusConfig } from "../types/event-types";
+import { env } from "../config/env";
 
 export class EventBusService {
   private connection: ChannelModel | null = null;
@@ -13,7 +14,7 @@ export class EventBusService {
   constructor(config: EventBusConfig = {}) {
     this.config = {
       serviceName: config.serviceName || "unknown-service",
-      url: config.url || process.env.RABBITMQ_URL || "amqp://localhost",
+      url: config.url || env.RABBITMQ_URL,
       exchangeName: config.exchangeName || "ecommerce.events",
       dlqExchange: config.dlqExchange || "dlq.exchange",
       dlqQueue: config.dlqQueue || "dlq.queue",
@@ -51,7 +52,6 @@ export class EventBusService {
 
       this.isConnected = true;
       this.reconnectAttempts = 0;
-      console.log("Connected to Event Bus");
     } catch (error) {
       console.error("Event Bus connection failed:", error);
       this.handleDisconnect();
@@ -75,10 +75,8 @@ export class EventBusService {
     await this.channel.bindQueue(
       this.config.dlqQueue,
       this.config.dlqExchange,
-      ""
+      "",
     );
-
-    console.log("✅ Dead Letter Queue configured");
   }
 
   private handleDisconnect() {
@@ -87,7 +85,7 @@ export class EventBusService {
     if (this.reconnectAttempts < this.config.maxReconnectAttempts) {
       this.reconnectAttempts++;
       console.log(
-        `Reconnecting in ${this.config.reconnectDelay}ms... (Attempt ${this.reconnectAttempts})`
+        `Reconnecting in ${this.config.reconnectDelay}ms... (Attempt ${this.reconnectAttempts})`,
       );
       setTimeout(() => this.connect(), this.config.reconnectDelay);
     } else {
@@ -112,7 +110,7 @@ export class EventBusService {
           timestamp: Date.now(),
           contentType: "application/json",
           messageId: event.eventId,
-        }
+        },
       );
 
       if (!published) {
@@ -136,7 +134,7 @@ export class EventBusService {
     options?: {
       maxRetries?: number;
       retryDelay?: number;
-    }
+    },
   ): Promise<void> {
     if (!this.channel) {
       throw new Error("Event Bus not connected");
@@ -184,7 +182,7 @@ export class EventBusService {
                   ...msg.properties.headers,
                   "x-retry-count": retries,
                 },
-              }
+              },
             );
 
             this.channel!.ack(msg);
@@ -196,10 +194,8 @@ export class EventBusService {
       },
       {
         noAck: false,
-      }
+      },
     );
-
-    console.log(`Subscribed: ${queueName} -> [${routingKeys.join(", ")}]`);
   }
 
   getChannel(): Channel | null {

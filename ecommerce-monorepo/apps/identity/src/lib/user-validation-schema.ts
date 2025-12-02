@@ -2,39 +2,42 @@ import { z } from "zod";
 
 export const registrationSchema = z.object({
   name: z
-    .string()
+    .string({ message: "Name is required" })
+    .min(1, "Name is required")
     .min(2, "Name must be at least 2 characters")
     .max(100, "Name cannot exceed 100 characters")
-    .trim()
-    .nonempty("Name is required"),
-
+    .trim(),
   email: z
-    .email("Please provide a valid email address")
+    .string({ message: "Email is required" })
+    .min(1, "Email is required")
     .trim()
     .toLowerCase()
-    .nonempty("Email is required"),
-
+    .refine((val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
+      message: "Please provide a valid email address",
+    }),
   password: z
-    .string()
+    .string({ message: "Password is required" })
+    .min(1, "Password is required")
     .min(8, "Password must be at least 8 characters")
     .max(128, "Password cannot exceed 128 characters")
     .regex(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-      "Password must contain uppercase, lowercase, number, and special character"
-    )
-    .nonempty("Password is required"),
+      "Password must contain uppercase, lowercase, number, and special character",
+    ),
 });
 
 export const loginSchema = z.object({
   email: z
-    .email("Please provide a valid email address")
+    .string({ message: "Email is required" })
+    .min(1, "Email is required")
     .trim()
     .toLowerCase()
-    .nonempty("Email is required"),
-
+    .refine((val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
+      message: "Please provide a valid email address",
+    }),
   password: z
-    .string()
+    .string({ message: "Password is required" })
+    .min(1, "Password is required")
     .min(8, "Password must be at least 8 characters")
-    .max(128, "Password cannot exceed 128 characters")
-    .nonempty("Password is required"),
+    .max(128, "Password cannot exceed 128 characters"),
 });

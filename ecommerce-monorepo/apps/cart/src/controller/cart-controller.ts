@@ -13,7 +13,7 @@ class CartController {
   async addToCart(req: Request, res: Response) {
     const { productId, quantity } = validateAndThrow<AddToCartInput>(
       addToCartSchema,
-      req.body
+      req.body,
     );
 
     const userId = req.user.id;
@@ -28,7 +28,7 @@ class CartController {
 
   // GET /api/cart
   async getCart(req: Request, res: Response) {
-    const userId = req.user!.id;
+    const userId = req.user.id;
     const cart = await cartService.getCart(userId);
 
     res.status(200).json({
@@ -40,7 +40,7 @@ class CartController {
   async updateCartItem(req: Request, res: Response) {
     const { quantity } = validateAndThrow<UpdateQuantityInput>(
       updateQuantitySchema,
-      req.body
+      req.body,
     );
     const userId = req.user.id;
     const productId = req.params.productId;
@@ -58,7 +58,7 @@ class CartController {
   }
 
   async removeFromCart(req: Request, res: Response) {
-    const userId = req.user!.id;
+    const userId = req.user.id;
     const productId = req.params.productId;
 
     if (!productId) {
@@ -74,7 +74,7 @@ class CartController {
   }
 
   async validationCart(req: Request, res: Response) {
-    const userId = req.user!.id;
+    const userId = req.user.id;
 
     const validation = await cartService.validateCart(userId);
 
@@ -85,7 +85,7 @@ class CartController {
   }
 
   async clearCart(req: Request, res: Response) {
-    const userId = req.user!.id;
+    const userId = req.user.id;
     await cartService.clearCart(userId);
 
     res.status(204).json({
@@ -95,7 +95,7 @@ class CartController {
   }
 
   async getCartCount(req: Request, res: Response) {
-    const userId = req.user!.id;
+    const userId = req.user.id;
     const count = await cartService.getCartItemCount(userId);
 
     res.status(200).json({

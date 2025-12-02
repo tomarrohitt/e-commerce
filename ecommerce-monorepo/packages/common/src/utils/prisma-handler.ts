@@ -37,11 +37,16 @@ export type ErrorContext = {
 
 export function handlePrismaError(
   error: unknown,
-  context?: ErrorContext
+  context?: ErrorContext,
 ): Error {
+  console.error("🛑 UNHANDLED PRISMA ERROR:", {
+    code: (error as any).code,
+    message: (error as any).message,
+    meta: (error as any).meta,
+  }); // 👈 Add this log!
   if (!isPrismaError(error)) {
     return new DatabaseOpError(
-      "Something went wrong with the database operation"
+      "Something went wrong with the database operation",
     );
   }
 
@@ -73,7 +78,7 @@ export function handlePrismaError(
     const humanLabel = getFieldLabel(fieldName);
     return new BadRequestError(
       `${modelName} with this ${humanLabel} already exists.`,
-      fieldName
+      fieldName,
     );
   }
 
@@ -109,7 +114,7 @@ export function handlePrismaError(
     const label = rawField ? getFieldLabel(rawField) : "Relation";
 
     return new BadRequestError(
-      `Invalid ${label}. The related record does not exist.`
+      `Invalid ${label}. The related record does not exist.`,
     );
   }
 
@@ -123,7 +128,7 @@ export function handlePrismaError(
 
 export const safeQuery = async <T>(
   query: () => Promise<T>,
-  context?: ErrorContext
+  context?: ErrorContext,
 ): Promise<T> => {
   try {
     return await query();

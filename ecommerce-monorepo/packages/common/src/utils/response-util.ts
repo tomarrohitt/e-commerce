@@ -4,7 +4,7 @@ export const sendError = (
   res: Response,
   statusCode: number,
   message: string,
-  field?: string
+  field?: string,
 ) => {
   return res.status(statusCode).json({
     success: false,
@@ -15,10 +15,10 @@ export const sendError = (
 export const sendSuccess = (
   res: Response,
   data: any,
-  statusCode: number = 200
+  statusCode: number = 200,
 ) => {
   return res.status(statusCode).json({
     success: true,
-    data,
+    ...data,
   });
 };

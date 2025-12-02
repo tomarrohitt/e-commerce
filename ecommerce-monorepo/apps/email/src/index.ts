@@ -1,10 +1,10 @@
-import "dotenv/config";
 import express from "express";
 import { EmailConsumer } from "./events/email-consumer";
 import { EventBusService } from "@ecommerce/common";
+import { env } from "./config/env";
 
 const app = express();
-const PORT = process.env.PORT || 4004;
+const PORT = env.PORT;
 
 const eventBus = new EventBusService({
   serviceName: "email-service",

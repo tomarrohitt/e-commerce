@@ -1,26 +1,48 @@
 import "dotenv/config";
-import express from "express";
+import express, { Request, Response, NextFunction } from "express"; // Import NextFunction
 import cookieParser from "cookie-parser";
 import { createProxyMiddleware, fixRequestBody } from "http-proxy-middleware";
 import { conditionalAuth } from "./middleware/auth-router";
 import { routeConfigs } from "./config/routes";
 import { ClientRequest, ServerResponse } from "http";
-import { Request } from "express";
 import { GatewayAuthMiddleware } from "./middleware/auth-middleware";
 import { requestLogger } from "./middleware/logger";
 import { errorHandler } from "@ecommerce/common";
+import { env } from "./config/env";
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = env.PORT || 4000;
+
+// 1. Logger should be FIRST (to capture start time correctly)
+app.use(requestLogger);
 
 app.use(cookieParser());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+// 2. 🛑 CONDITIONAL BODY PARSING (The Stripe Fix)
+// We skip express.json() ONLY for the webhook route.
+// This allows the raw stream to pipe directly to the Order Service.
+const rawBodyRoutes = ["/api/orders/webhook"];
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (rawBodyRoutes.includes(req.originalUrl)) {
+    next(); // Skip parsing, let the stream pass through
+  } else {
+    express.json()(req, res, next); // Parse everything else
+  }
+});
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (rawBodyRoutes.includes(req.originalUrl)) {
+    next();
+  } else {
+    express.urlencoded({ extended: true })(req, res, next);
+  }
+});
 
 const onProxyReq = (
   proxyReq: ClientRequest,
   req: Request,
-  res: ServerResponse
+  res: ServerResponse,
 ) => {
   const user = req.user;
   if (user) {
@@ -28,18 +50,19 @@ const onProxyReq = (
     proxyReq.setHeader("x-user-email", user.email);
     proxyReq.setHeader("x-user-role", user.role);
     proxyReq.setHeader("x-user-image", user.image || "");
-    proxyReq.setHeader("x-user-name", encodeURIComponent(user.name || ""));
+    proxyReq.setHeader("x-user-name", encodeURIComponent(user.name));
     proxyReq.setHeader("x-user-session-id", user.sessionId);
-    proxyReq.setHeader(
-      "x-internal-secret",
-      process.env.INTERNAL_SERVICE_SECRET || ""
-    );
+    proxyReq.setHeader("x-internal-secret", env.INTERNAL_SERVICE_SECRET);
   }
-  fixRequestBody(proxyReq, req);
+
+  // 3. Only fix body if we actually parsed it!
+  // If we skipped parsing (webhook), we don't touch the stream.
+  if (!rawBodyRoutes.includes(req.originalUrl)) {
+    fixRequestBody(proxyReq, req);
+  }
 };
 
-app.use(requestLogger);
-
+// ... Internal routes ...
 app.get("/api/validate", GatewayAuthMiddleware.authenticate, (req, res) => {
   const user = req.user;
 
@@ -55,6 +78,7 @@ app.get("/api/validate", GatewayAuthMiddleware.authenticate, (req, res) => {
   });
 });
 
+// ... Proxy Setup ...
 routeConfigs.forEach((routeConfig) => {
   app.use(
     routeConfig.path,
@@ -68,7 +92,7 @@ routeConfigs.forEach((routeConfig) => {
       on: {
         proxyReq: onProxyReq,
       },
-    })
+    }),
   );
 });
 

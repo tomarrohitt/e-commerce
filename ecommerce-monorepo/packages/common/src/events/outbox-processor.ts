@@ -10,13 +10,12 @@ export class OutboxProcessor {
     private eventBus: EventBusService,
     private EventStatus: { PENDING: string; PROCESSED: string; FAILED: string },
     private batchSize = 50,
-    private pollInterval = 500
+    private pollInterval = 500,
   ) {}
 
   async start() {
     if (this.isRunning) return;
     this.isRunning = true;
-    console.log("Outbox Processor Started");
     this.loop();
   }
 
@@ -59,7 +58,7 @@ export class OutboxProcessor {
           } catch (err) {
             console.error(`Failed to publish event ${dbEvent.id}`, err);
           }
-        })
+        }),
       );
     } catch (error) {
       console.error("Outbox Processor Error:", error);

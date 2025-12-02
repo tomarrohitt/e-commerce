@@ -18,9 +18,9 @@ class CartService {
       throw new BadRequestError("Product is not available");
     }
 
-    if (quantity > product.stock) {
+    if (quantity > product.stockQuantity) {
       throw new BadRequestError(
-        `We only have ${product.stock} items in stock.`
+        `We only have ${product.stockQuantity} items in stockQuantity.`
       );
     }
 
@@ -28,12 +28,12 @@ class CartService {
 
     if (existingItem) {
       const newTotalQuantity = existingItem.quantity + quantity;
-      if (newTotalQuantity > product.stock) {
-        const remainingAllowed = product.stock - existingItem.quantity;
+      if (newTotalQuantity > product.stockQuantity) {
+        const remainingAllowed = product.stockQuantity - existingItem.quantity;
 
         if (remainingAllowed <= 0) {
           throw new BadRequestError(
-            `You already have the maximum available stock (${product.stock}) in your cart.`
+            `You already have the maximum available stockQuantity (${product.stockQuantity}) in your cart.`
           );
         }
 
@@ -71,23 +71,24 @@ class CartService {
         continue;
       }
 
-      if (product.stock === 0) {
+      if (product.stockQuantity === 0) {
         items.push({
           ...cartItem,
           product: {
             id: product.id,
             name: product.name,
+            sku: product.sku,
             price: product.price.toNumber(),
-            images: product.image ? [product.image] : [],
-            stockQuantity: product.stock,
+            thumbnail: product.thumbnail ? [product.thumbnail] : [],
+            stockQuantity: product.stockQuantity,
           },
         });
         continue;
       }
 
       let quantity = cartItem.quantity;
-      if (product.stock < quantity) {
-        quantity = product.stock;
+      if (product.stockQuantity < quantity) {
+        quantity = product.stockQuantity;
         await cartRepository.updateQuantity(
           userId,
           cartItem.productId,
@@ -104,9 +105,10 @@ class CartService {
         product: {
           id: product.id,
           name: product.name,
+          sku: product.sku,
           price: product.price.toNumber(),
-          stockQuantity: product.stock,
-          images: product.image ? [product.image] : [],
+          stockQuantity: product.stockQuantity,
+          thumbnail: product.thumbnail ? [product.thumbnail] : [],
         },
       });
 
@@ -138,9 +140,9 @@ class CartService {
       throw new BadRequestError("Product is no longer available");
     }
 
-    if (quantity > product.stock) {
+    if (quantity > product.stockQuantity) {
       throw new BadRequestError(
-        `Cannot update to ${quantity}. Only ${product.stock} items left in stock.`
+        `Cannot update to ${quantity}. Only ${product.stockQuantity} items left in stockQuantity.`
       );
     }
 
@@ -158,10 +160,10 @@ class CartService {
 
     for (const item of cart.items) {
       if (item.product.stockQuantity === 0) {
-        errors.push(`"${item.product.name}" is out of stock.`);
+        errors.push(`"${item.product.name}" is out of stockQuantity.`);
       } else if (item.quantity > item.product.stockQuantity) {
         errors.push(
-          `"${item.product.name}" only has ${item.product.stockQuantity} items left in stock.`
+          `"${item.product.name}" only has ${item.product.stockQuantity} items left in stockQuantity.`
         );
       }
     }

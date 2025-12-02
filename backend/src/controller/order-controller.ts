@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import orderService from "../service/order-service";
-import { OrderStatus } from "../../generated/prisma/client";
+import { OrderStatus } from "@prisma/client";
 import {
   createOrderSchema,
   updateOrderStatusSchema,

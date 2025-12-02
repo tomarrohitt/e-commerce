@@ -12,6 +12,10 @@ import { prisma } from "./config/prisma";
 import productRouter from "./router/product-router";
 import categoryRouter from "./router/category-router";
 import { EventStatus } from "@prisma/client";
+import { env } from "./config/env";
+import productAdminRouter from "./router/product-admin-router";
+import categoryAdminRouter from "./router/category-admin-router";
+import { OrderCreatedConsumer } from "./events/order-consumer";
 
 const eventBus = new EventBusService({
   serviceName: "catalog-service",
@@ -23,11 +27,13 @@ const outboxProcessor = new OutboxProcessor(
   eventBus,
   EventStatus,
   50,
-  500
+  500,
 );
 
+const orderConsumer = new OrderCreatedConsumer(eventBus);
+
 const app = express();
-const PORT = process.env.PORT || 4002;
+const PORT = env.PORT;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -37,6 +43,9 @@ app.use(currentUser);
 app.use("/api/products", productRouter);
 app.use("/api/category", categoryRouter);
 
+app.use("/api/admin/products", productAdminRouter);
+app.use("/api/admin/category", categoryAdminRouter);
+
 app.use(errorHandler);
 
 async function startServer() {
@@ -45,6 +54,7 @@ async function startServer() {
     app.listen(PORT, () => {
       console.log(`Catalog Service running on ${PORT}`);
       outboxProcessor.start();
+      orderConsumer.start();
     });
   } catch (error) {
     console.error("Failed to start server. Shutting down.", { error });

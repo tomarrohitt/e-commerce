@@ -2,16 +2,17 @@ import { Request, Response, NextFunction } from "express";
 import axios from "axios";
 import {
   extractToken,
-  redis, // Changed to redis (standard naming)
+  redis,
   UserContext,
   NotAuthorizedError,
   DatabaseOpError,
   HttpClient,
   CircuitBreakerOpenError,
 } from "@ecommerce/common";
+import { env } from "../config/env";
 
 const IDENTITY_PATH = "/api/internal/validate-session";
-const INTERNAL_SERVICE_SECRET = process.env.INTERNAL_SERVICE_SECRET;
+const INTERNAL_SERVICE_SECRET = env.INTERNAL_SERVICE_SECRET;
 const TOKEN_CACHE_TTL = 3600;
 
 interface IdentityResponse {
@@ -21,7 +22,7 @@ interface IdentityResponse {
 }
 
 const identityClient = new HttpClient(
-  "http://localhost:4001",
+  env.IDENTITY_SERVICE_URL,
   "IdentityService"
 );
 

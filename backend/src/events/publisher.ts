@@ -2,7 +2,7 @@
 import { Channel } from "amqplib";
 import { rabbitMq } from "../config/rabbitmq";
 import { logger } from "../utils/logger";
-import { Address } from "../../generated/prisma/client";
+import { Address } from "@prisma/client";
 
 export enum EventType {
   ORDER_CREATED = "order.created",

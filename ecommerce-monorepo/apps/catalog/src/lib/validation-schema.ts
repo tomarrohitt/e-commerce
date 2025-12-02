@@ -49,12 +49,12 @@ export const createProductSchema = z.object({
 
 export const updateProductSchema = createProductSchema.partial();
 
-export const updateProductQuantitySchema = z.object({
+export const updateProductStockSchema = z.object({
   stockQuantity: z.coerce.number().int(),
 });
 
 export const addImagesSchema = z.object({
-  images: z.array(z.string().url("Must be a valid URL")).min(1).max(10),
+  images: z.array(z.url("Must be a valid URL")).min(1).max(10),
 });
 
 export const createCategorySchema = z.object({
@@ -92,6 +92,10 @@ export const listProductSchema = z.object({
 export type CreateProductInput = z.infer<typeof createProductSchema>;
 export type UpdateProductInput = z.infer<typeof updateProductSchema>;
 export type ListProductQuery = z.infer<typeof listProductSchema>;
+
+export type UpdateProductStockInput = z.infer<typeof updateProductStockSchema>;
+
+export type AddImagesInput = z.infer<typeof addImagesSchema>;
 
 export type CreateCategoryInput = z.infer<typeof createCategorySchema>;
 export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>;

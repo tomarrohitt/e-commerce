@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/index.ts",
-    "build": "tsc -b tsconfig.json",
+    "build": "npx tsc --build --force",
     "start": "node dist/index.js",
-    "prisma:generate": "prisma generate --schema=prisma/schema.prisma && prisma db push"
+    "prisma:generate": "prisma generate --schema=prisma/schema.prisma && prisma db push",
+    "seed": "nodemon --exec ts-node -r tsconfig-paths/register seed/user-seed.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.936.0",

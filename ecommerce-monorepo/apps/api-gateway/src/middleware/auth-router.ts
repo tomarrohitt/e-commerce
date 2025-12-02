@@ -1,16 +1,16 @@
-import "dotenv/config";
 import { Request, Response, NextFunction } from "express";
 import { GatewayAuthMiddleware } from "./auth-middleware";
 import { routeConfigs } from "../config/routes";
 import { RouteMatcher } from "./router-matcher";
 import { ForbiddenError } from "@ecommerce/common";
+import { env } from "../config/env";
 
 export const conditionalAuth = async (
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  const fullPath = new URL(req.originalUrl, process.env.BASE_URL).pathname;
+  const fullPath = new URL(req.originalUrl, env.BASE_URL).pathname;
 
   const config = RouteMatcher.findConfig(fullPath, routeConfigs);
 

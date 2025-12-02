@@ -1,4 +1,4 @@
-import { Prisma } from "../../generated/prisma/client";
+import { Prisma } from "@prisma/client";
 import { prisma } from "../config/prisma";
 import { safeQuery } from "../middleware/prisma-error-middleware";
 
@@ -9,7 +9,7 @@ class CategoryRepository {
         prisma.category.create({
           data,
         }),
-      { model: "Category", operation: "create" },
+      { model: "Category", operation: "create" }
     );
   }
 
@@ -24,7 +24,7 @@ class CategoryRepository {
             },
           },
         }),
-      { model: "Category", id, operation: "find" },
+      { model: "Category", id, operation: "find" }
     );
   }
 
@@ -39,7 +39,7 @@ class CategoryRepository {
             },
           },
         }),
-      { model: "Category", slug, operation: "find" },
+      { model: "Category", slug, operation: "find" }
     );
   }
 
@@ -56,7 +56,7 @@ class CategoryRepository {
             createdAt: "asc",
           },
         }),
-      { model: "Category", operation: "find" },
+      { model: "Category", operation: "find" }
     );
   }
 
@@ -67,7 +67,7 @@ class CategoryRepository {
           where: { id },
           data,
         }),
-      { model: "Category", id, operation: "update" },
+      { model: "Category", id, operation: "update" }
     );
   }
 
@@ -85,7 +85,7 @@ class CategoryRepository {
         prisma.category.delete({
           where: { id },
         }),
-      { model: "Category", id, operation: "delete" },
+      { model: "Category", id, operation: "delete" }
     );
   }
 }

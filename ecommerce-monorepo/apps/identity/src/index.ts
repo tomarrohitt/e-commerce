@@ -14,7 +14,9 @@ import { prisma } from "./config/prisma";
 import internalRouter from "./router/internal-router";
 import { EventStatus } from "@prisma/client";
 import { addressRouter } from "./router/address-router";
-import { adminRouter } from "./router/admin-router";
+import { adminUserRouter } from "./router/user-admin-router";
+import { env } from "./config/env";
+import { adminAddressRouter } from "./router/address-admin-router";
 
 const eventBus = new EventBusService({
   serviceName: "identity-service",
@@ -26,10 +28,10 @@ const outboxProcessor = new OutboxProcessor(
   eventBus,
   EventStatus,
   50,
-  500
+  500,
 );
 const app = express();
-const PORT = process.env.PORT || 4001;
+const PORT = env.PORT || 4001;
 
 app.all("/api/auth/*", toNodeHandler(auth));
 
@@ -42,7 +44,8 @@ app.use(currentUser);
 app.use("/api/internal", internalRouter);
 app.use("/api/user", userRouter);
 app.use("/api/addresses", addressRouter);
-app.use("/api/admin", adminRouter);
+app.use("/api/admin/user", adminUserRouter);
+app.use("/api/admin/addresses", adminAddressRouter);
 
 app.use(errorHandler);
 

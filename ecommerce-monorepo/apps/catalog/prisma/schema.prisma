@@ -2,7 +2,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-
 datasource db {
   provider = "postgresql"
 }
@@ -13,52 +12,49 @@ enum EventStatus {
   FAILED
 }
 
-
-
-
 model Product {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  price       Decimal  @db.Decimal(10, 2)
-  stockQuantity       Int      @default(0)
-  sku         String   @unique
-  images      String[]
-  isActive    Boolean  @default(true)
-  
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  price         Decimal  @db.Decimal(10, 2)
+  stockQuantity Int      @default(0) @map("stock_quantity")
+  sku           String   @unique
+  images        String[]
+  thumbnail     String?  @map("thumbnail")
+  isActive      Boolean  @default(true) @map("is_active")
 
-  categoryId  String?  @map("category_id")
-  category    Category? @relation(fields: [categoryId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  categoryId String?   @map("category_id")
+  category   Category? @relation(fields: [categoryId], references: [id])
 
   @@map("products")
 }
 
 model Category {
-  id          String       @id @default(cuid())
-  name        String    @unique
-  slug        String    @unique
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  
-  products    Product[] 
-  
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  products Product[]
+
   @@map("categories")
 }
-
 
 model OutboxEvent {
   id          String      @id @default(uuid())
   aggregateId String      @map("aggregate_id")
-  eventType   String   @map("event_type")
+  eventType   String      @map("event_type")
   payload     Json
   status      EventStatus @default(PENDING)
   createdAt   DateTime    @default(now()) @map("created_at")
   publishedAt DateTime?   @map("published_at")
   retries     Int         @default(0)
-  error       String?     // Store last error message
-  
+  error       String?
+
   @@index([status, createdAt])
   @@index([aggregateId])
   @@map("outbox_events")

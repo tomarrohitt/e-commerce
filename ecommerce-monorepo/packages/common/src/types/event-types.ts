@@ -1,5 +1,3 @@
-// INFRASTRUCTURE & SHARED TYPES
-
 export interface Event<T = any> {
   eventId: string;
   eventType: string;
@@ -69,6 +67,17 @@ export enum ProductEventType {
   DELETED = "product.deleted",
   STOCK_CHANGED = "product.stock_changed",
   PRICE_CHANGED = "product.price_changed",
+  STOCK_RESERVED = "product.stock_reserved",
+  STOCK_FAILED = "product.stock_failed",
+}
+
+export interface StockReservedEvent extends Event<{ orderId: string }> {
+  eventType: ProductEventType.STOCK_RESERVED;
+}
+
+export interface StockFailedEvent
+  extends Event<{ orderId: string; reason: string }> {
+  eventType: ProductEventType.STOCK_FAILED;
 }
 
 export interface ProductCreatedData {
@@ -76,7 +85,7 @@ export interface ProductCreatedData {
   name: string;
   description?: string;
   price: string;
-  stock: number;
+  stockQuantity: number;
   sku: string;
   images: string[];
   categoryId?: string;
@@ -95,7 +104,7 @@ export interface ProductDeletedData {
 
 export interface StockChangedData {
   id: string;
-  stock: number;
+  stockQuantity: number;
   previousStock: number;
 }
 
@@ -130,17 +139,22 @@ export type ProductEvent =
   | ProductUpdatedEvent
   | ProductDeletedEvent
   | StockChangedEvent
-  | PriceChangedEvent;
+  | PriceChangedEvent
+  | StockReservedEvent
+  | StockFailedEvent;
 
 // ORDER EVENTS (PUBLISHER: ORDER SERVICE)
 
 export enum OrderEventType {
+  PENDING = "order.pending",
   CREATED = "order.created",
   CONFIRMED = "order.confirmed",
   SHIPPED = "order.shipped",
   DELIVERED = "order.delivered",
   CANCELLED = "order.cancelled",
   PAYMENT_FAILED = "payment.failed",
+  PAYMENT_INTENT_CREATED = "order.payment_intent_created",
+  PAYMENT_INTENT_FAILED = "order.payment_intent_failed",
 }
 
 export interface OrderItemSnapshot {
@@ -179,6 +193,31 @@ export interface OrderCancelledData {
   reason?: string;
 }
 
+export interface PaymentIntentCreatedData {
+  orderId: string;
+  userId: string;
+  clientSecret: string;
+  paymentId: string;
+}
+
+// Data for Payment Failure
+export interface PaymentIntentFailedData {
+  orderId: string;
+  userId: string;
+  reason: string;
+}
+
+// Event Envelopes
+export interface PaymentIntentCreatedEvent
+  extends Event<PaymentIntentCreatedData> {
+  eventType: OrderEventType.PAYMENT_INTENT_CREATED;
+}
+
+export interface PaymentIntentFailedEvent
+  extends Event<PaymentIntentFailedData> {
+  eventType: OrderEventType.PAYMENT_INTENT_FAILED;
+}
+
 export interface OrderCreatedEvent extends Event<OrderCreatedData> {
   eventType: OrderEventType.CREATED;
 }
@@ -187,4 +226,8 @@ export interface OrderCancelledEvent extends Event<OrderCancelledData> {
   eventType: OrderEventType.CANCELLED;
 }
 
-export type OrderEvent = OrderCreatedEvent | OrderCancelledEvent;
+export type OrderEvent =
+  | OrderCreatedEvent
+  | OrderCancelledEvent
+  | PaymentIntentCreatedEvent
+  | PaymentIntentFailedEvent;

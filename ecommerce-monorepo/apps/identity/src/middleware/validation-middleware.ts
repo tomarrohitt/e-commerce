@@ -6,10 +6,8 @@ import { loginSchema, registrationSchema } from "../lib/user-validation-schema";
 export const authHooks: BetterAuthOptions["hooks"] = {
   before: createAuthMiddleware(async (ctx) => {
     let schema = null;
-
     if (ctx.path === "/sign-up/email") schema = registrationSchema;
     if (ctx.path === "/sign-in/email") schema = loginSchema;
-
     if (!schema) return;
 
     const result = schema.safeParse(ctx.body);
@@ -21,12 +19,14 @@ export const authHooks: BetterAuthOptions["hooks"] = {
       }));
 
       throw new APIError("BAD_REQUEST", {
-        message: "Validation failed",
-        details: formatted,
+        success: false,
+        errors: formatted, // Changed from 'details' to 'errors'
       });
     }
+
     ctx.body = result.data;
   }),
+
   after: createAuthMiddleware(async (ctx) => {
     const response = ctx.context.returned as APIError;
     if (response && typeof response === "object" && "body" in response) {

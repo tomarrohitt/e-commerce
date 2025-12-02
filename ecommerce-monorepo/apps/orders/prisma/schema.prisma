@@ -1,90 +1,100 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../node_modules/@generated/orders"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
+enum OrderStatus {
+  CREATED
+  PENDING
+  AWAITING_PAYMENT
+  PAID
+  FAILED
+  CANCELLED
+  SHIPPED
+  DELIVERED
+  REFUNDED
+}
 
+model Order {
+  id          String      @id @default(cuid())
+  userId      String      @map("user_id")
+  status      OrderStatus @default(CREATED)
+  totalAmount Decimal     @map("total_amount") @db.Decimal(10, 2)
+  currency    String      @default("USD")
+
+  // Payment
+  paymentId String? @map("payment_id") // Stripe PaymentIntent ID
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  items           OrderItem[]
+  shippingAddress OrderAddress? @relation("ShippingAddress")
+  billingAddress  OrderAddress? @relation("BillingAddress")
+
+  @@index([userId])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String @id @default(cuid())
+  orderId   String @map("order_id")
+  productId String @map("product_id")
+
+  // SNAPSHOTS (Frozen Data)
+  name      String
+  sku       String
+  price     Decimal @db.Decimal(10, 2)
+  thumbnail String?
+  quantity  Int
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("order_items")
+}
+
+model OrderAddress {
+  id String @id @default(cuid())
+
+  street      String
+  city        String
+  state       String
+  zipCode     String  @map("zip_code")
+  country     String
+  phoneNumber String? @map("phone_number")
+
+  // Relations back to Order
+  orderShipping   Order?  @relation("ShippingAddress", fields: [orderShippingId], references: [id])
+  orderShippingId String? @unique
+
+  orderBilling   Order?  @relation("BillingAddress", fields: [orderBillingId], references: [id])
+  orderBillingId String? @unique
+
+  @@map("order_addresses")
+}
+
+// --- RELIABILITY (The Outbox) ---
 enum EventStatus {
   PENDING
   PROCESSED
   FAILED
 }
 
-model User {
-  id      String @id 
-  email   String @unique
-  name    String
-  
-  orders  Order[]
-
-  @@map("users")
-}
-
-model ProductCache {
-  id      String  @id 
-  name    String
-  price   Decimal
-  stock   Int
-  
-  @@map("products_cache")
-}
-
-model Order {
-  id            String      @id @default(cuid())
-  userId        String      @map("user_id")
-  
-  status        OrderStatus @default(PENDING)
-  totalAmount   Decimal     @map("total_amount")
-
-  shippingAddress Json     
-  
-  createdAt     DateTime    @default(now()) @map("created_at")
-  updatedAt     DateTime    @updatedAt @map("updated_at")
-
-  user          User        @relation(fields: [userId], references: [id])
-  items         OrderItem[]
-
-  @@map("orders")
-}
-
-model OrderItem {
-  id          String  @id @default(cuid())
-  orderId     String  @map("order_id")
-  productId   String  @map("product_id") 
-  
-  name        String  
-  price       Decimal 
-  image       String?
-  quantity    Int
-
-  order       Order   @relation(fields: [orderId], references: [id])
-
-  @@map("order_items")
-}
-
-enum OrderStatus {
-  PENDING
-  PAID
-  SHIPPED
-  DELIVERED
-  CANCELLED
-}
-
 model OutboxEvent {
   id          String      @id @default(uuid())
   aggregateId String      @map("aggregate_id")
-  eventType   String   @map("event_type")
+  eventType   String      @map("event_type")
   payload     Json
   status      EventStatus @default(PENDING)
   createdAt   DateTime    @default(now()) @map("created_at")
   publishedAt DateTime?   @map("published_at")
   retries     Int         @default(0)
-  error       String?     // Store last error message
-  
+  error       String?
+
   @@index([status, createdAt])
   @@index([aggregateId])
   @@map("outbox_events")

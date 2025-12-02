@@ -1,13 +1,30 @@
-import { PrismaClient } from "../../generated/prisma/client";
+import { Pool } from "pg";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "@prisma/client";
 
-const globalForPrisma = global as unknown as {
-  prisma: PrismaClient | undefined;
+const connectionString = process.env.DATABASE_URL;
+
+// 1. Create a global variable to hold the instance in development
+const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
+
+// 2. Define the setup function
+const prismaClientSingleton = () => {
+  // Create the pg pool
+  const pool = new Pool({ connectionString });
+
+  // Create the adapter
+  const adapter = new PrismaPg(pool);
+
+  // Pass the adapter to PrismaClient
+  return new PrismaClient({
+    adapter,
+    log: ["query", "info", "warn", "error"], // Helpful for debugging
+  });
 };
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
-  });
+// 3. Export the client
+export const prisma = globalForPrisma.prisma || prismaClientSingleton();
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+}

@@ -1,7 +1,7 @@
 import { config } from "../config";
 import { logger } from "../utils/logger";
 import orderRepository from "../repository/order-repository";
-import { OrderStatus, Prisma } from "../../generated/prisma/client";
+import { OrderStatus, Prisma } from "@prisma/client";
 import Stripe from "stripe";
 import cartRepository from "../repository/cart-repository";
 import { eventPublisher, EventType } from "../events/publisher";

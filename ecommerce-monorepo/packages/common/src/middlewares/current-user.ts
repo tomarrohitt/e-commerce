@@ -7,8 +7,8 @@ interface AuthenticatedRequest extends Request {
 
 export const currentUser = (
   req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
+  _res: Response,
+  next: NextFunction,
 ) => {
   if (!req.headers["x-user-id"]) {
     return next();

@@ -4,6 +4,7 @@ import { prisma } from "./prisma";
 import { authHooks } from "../middleware/validation-middleware";
 import { UserEventType } from "@ecommerce/common";
 import { dispatchUserEvent } from "../service/outbox-dispatcher";
+import { env } from "./env";
 
 const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -19,13 +20,14 @@ const auth = betterAuth({
       });
     },
   },
-  baseURL: process.env.BASE_URL,
+  baseURL: env.BASE_URL,
 
   session: {
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,
     cookieCache: {
-      enabled: false,
+      enabled: true,
+      maxAge: 60 * 60 * 24,
     },
   },
 
@@ -55,7 +57,7 @@ const auth = betterAuth({
       await dispatchUserEvent(UserEventType.VERIFIED, user);
     },
   },
-  trustedOrigins: [process.env.CLIENT_URL || ""],
+  trustedOrigins: [env.CLIENT_URL],
   databaseHooks: {
     user: {
       create: {

@@ -1,4 +1,4 @@
-import { OrderStatus, Prisma } from "../../generated/prisma/client";
+import { OrderStatus, Prisma } from "@prisma/client";
 import { prisma } from "../config/prisma";
 import { safeQuery } from "../middleware/prisma-error-middleware";
 

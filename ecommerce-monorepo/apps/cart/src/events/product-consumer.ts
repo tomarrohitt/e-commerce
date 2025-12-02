@@ -14,33 +14,33 @@ export class ProductConsumer {
       "cart-service-product-queue",
       ["product.*"],
       async (event: Event) => {
-        console.log(
-          `[Cart] 📥 Received ${event.eventType} for ${event.aggregateId}`
-        );
-
         try {
           switch (event.eventType) {
             case ProductEventType.CREATED:
             case ProductEventType.UPDATED:
             case ProductEventType.STOCK_CHANGED:
             case ProductEventType.PRICE_CHANGED:
-              await this.handleProductSync(event.data);
+              await this.handleProductSync(event.data as ProductCreatedData);
               break;
 
             case ProductEventType.DELETED:
-              await this.handleProductDelete(event.data);
+              await this.handleProductDelete(event.data as ProductDeletedData);
+              break;
+
+            case ProductEventType.STOCK_RESERVED:
+            case ProductEventType.STOCK_FAILED:
               break;
 
             default:
               console.warn(
-                `[Cart] Unknown event type ignored: ${event.eventType}`
+                `[Cart] Unknown event type ignored: ${event.eventType}`,
               );
           }
         } catch (err) {
           console.error(`[Cart] Error processing event ${event.eventId}:`, err);
           throw err;
         }
-      }
+      },
     );
   }
 
@@ -51,19 +51,21 @@ export class ProductConsumer {
         id: data.id,
         name: data.name,
         price: data.price,
-        stock: data.stock,
-        image: data.images && data.images.length > 0 ? data.images[0] : "",
+        stockQuantity: data.stockQuantity,
+        sku: data.sku,
+        thumbnail: data.images && data.images.length > 0 ? data.images[0] : "",
         isActive: data.isActive,
       },
       update: {
         name: data.name,
         price: data.price,
-        stock: data.stock,
-        image: data.images && data.images.length > 0 ? data.images[0] : "",
+        sku: data.sku,
+        stockQuantity: data.stockQuantity,
+        thumbnail: data.images && data.images.length > 0 ? data.images[0] : "",
         isActive: data.isActive,
       },
     });
-    console.log(`[Cart] Synced Replica: ${data.name}`);
+    console.log(`[Cart] Synced Replica: product ${data.id}`);
   }
 
   private async handleProductDelete(data: ProductDeletedData) {
@@ -72,7 +74,7 @@ export class ProductConsumer {
         where: { id: data.id },
       });
 
-      console.log(`[Cart] 🗑️ Deleted Replica: ${data.id}`);
+      console.log(`[Cart] 🗑️ Deleted Replica: product ${data.id}`);
     } catch (error) {
       console.log(`[Cart] Product already deleted or not found.`);
     }

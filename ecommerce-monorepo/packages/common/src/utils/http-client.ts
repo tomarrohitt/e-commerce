@@ -24,7 +24,7 @@ export class HttpClient {
   async post<T>(
     url: string,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ): Promise<T> {
     return this.breaker.execute(async () => {
       const response = await this.client.post<T>(url, data, config);
@@ -39,5 +39,10 @@ export class HttpClient {
     });
   }
 
-  // Add put, patch, delete as needed...
+  async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+    return this.breaker.execute(async () => {
+      const response = await this.client.delete<T>(url, config);
+      return response.data;
+    });
+  }
 }

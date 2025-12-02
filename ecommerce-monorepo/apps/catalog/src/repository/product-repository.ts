@@ -17,7 +17,7 @@ class ProductRepository {
       id: product.id,
       name: product.name,
       price: product.price.toString(),
-      stock: product.stockQuantity,
+      stockQuantity: product.stockQuantity,
       isActive: product.isActive,
       images: product.images,
       sku: product.sku,
@@ -31,7 +31,7 @@ class ProductRepository {
     tx: Prisma.TransactionClient,
     eventType: ProductEventType,
     product: Product,
-    extraData: Record<string, any> = {}
+    extraData: Record<string, any> = {},
   ) {
     await tx.outboxEvent.create({
       data: {
@@ -59,7 +59,7 @@ class ProductRepository {
           return product;
         });
       },
-      { model: "Product", operation: "create", field: "sku" }
+      { model: "Product", operation: "create", field: "sku" },
     );
   }
 
@@ -83,7 +83,7 @@ class ProductRepository {
           return product;
         });
       },
-      { model: "Product", operation: "update", field: "sku" }
+      { model: "Product", operation: "update", field: "sku" },
     );
   }
 
@@ -107,14 +107,14 @@ class ProductRepository {
           return product;
         });
       },
-      { model: "Product", operation: "delete" }
+      { model: "Product", operation: "delete" },
     );
   }
 
   async updateStock(
     id: string,
     quantity: number,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ) {
     return await safeQuery(
       async () => {
@@ -128,13 +128,19 @@ class ProductRepository {
             previousStock: product.stockQuantity - quantity,
           });
 
+          console.log("Product stock changed event throw");
+          console.log({
+            product,
+            previousStock: product.stockQuantity - quantity,
+          });
+
           return product;
         };
 
         if (tx) return transaction(tx);
         return await prisma.$transaction(transaction);
       },
-      { model: "Product", operation: "updateStock" }
+      { model: "Product", operation: "updateStock" },
     );
   }
 
@@ -152,7 +158,7 @@ class ProductRepository {
           return product;
         });
       },
-      { model: "Product", operation: "addImage" }
+      { model: "Product", operation: "addImage" },
     );
   }
 
@@ -183,7 +189,7 @@ class ProductRepository {
           return updatedProduct;
         });
       },
-      { model: "Product", operation: "reorderImages" }
+      { model: "Product", operation: "reorderImages" },
     );
   }
 
@@ -195,7 +201,7 @@ class ProductRepository {
 
           include: { category: true },
         }),
-      { model: "Product", operation: "find" }
+      { model: "Product", operation: "find" },
     );
   }
 
@@ -207,7 +213,7 @@ class ProductRepository {
 
           include: { category: true },
         }),
-      { model: "Product", operation: "findByIds" }
+      { model: "Product", operation: "findByIds" },
     );
   }
 
@@ -241,13 +247,25 @@ class ProductRepository {
           ...(categoryId && { categoryId }),
         };
 
-        const [products, total] = await Promise.all([
+        const [products, total] = await prisma.$transaction([
           prisma.product.findMany({
             where,
             skip,
             take: limit,
             orderBy: { createdAt: "desc" },
-            include: { category: true },
+            select: {
+              id: true,
+              name: true,
+              price: true,
+              images: true,
+              stockQuantity: true,
+              category: {
+                select: {
+                  name: true,
+                  slug: true,
+                },
+              },
+            },
           }),
           prisma.product.count({ where }),
         ]);
@@ -255,13 +273,16 @@ class ProductRepository {
           products,
           pagination: {
             total,
-            page,
+            page: Math.floor(skip / limit) + 1, // Current page number
             limit,
             totalPages: Math.ceil(total / limit),
+            hasNextPage: skip + limit < total,
+            hasPrevPage: skip > 0,
           },
         };
       },
-      { model: "Product", operation: "list" }
+
+      { model: "Product", operation: "list" },
     );
   }
 }

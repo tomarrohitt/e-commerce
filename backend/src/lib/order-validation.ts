@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { OrderStatus } from "../../generated/prisma/client";
+import { OrderStatus } from "@prisma/client";
 
 export const createOrderSchema = Joi.object({
   shippingAddressId: Joi.string().required().messages({

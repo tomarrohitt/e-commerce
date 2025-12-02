@@ -3,8 +3,13 @@ import {
   addImagesSchema,
   createProductSchema,
   listProductSchema,
-  updateProductQuantitySchema,
   updateProductSchema,
+  updateProductStockSchema,
+  AddImagesInput,
+  CreateProductInput,
+  ListProductQuery,
+  UpdateProductInput,
+  UpdateProductStockInput,
 } from "../lib/validation-schema";
 
 import {
@@ -19,7 +24,10 @@ import { BadRequestError, validateAndThrow } from "@ecommerce/common";
 
 class ProductController {
   async createProduct(req: Request, res: Response) {
-    const data = validateAndThrow<any>(createProductSchema, req.body);
+    const data = validateAndThrow<CreateProductInput>(
+      createProductSchema,
+      req.body,
+    );
     const product = await productRepostiory.create(data);
     res.status(201).json({ success: true, data: product });
   }
@@ -30,14 +38,20 @@ class ProductController {
   }
 
   async listProducts(req: Request, res: Response) {
-    const filters = validateAndThrow<any>(listProductSchema, req.query);
+    const filters = validateAndThrow<ListProductQuery>(
+      listProductSchema,
+      req.query,
+    );
     const products = await productRepostiory.findMany(filters);
 
     res.status(200).json({ success: true, data: products });
   }
 
   async updateProduct(req: Request, res: Response) {
-    const data = validateAndThrow<any>(updateProductSchema, req.body);
+    const data = validateAndThrow<UpdateProductInput>(
+      updateProductSchema,
+      req.body,
+    );
 
     const products = await productRepostiory.update(req.params.id, data);
 
@@ -68,10 +82,11 @@ class ProductController {
   }
 
   async updateStock(req: Request, res: Response) {
-    const { stockQuantity: quantity } = validateAndThrow<any>(
-      updateProductQuantitySchema,
-      req.body
-    );
+    const { stockQuantity: quantity } =
+      validateAndThrow<UpdateProductStockInput>(
+        updateProductStockSchema,
+        req.body,
+      );
     const { id } = req.params;
 
     if (quantity < 0) {
@@ -106,14 +121,17 @@ class ProductController {
     const result = await generatePresignedUrls(
       StoragePrefix.PRODUCT,
       id,
-      imageCount
+      imageCount,
     );
 
     res.status(200).json({ success: true, data: result });
   }
 
   async addImage(req: Request, res: Response) {
-    const { images } = validateAndThrow<any>(addImagesSchema, req.body);
+    const { images } = validateAndThrow<AddImagesInput>(
+      addImagesSchema,
+      req.body,
+    );
     const id = req.params.id;
 
     const product = await productRepostiory.addImage(id, images);
@@ -125,7 +143,10 @@ class ProductController {
     });
   }
   async reorderImages(req: Request, res: Response) {
-    const { images } = validateAndThrow<any>(addImagesSchema, req.body);
+    const { images } = validateAndThrow<AddImagesInput>(
+      addImagesSchema,
+      req.body,
+    );
     const { id } = req.params;
 
     const product = await productRepostiory.reorderImages(id, images);

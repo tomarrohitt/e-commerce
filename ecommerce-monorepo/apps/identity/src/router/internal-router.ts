@@ -1,9 +1,10 @@
 import express from "express";
 import { IdentityAuthMiddleware } from "../middleware/auth-middleware";
+import { env } from "../config/env";
 
 const internalRouter = express.Router();
 
-const INTERNAL_SECRET = process.env.INTERNAL_SERVICE_SECRET;
+const INTERNAL_SECRET = env.INTERNAL_SERVICE_SECRET;
 
 if (!INTERNAL_SECRET) {
   console.error(

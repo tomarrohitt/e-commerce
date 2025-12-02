@@ -2,7 +2,7 @@
   "name": "email-service",
   "scripts": {
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/index.ts",
-    "build": "tsc -b tsconfig.json",
+    "build": "npx tsc --build --force",
     "start": "node dist/index.js"
   },
   "private": true,

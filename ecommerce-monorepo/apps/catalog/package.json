@@ -3,7 +3,7 @@
   "scripts": {
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/index.ts",
     "seed": "nodemon --exec ts-node -r tsconfig-paths/register seed/category.ts",
-    "build": "tsc -b tsconfig.json",
+    "build": "npx tsc --build --force",
     "start": "node dist/index.js",
     "prisma:generate": "prisma generate --schema=prisma/schema.prisma && prisma db push"
   },

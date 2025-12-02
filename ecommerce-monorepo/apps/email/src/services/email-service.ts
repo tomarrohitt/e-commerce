@@ -6,20 +6,22 @@ import {
   UserRegisteredEvent,
   UserVerifiedEvent,
 } from "@ecommerce/common";
+import { env } from "../config/env";
+import SMTPTransport from "nodemailer/lib/smtp-transport";
 
 class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor() {
     this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT),
-      secure: process.env.SMTP_SECURE === "true",
+      host: env.SMTP_HOST,
+      port: Number(env.SMTP_PORT),
+      secure: env.SMTP_SECURE === "true",
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
+        user: env.SMTP_USER,
+        pass: env.SMTP_PASS,
       },
-    });
+    } as SMTPTransport.Options);
   }
 
   async sendVerificationEmail(event: UserRegisteredEvent["data"]) {
@@ -49,8 +51,8 @@ class EmailService {
 
       <p>You requested to reset your password. Click the button below to create a new one.</p>
 
-      <a href="${resetLink}" 
-         style="display: inline-block; padding: 12px 24px; margin: 20px 0; 
+      <a href="${resetLink}"
+         style="display: inline-block; padding: 12px 24px; margin: 20px 0;
                 font-size: 16px; color: #fff; background-color: #dc3545;
                 text-decoration: none; border-radius: 5px;">
         Reset Password
@@ -89,7 +91,7 @@ class EmailService {
     const { userEmail, orderId, totalAmount, items } = event;
     const html = this.createEmailWrapper(
       "Order Confirmed",
-      `<p>Order #${orderId} received.</p>`
+      `<p>Order #${orderId} received.</p>`,
     );
     await this.send(userEmail, `Order #${orderId} Confirmed`, html);
   }
@@ -98,7 +100,7 @@ class EmailService {
     const { userEmail, orderId } = event;
     const html = this.createEmailWrapper(
       "Order Cancelled",
-      `<p>Order #${orderId} was cancelled.</p>`
+      `<p>Order #${orderId} was cancelled.</p>`,
     );
     await this.send(userEmail, `Order #${orderId} Cancelled`, html);
   }
@@ -106,7 +108,7 @@ class EmailService {
   private async send(to: string, subject: string, html: string) {
     try {
       const info = await this.transporter.sendMail({
-        from: process.env.SMTP_FROM,
+        from: env.SMTP_FROM,
         to,
         subject,
         html,

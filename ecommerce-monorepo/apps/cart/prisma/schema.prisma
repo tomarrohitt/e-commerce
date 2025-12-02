@@ -2,20 +2,19 @@ generator client {
   provider = "prisma-client-js"
 }
 
-
 datasource db {
   provider = "postgresql"
 }
 
-
 model ProductReplica {
-  id          String   @id
-  name        String
-  price       Decimal  @db.Decimal(10, 2)
-  stock       Int
-  image       String?
-  isActive    Boolean
-  updatedAt   DateTime @updatedAt
+  id            String   @id
+  name          String
+  price         Decimal  @db.Decimal(10, 2)
+  stockQuantity Int
+  sku           String   @unique
+  thumbnail     String?
+  isActive      Boolean
+  updatedAt     DateTime @updatedAt
 
   @@map("product_replicas")
 }

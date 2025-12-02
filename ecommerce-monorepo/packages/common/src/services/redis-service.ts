@@ -1,5 +1,6 @@
 import Redis, { Redis as RedisClient } from "ioredis";
 import { UserContext } from "../types/user-types";
+import { env } from "../config/env";
 
 export class RedisService {
   private client: RedisClient;
@@ -9,15 +10,15 @@ export class RedisService {
   // This runs inside Redis. It is atomic and requires only 1 network hop.
   private getSessionScript = `
     local tokenKey = KEYS[1]
-    
+
     -- 1. Get the Pointer (Layer 1)
     local pointerRaw = redis.call("GET", tokenKey)
     if not pointerRaw then return nil end
-    
+
     -- 2. Decode JSON to get Session ID (using Redis cjson library)
     local pointer = cjson.decode(pointerRaw)
     local sessionId = pointer.sessionId
-    
+
     -- 3. Get the Actual Data (Layer 2)
     -- We assume the session data key is format "session:{id}"
     local session = redis.call("GET", "session:" .. sessionId)
@@ -25,7 +26,7 @@ export class RedisService {
   `;
 
   constructor() {
-    this.client = new Redis(process.env.REDIS_URL!, {
+    this.client = new Redis(env.REDIS_URL, {
       lazyConnect: true,
       maxRetriesPerRequest: 3,
       retryStrategy: (times) => {
@@ -36,7 +37,6 @@ export class RedisService {
 
     this.client.on("connect", () => {
       this.isConnected = true;
-      console.log("Redis connected");
     });
 
     this.client.on("error", (error) => {
@@ -60,7 +60,7 @@ export class RedisService {
       const result = await this.client.eval(
         this.getSessionScript,
         1,
-        `token:${token}`
+        `token:${token}`,
       );
 
       return result ? JSON.parse(result as string) : null;
@@ -73,7 +73,7 @@ export class RedisService {
   async saveSessionDualLayer(
     token: string,
     session: UserContext,
-    ttl: number = 7 * 24 * 60 * 60
+    ttl: number = 7 * 24 * 60 * 60,
   ): Promise<void> {
     const sessionId = session.sessionId;
     const pipeline = this.client.pipeline();
@@ -108,13 +108,13 @@ export class RedisService {
   async updateSessionData(
     sessionId: string,
     session: UserContext,
-    ttl: number = 7 * 24 * 60 * 60
+    ttl: number = 7 * 24 * 60 * 60,
   ): Promise<void> {
     await this.client.set(
       `session:${sessionId}`,
       JSON.stringify(session),
       "EX",
-      ttl
+      ttl,
     );
   }
 
