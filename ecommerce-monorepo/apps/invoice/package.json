@@ -1,8 +1,7 @@
 {
-  "name": "catalog-service",
+  "name": "invoice-service",
   "scripts": {
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/index.ts",
-    "seed": "nodemon --exec ts-node -r tsconfig-paths/register seed/category-and-product.ts",
     "build": "npx tsc --build --force",
     "start": "node dist/index.js",
     "prisma:generate": "prisma generate --schema=prisma/schema.prisma && prisma db push"
@@ -10,18 +9,18 @@
   "private": true,
   "dependencies": {
     "@ecommerce/common": "workspace:*",
-    "@ecommerce/storage-service": "workspace:*",
-    "@prisma/adapter-pg": "7.0.0",
-    "@prisma/client": "7.0.0",
+    "aws-sdk": "^2.1693.0",
     "dotenv": "^17.2.3",
     "express-async-errors": "^3.1.1",
+    "pdfkit": "^0.17.2",
     "pg": "^8.16.3",
-    "zod": "^4.1.12"
+    "@prisma/adapter-pg": "7.0.0",
+    "@prisma/client": "7.0.0"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
-    "@types/pg": "^8.15.6",
     "nodemon": "^3.1.1",
-    "prisma": "7.0.0"
+    "prisma": "7.0.0",
+    "@types/pdfkit": "^0.17.4"
   }
 }

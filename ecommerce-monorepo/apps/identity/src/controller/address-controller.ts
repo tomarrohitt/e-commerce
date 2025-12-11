@@ -4,6 +4,8 @@ import {
   validateAndThrow,
   NotFoundError,
   sendSuccess,
+  sendCreated,
+  sendNoContent,
 } from "@ecommerce/common";
 import {
   CreateAddressInput,
@@ -18,13 +20,13 @@ class AddressController {
   async createAddress(req: Request, res: Response) {
     const data = validateAndThrow<CreateAddressInput>(
       createAddressSchema,
-      req.body
+      req.body,
     );
     const userId = req.user.id;
 
     const address = await addressService.create(userId, data);
 
-    return sendSuccess(res, address, 201);
+    return sendCreated(res, address);
   }
 
   async listAddresses(req: Request, res: Response) {
@@ -49,15 +51,12 @@ class AddressController {
   async getAddressById(req: Request, res: Response) {
     const userId = req.user.id;
     const address = await addressService.findOne(userId, req.params.id);
-    res.status(200).json({
-      success: true,
-      data: address,
-    });
+    return sendSuccess(res, address);
   }
   async updateAddress(req: Request, res: Response) {
     const data = validateAndThrow<UpdateAddressInput>(
       updateAddressSchema,
-      req.body
+      req.body,
     );
     const userId = req.user.id;
 
@@ -71,7 +70,7 @@ class AddressController {
     const addressId = req.params.id;
     await addressService.delete(userId, addressId);
 
-    return sendSuccess(res, { message: "Address deleted successfully" }, 204);
+    return sendNoContent(res);
   }
 
   async setDefaultAddress(req: Request, res: Response) {

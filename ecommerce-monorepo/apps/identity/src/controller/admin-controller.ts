@@ -5,6 +5,7 @@ import {
   sendSuccess,
   NotFoundError,
   BadRequestError,
+  sendNoContent,
 } from "@ecommerce/common";
 import {
   AdminListUsersQuery,
@@ -23,7 +24,7 @@ class AdminController {
   async listUsers(req: Request, res: Response) {
     const filters = validateAndThrow<AdminListUsersQuery>(
       adminListUsersSchema,
-      req.query
+      req.query,
     );
     const result = await adminService.findAllUsers(filters);
     return sendSuccess(res, result);
@@ -42,7 +43,7 @@ class AdminController {
   async updateUser(req: Request, res: Response) {
     const data = validateAndThrow<AdminUpdateUserInput>(
       adminUpdateUserSchema,
-      req.body
+      req.body,
     );
 
     if (req.params.id === req.user.id && data.role === "user") {
@@ -50,7 +51,7 @@ class AdminController {
     }
 
     const user = await adminService.updateUser(req.params.id, data);
-    return sendSuccess(res, user, 201);
+    return sendSuccess(res, user, "User updated successfully");
   }
 
   async deleteUser(req: Request, res: Response) {
@@ -59,13 +60,13 @@ class AdminController {
     }
 
     await adminService.deleteUser(req.params.id);
-    return sendSuccess(res, { message: "User deleted successfully" }, 204);
+    return sendNoContent(res);
   }
 
   async listAllAddressesAdmin(req: Request, res: Response) {
     const filters = validateAndThrow<AdminListAddressQuery>(
       adminListAddressSchema,
-      req.query
+      req.query,
     );
     const result = await adminService.findAllAddresses(filters);
     return sendSuccess(res, result);
@@ -80,15 +81,18 @@ class AdminController {
 
   async deleteAddress(req: Request, res: Response) {
     await adminService.deleteAddress(req.params.id);
-    return sendSuccess(res, { message: "Address deleted successfully" }, 204);
+    return sendNoContent(res);
   }
   async updateAddress(req: Request, res: Response) {
     const data = validateAndThrow<AdminUpdateUserInput>(
       updateAddressSchema,
-      req.body
+      req.body,
     );
-    await adminService.updateAddress(req.params.id, data);
-    return sendSuccess(res, { message: "Address deleted successfully" }, 204);
+    const updatedAddress = await adminService.updateAddress(
+      req.params.id,
+      data,
+    );
+    return sendSuccess(res, updatedAddress, "Address updated successfully");
   }
 }
 

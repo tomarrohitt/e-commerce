@@ -1,12 +1,12 @@
 import express from "express";
 import { EmailConsumer } from "./events/email-consumer";
-import { EventBusService, LoggerFactory } from "@ecommerce/common";
+import { errorHandler, EventBusService } from "@ecommerce/common";
 import { env } from "./config/env";
 
 const app = express();
 const PORT = env.PORT;
 
-const logger = LoggerFactory.create("EmailService");
+app.use(errorHandler);
 
 const eventBus = new EventBusService({
   serviceName: "email-service",
@@ -26,7 +26,7 @@ async function start() {
       console.log(`📧 Email Service running on ${PORT}`);
     });
   } catch (error) {
-    logger.error("Email Service failed to start:", error);
+    console.error("Email Service failed to start:", error);
     process.exit(1);
   }
 }

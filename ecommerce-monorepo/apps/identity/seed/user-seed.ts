@@ -1,14 +1,11 @@
 import axios from "axios";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { LoggerFactory } from "@ecommerce/common";
 
-const GATEWAY_URL = "http://localhost:4000";
-
-const logger = LoggerFactory.create("IdentityService");
+const GATEWAY_URL = "http://127.0.0.1:4000";
 
 const connectionString =
-  "postgresql://postgres:password@localhost:5432/identity";
+  "postgresql://postgres:password@127.0.0.1:5432/identity";
 
 const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ adapter });
@@ -46,7 +43,7 @@ const users = [
   },
 ];
 
-const addressTypes = ["Home", "Work", "Vacation", "Parents", "Other"];
+const addressTypes = ["shipping", "billing"];
 
 async function main() {
   await prisma.user.deleteMany();
@@ -68,7 +65,7 @@ async function main() {
         {
           headers: {
             "Content-Type": "application/json",
-            Origin: "http://localhost:4000",
+            Origin: "http://127.0.0.1:4000",
           },
         },
       );
@@ -104,7 +101,7 @@ async function main() {
           {
             headers: {
               Cookie: cookieHeader,
-              Origin: "http://localhost:4000",
+              Origin: "http://127.0.0.1:4000",
             },
           },
         );
@@ -119,11 +116,11 @@ async function main() {
       }
     } catch (error: any) {
       if (error.response) {
-        logger.error(
+        console.error(
           `   ❌ Failed: ${error.response.status} - ${JSON.stringify(error.response.data)}`,
         );
       } else {
-        logger.error(`   ❌ Error: ${error.message}`);
+        console.error(`   ❌ Error: ${error.message}`);
       }
     }
   }

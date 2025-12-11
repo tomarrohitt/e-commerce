@@ -11,7 +11,7 @@ class StripeService {
     });
   }
 
-  async createPaymentIntent(amount: number, metadata: any) {
+  async createPaymentIntent(amount: number, metadata: Record<string, any>) {
     const amountInCents = Math.round(amount * 100);
 
     const paymentIntent = await this.stripe.paymentIntents.create({

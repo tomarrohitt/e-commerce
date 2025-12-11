@@ -20,7 +20,13 @@ import {
 
 import productRepostiory from "../repository/product-repository";
 
-import { BadRequestError, validateAndThrow } from "@ecommerce/common";
+import {
+  BadRequestError,
+  sendCreated,
+  sendError,
+  sendSuccess,
+  validateAndThrow,
+} from "@ecommerce/common";
 
 class ProductController {
   async createProduct(req: Request, res: Response) {
@@ -29,12 +35,12 @@ class ProductController {
       req.body,
     );
     const product = await productRepostiory.create(data);
-    res.status(201).json({ success: true, data: product });
+    return sendCreated(res, product, "Product created successfully");
   }
 
   async getProduct(req: Request, res: Response) {
     const product = await productRepostiory.findbyId(req.params.id);
-    res.status(200).json({ success: true, data: product });
+    return sendSuccess(res, product);
   }
 
   async listProducts(req: Request, res: Response) {
@@ -44,7 +50,7 @@ class ProductController {
     );
     const products = await productRepostiory.findMany(filters);
 
-    res.status(200).json({ success: true, data: products });
+    return sendSuccess(res, products);
   }
 
   async updateProduct(req: Request, res: Response) {
@@ -55,11 +61,11 @@ class ProductController {
 
     const products = await productRepostiory.update(req.params.id, data);
 
-    res.status(200).json({
-      success: true,
-      message: `Product with productID:${req.params.id} has been updated successfully`,
-      data: products,
-    });
+    return sendSuccess(
+      res,
+      products,
+      `Product with productID:${req.params.id} has been updated successfully`,
+    );
   }
 
   async deleteProduct(req: Request, res: Response) {
@@ -68,17 +74,19 @@ class ProductController {
     await productRepostiory.delete(req.params.id);
 
     if (failed.length > 0) {
-      return res.status(200).json({
-        success: true,
-        message: `Product deleted, but ${failed.length} images failed to delete and require manual cleanup.`,
-        data: { failedImages: failed, deletedImagesCount: deleted.length },
-      });
+      return sendSuccess(
+        res,
+        { failedImages: failed, deletedImagesCount: deleted.length },
+        `Product deleted, but ${failed.length} images failed to delete and require manual cleanup.`,
+        400,
+      );
     }
 
-    res.status(200).json({
-      success: true,
-      message: `Product with ProductID:${req.params.id} and all ${deleted.length} associated images have been deleted successfully.`,
-    });
+    return sendSuccess(
+      res,
+      null,
+      `Product with ProductID:${req.params.id} and all ${deleted.length} associated images have been deleted successfully.`,
+    );
   }
 
   async updateStock(req: Request, res: Response) {
@@ -99,11 +107,11 @@ class ProductController {
 
     const product = await productRepostiory.updateStock(id, quantity);
 
-    res.status(200).json({
-      success: true,
-      message: `Product stock for ID:${req.params.id} has been updated successfully`,
-      data: product,
-    });
+    return sendSuccess(
+      res,
+      product,
+      `Product stock for ID:${req.params.id} has been updated successfully`,
+    );
   }
 
   async getProductUploadUrls(req: Request, res: Response) {
@@ -124,7 +132,11 @@ class ProductController {
       imageCount,
     );
 
-    res.status(200).json({ success: true, data: result });
+    return sendSuccess(
+      res,
+      result,
+      "Product upload URLs generated successfully",
+    );
   }
 
   async addImage(req: Request, res: Response) {
@@ -136,11 +148,7 @@ class ProductController {
 
     const product = await productRepostiory.addImage(id, images);
 
-    res.status(201).json({
-      success: true,
-      message: `Product images updated successfully`,
-      data: product,
-    });
+    return sendSuccess(res, product);
   }
   async reorderImages(req: Request, res: Response) {
     const { images } = validateAndThrow<AddImagesInput>(
@@ -151,11 +159,7 @@ class ProductController {
 
     const product = await productRepostiory.reorderImages(id, images);
 
-    res.status(200).json({
-      success: true,
-      message: "Product images reordered successfully",
-      data: product,
-    });
+    return sendSuccess(res, product);
   }
 }
 

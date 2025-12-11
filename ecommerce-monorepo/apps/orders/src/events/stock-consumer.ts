@@ -11,7 +11,7 @@ export class StockConsumer {
       "order-service-saga-reply",
       [ProductEventType.STOCK_RESERVED, ProductEventType.STOCK_FAILED],
       async (event: Event) => {
-        const { orderId, reason } = event.data;
+        const { orderId } = event.data;
 
         if (event.eventType === ProductEventType.STOCK_RESERVED) {
           await orderRepository.updateStatus(

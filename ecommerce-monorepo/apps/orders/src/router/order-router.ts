@@ -1,11 +1,9 @@
 import { Router } from "express";
 import { orderController } from "../controller/order-controller";
-import express from "express";
-import { orderService } from "../services/order-service";
 
 const orderRouter = Router();
 
-// User routes
+// Order routes
 orderRouter.post("/", orderController.createOrder);
 orderRouter.get("/", orderController.getUserOrders);
 orderRouter.get("/summary", orderController.getOrderSummary);

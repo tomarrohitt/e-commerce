@@ -6,7 +6,7 @@ export interface AuthenticatedRequest extends Request {
   user?: UserContext;
 }
 
-export const logger = new Logger("CurrentUser");
+const logger = new Logger("CurrentUser");
 
 export const currentUser = (
   req: AuthenticatedRequest,

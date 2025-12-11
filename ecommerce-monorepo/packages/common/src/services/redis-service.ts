@@ -19,6 +19,10 @@ export interface IRedisService {
   ): Promise<void>;
   get<T>(key: string): Promise<T | null>;
   set(key: string, value: any, ttl?: number): Promise<void>;
+
+  decrement(key: string, amount?: number): Promise<number>;
+  increment(key: string, amount?: number): Promise<number>;
+
   delete(key: string): Promise<void>;
   deleteToken(token: string): Promise<void>;
   isConnected(): boolean;
@@ -113,8 +117,14 @@ export class RedisService implements IRedisService {
 
   private async connect(): Promise<void> {
     try {
+      if (["connect", "connecting", "ready"].includes(this.client.status)) {
+        return;
+      }
       await this.client.connect();
     } catch (error) {
+      if ((error as Error).message.includes("Redis is already connecting")) {
+        return;
+      }
       this.logger.error("Failed to connect to Redis", error);
       throw error;
     }
@@ -174,6 +184,24 @@ export class RedisService implements IRedisService {
       await this.set(`session:${sessionId}`, session, ttl);
     } catch (error) {
       this.logger.error("Failed to update session", error, { sessionId });
+      throw error;
+    }
+  }
+
+  async decrement(key: string, amount: number = 1): Promise<number> {
+    try {
+      return await this.client.decrby(key, amount);
+    } catch (error) {
+      this.logger.error("Failed to decrement key", error, { key, amount });
+      throw error;
+    }
+  }
+
+  async increment(key: string, amount: number = 1): Promise<number> {
+    try {
+      return await this.client.incrby(key, amount);
+    } catch (error) {
+      this.logger.error("Failed to increment key", error, { key, amount });
       throw error;
     }
   }

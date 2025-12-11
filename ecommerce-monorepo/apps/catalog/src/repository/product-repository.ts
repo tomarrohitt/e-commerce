@@ -127,13 +127,6 @@ class ProductRepository {
           await this.emitEvent(db, ProductEventType.STOCK_CHANGED, product, {
             previousStock: product.stockQuantity - quantity,
           });
-
-          console.log("Product stock changed event throw");
-          console.log({
-            product,
-            previousStock: product.stockQuantity - quantity,
-          });
-
           return product;
         };
 

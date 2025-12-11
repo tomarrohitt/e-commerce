@@ -11,10 +11,11 @@
     "build:gateway": "cd apps/api-gateway && npx tsc --build --force",
     "build:cart": "cd apps/cart && npx tsc --build --force",
     "build:email": "cd apps/email && npx tsc --build --force",
+    "build:invoice": "cd apps/invoice && npx tsc --build --force",
     "build:catalog": "cd apps/catalog && npx tsc --build --force",
     "build:orders": "cd apps/orders && npx tsc --build --force",
-    "build:apps": "pnpm run build:identity && pnpm run build:gateway && pnpm run build:cart  && pnpm run build:email && pnpm run build:catalog && pnpm run build:orders",
-    "prisma:generate": "pnpm --filter identity-service prisma:generate && pnpm --filter cart-service prisma:generate && pnpm --filter catalog-service prisma:generate && pnpm --filter orders-service prisma:generate",
+    "build:apps": "pnpm run build:identity && pnpm run build:gateway && pnpm run build:cart  && pnpm run build:email && pnpm run build:catalog && pnpm run build:orders && pnpm run build:invoice",
+    "prisma:generate": "pnpm --filter identity-service prisma:generate && pnpm --filter cart-service prisma:generate && pnpm --filter catalog-service prisma:generate && pnpm --filter orders-service prisma:generate && pnpm --filter invoice-service prisma:generate",
     "dev": "turbo run dev"
   },
   "devDependencies": {

@@ -17,8 +17,6 @@ export class EmailConsumer {
       "email-service-queue",
       ["order.*", "user.*"],
       async (event: Event) => {
-        console.log(`[Email] Processing ${event.eventType}`);
-
         try {
           switch (event.eventType) {
             case UserEventType.REGISTERED:
@@ -31,7 +29,7 @@ export class EmailConsumer {
               await emailService.sendPasswordResetEmail(event.data);
               break;
 
-            case OrderEventType.CREATED:
+            case OrderEventType.PAID:
               await emailService.sendOrderConfirmation(event.data);
               break;
 

@@ -24,8 +24,8 @@ export class ResponseUtil {
   static sendSuccess<T>(
     res: Response,
     data?: T,
-    statusCode: number = 200,
     message?: string,
+    statusCode: number = 200,
     meta?: Record<string, any>,
   ): Response<SuccessResponse<T>> {
     return res.status(statusCode).json({
@@ -41,7 +41,7 @@ export class ResponseUtil {
     data: T,
     message?: string,
   ): Response<SuccessResponse<T>> {
-    return this.sendSuccess(res, data, 201, message);
+    return this.sendSuccess(res, data, message, 201);
   }
 
   static sendNoContent(res: Response): Response {
@@ -52,3 +52,5 @@ export class ResponseUtil {
 // Backward compatibility exports
 export const sendError = ResponseUtil.sendError.bind(ResponseUtil);
 export const sendSuccess = ResponseUtil.sendSuccess.bind(ResponseUtil);
+export const sendCreated = ResponseUtil.sendCreated.bind(ResponseUtil);
+export const sendNoContent = ResponseUtil.sendNoContent.bind(ResponseUtil);

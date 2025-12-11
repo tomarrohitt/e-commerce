@@ -1,7 +1,6 @@
 import { OrderStatus } from "@prisma/client";
 import { z } from "zod";
 
-// Address Schema (Reuse this)
 const addressSchema = z.object({
   street: z.string().min(5),
   city: z.string().min(2),
@@ -14,10 +13,10 @@ const addressSchema = z.object({
 const orderItemSchema = z.object({
   productId: z.string().min(1),
   quantity: z.coerce.number().int().positive(),
-  price: z.coerce.number().positive(), // Snapshot Price
-  name: z.string().min(1), // Snapshot Name
-  sku: z.string().min(1), // Snapshot SKU
-  thumbnail: z.string().optional().default(""), // Snapshot thumbnail
+  price: z.coerce.number().positive(),
+  name: z.string().min(1),
+  sku: z.string().min(1),
+  thumbnail: z.string().optional().default(""),
 });
 
 export const createOrderSchema = z

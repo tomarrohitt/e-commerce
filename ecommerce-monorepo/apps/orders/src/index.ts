@@ -6,7 +6,6 @@ import {
   currentUser,
   errorHandler,
   EventBusService,
-  LoggerFactory,
   OutboxProcessor,
 } from "@ecommerce/common";
 import { prisma } from "./config/prisma";
@@ -17,9 +16,8 @@ import { StockConsumer } from "./events/stock-consumer";
 import { orderController } from "./controller/order-controller";
 import { OrderCreatedListener } from "./events/order-created-listener";
 import { PaymentConsumer } from "./events/payment-consumer";
-import { checkStaleOrders } from "./workers/order-timeout";
-
-const logger = LoggerFactory.create("OrderService");
+import { InventorySyncConsumer } from "./events/inventory-sync-consumer";
+import { InvoiceGeneratedConsumer } from "./events/invoice-generated-consumer";
 
 const eventBus = new EventBusService({
   serviceName: "order-service",
@@ -34,6 +32,8 @@ const outboxProcessor = new OutboxProcessor(prisma, eventBus, {
 const stockConsumer = new StockConsumer(eventBus);
 const paymentConsumer = new PaymentConsumer(eventBus);
 const paymentListener = new OrderCreatedListener(eventBus);
+const inventorySync = new InventorySyncConsumer(eventBus);
+const invoiceGeneratedConsumer = new InvoiceGeneratedConsumer(eventBus);
 
 const app = express();
 const PORT = env.PORT;
@@ -60,13 +60,14 @@ async function startServer() {
     await stockConsumer.start();
     await paymentListener.start();
     await paymentConsumer.start();
-    // setInterval(checkStaleOrders, 1 * 1000);
+    await inventorySync.start();
+    await invoiceGeneratedConsumer.start();
     app.listen(PORT, () => {
       console.log(`Order Service running on ${PORT}`);
       outboxProcessor.start();
     });
   } catch (error) {
-    logger.error("Failed to start server. Shutting down.", { error });
+    console.error("Failed to start server. Shutting down.", { error });
     process.exit(1);
   }
 }

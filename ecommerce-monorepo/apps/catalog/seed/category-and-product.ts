@@ -1,9 +1,15 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
-import { generateSlug, LoggerFactory } from "@ecommerce/common";
+import { generateSlug, LoggerFactory, RedisService } from "@ecommerce/common";
+import { env } from "../src/config/env";
 
-const connectionString =
-  "postgresql://postgres:password@localhost:5432/catalog";
+const redis = new RedisService({
+  url: env.REDIS_URL,
+  maxRetries: 3,
+  retryDelay: 50,
+});
+
+const connectionString = env.DATABASE_URL;
 
 const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ adapter });
@@ -152,9 +158,43 @@ const productsByCategory = {
   ],
 };
 
+async function clearRedisStock() {
+  console.log("🧹 Cleaning Redis 'stock:*' keys...");
+  const client = redis.getClient();
+  let cursor = "0";
+  let deletedCount = 0;
+
+  do {
+    const result = await client.scan(cursor, "MATCH", "stock:*", "COUNT", 100);
+    cursor = result[0];
+    const keys = result[1];
+
+    if (keys.length > 0) {
+      await client.del(...keys);
+      deletedCount += keys.length;
+    }
+  } while (cursor !== "0");
+
+  console.log(`✅ Redis cleaned. Removed ${deletedCount} keys.`);
+}
+
+async function syncAllStock() {
+  const products = await prisma.product.findMany();
+
+  console.log(`Syncing ${products.length} products to Redis...`);
+
+  for (const p of products) {
+    await redis.set(`stock:${p.id}`, p.stockQuantity);
+  }
+
+  console.log("✅ Done.");
+  process.exit(0);
+}
+
 async function main() {
   await prisma.category.deleteMany();
   await prisma.product.deleteMany();
+  await clearRedisStock();
 
   for (const category of categories) {
     const slug = generateSlug(category.name);
@@ -181,6 +221,7 @@ async function main() {
   }
 
   console.log("Seeding done.");
+  await syncAllStock();
 }
 
 main()

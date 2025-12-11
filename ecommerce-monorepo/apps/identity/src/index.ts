@@ -17,8 +17,7 @@ import { addressRouter } from "./router/address-router";
 import { adminUserRouter } from "./router/user-admin-router";
 import { env } from "./config/env";
 import { adminAddressRouter } from "./router/address-admin-router";
-
-const logger = LoggerFactory.create("IdentityService");
+import { logger } from "./config/logger";
 
 const eventBus = new EventBusService({
   serviceName: "identity-service",

@@ -1,20 +1,20 @@
 import {
   EventBusService,
   OrderEventType,
-  OrderCreatedEvent,
   withRetry,
   LoggerFactory,
+  OrderPaidEvent,
 } from "@ecommerce/common";
 import { stripeService } from "../services/stripe-service";
 import { prisma } from "../config/prisma";
 
-const logger = LoggerFactory.create("IdentityService");
+const logger = LoggerFactory.create("OrderService");
 
 export class OrderCreatedListener {
   constructor(private eventBus: EventBusService) {}
 
   async start() {
-    await this.eventBus.subscribe<OrderCreatedEvent["data"]>(
+    await this.eventBus.subscribe<OrderPaidEvent["data"]>(
       "order-service-payment-processor",
       [OrderEventType.CREATED],
       async (event) => {
@@ -23,9 +23,8 @@ export class OrderCreatedListener {
     );
   }
 
-  private async handlePaymentCreation(data: OrderCreatedEvent["data"]) {
-    const { orderId, userId, totalAmount } = data;
-
+  private async handlePaymentCreation(data: OrderPaidEvent["data"]) {
+    const { orderId, userId, totalAmount, userEmail, userName } = data;
     try {
       const payment = await withRetry(
         async () => {
@@ -36,18 +35,20 @@ export class OrderCreatedListener {
         },
         { retries: 3, delay: 500 },
       );
+
       await prisma.order.update({
         where: { id: orderId },
         data: { paymentId: payment.id },
       });
 
-      // 3. Emit Success Event
       await prisma.outboxEvent.create({
         data: {
           aggregateId: orderId,
           eventType: OrderEventType.PAYMENT_INTENT_CREATED,
           payload: {
             orderId,
+            userEmail,
+            userName,
             userId,
             paymentId: payment.id,
             clientSecret: payment.clientSecret,

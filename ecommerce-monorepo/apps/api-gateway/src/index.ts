@@ -1,33 +1,30 @@
 import "dotenv/config";
-import express, { Request, Response, NextFunction } from "express"; // Import NextFunction
+import express, { Request, Response, NextFunction } from "express";
 import cookieParser from "cookie-parser";
 import { createProxyMiddleware, fixRequestBody } from "http-proxy-middleware";
 import { conditionalAuth } from "./middleware/auth-router";
 import { routeConfigs } from "./config/routes";
 import { ClientRequest, ServerResponse } from "http";
 import { GatewayAuthMiddleware } from "./middleware/auth-middleware";
-import { requestLogger } from "./middleware/logger";
-import { errorHandler } from "@ecommerce/common";
+import { errorHandler, sendError, sendSuccess } from "@ecommerce/common";
 import { env } from "./config/env";
+import { requestLogger } from "./config/logger";
 
 const app = express();
 const PORT = env.PORT || 4000;
 
-// 1. Logger should be FIRST (to capture start time correctly)
-app.use(requestLogger);
-
 app.use(cookieParser());
 
-// 2. 🛑 CONDITIONAL BODY PARSING (The Stripe Fix)
-// We skip express.json() ONLY for the webhook route.
-// This allows the raw stream to pipe directly to the Order Service.
+app.use(requestLogger);
+app.use(errorHandler);
+
 const rawBodyRoutes = ["/api/orders/webhook"];
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   if (rawBodyRoutes.includes(req.originalUrl)) {
-    next(); // Skip parsing, let the stream pass through
+    next();
   } else {
-    express.json()(req, res, next); // Parse everything else
+    express.json()(req, res, next);
   }
 });
 
@@ -55,30 +52,24 @@ const onProxyReq = (
     proxyReq.setHeader("x-internal-secret", env.INTERNAL_SERVICE_SECRET);
   }
 
-  // 3. Only fix body if we actually parsed it!
-  // If we skipped parsing (webhook), we don't touch the stream.
   if (!rawBodyRoutes.includes(req.originalUrl)) {
     fixRequestBody(proxyReq, req);
   }
 };
 
-// ... Internal routes ...
 app.get("/api/validate", GatewayAuthMiddleware.authenticate, (req, res) => {
   const user = req.user;
 
   if (!user) {
-    return res.status(401).json({
-      success: false,
-      errors: [{ message: "Unauthorized: No authentication token provided" }],
-    });
+    return sendError(
+      res,
+      401,
+      "Unauthorized: No authentication token provided",
+    );
   }
-  res.json({
-    valid: true,
-    user,
-  });
+  return sendSuccess(res, user);
 });
 
-// ... Proxy Setup ...
 routeConfigs.forEach((routeConfig) => {
   app.use(
     routeConfig.path,
@@ -95,8 +86,6 @@ routeConfigs.forEach((routeConfig) => {
     }),
   );
 });
-
-app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Gateway running on port ${PORT}`);

@@ -6,7 +6,6 @@ import {
   currentUser,
   errorHandler,
   EventBusService,
-  LoggerFactory,
   OutboxProcessor,
 } from "@ecommerce/common";
 import { prisma } from "./config/prisma";
@@ -17,8 +16,6 @@ import productAdminRouter from "./router/product-admin-router";
 import categoryAdminRouter from "./router/category-admin-router";
 import { OrderCreatedConsumer } from "./events/order-created-consumer";
 import { OrderCancelledConsumer } from "./events/order-cancelled-consumer";
-
-const logger = LoggerFactory.create("CatalogService");
 
 const eventBus = new EventBusService({
   serviceName: "catalog-service",
@@ -59,7 +56,7 @@ async function startServer() {
       orderCancelledConsumer.start();
     });
   } catch (error) {
-    logger.error("Failed to start server. Shutting down.", { error });
+    console.error("Failed to start server. Shutting down.", { error });
     process.exit(1);
   }
 }

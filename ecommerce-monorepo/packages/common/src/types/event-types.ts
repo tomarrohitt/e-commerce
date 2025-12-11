@@ -19,9 +19,29 @@ export interface EventBusConfig {
   reconnectDelay?: number;
 }
 
-export type DomainEvent = ProductEvent | UserEvent | OrderEvent;
+export enum InvoiceEventType {
+  GENERATED = "invoice.generated",
+  FAILED = "invoice.failed",
+}
 
-// USER EVENTS (PUBLISHER: IDENTITY SERVICE)
+export interface InvoiceGeneratedData {
+  orderId: string;
+  invoiceUrl: string;
+}
+
+export interface InvoiceFailedData {
+  orderId: string;
+}
+
+export interface InvoiceGeneratedEvent extends Event<InvoiceGeneratedData> {
+  eventType: InvoiceEventType.GENERATED;
+}
+
+export interface InvoiceFailedEvent extends Event<InvoiceFailedData> {
+  eventType: InvoiceEventType.FAILED;
+}
+
+export type InvoiceEvent = InvoiceGeneratedEvent | InvoiceFailedEvent;
 
 export enum UserEventType {
   REGISTERED = "user.registered",
@@ -145,6 +165,7 @@ export enum OrderEventType {
   PENDING = "order.pending",
   CREATED = "order.created",
   CONFIRMED = "order.confirmed",
+  PAID = "order.paid",
   SHIPPED = "order.shipped",
   DELIVERED = "order.delivered",
   CANCELLED = "order.cancelled",
@@ -209,6 +230,22 @@ export interface PaymentIntentFailedData {
   reason: string;
 }
 
+export interface OrderPaidData {
+  orderId: string;
+  userId: string;
+  userEmail: string;
+  userName: string;
+  totalAmount: number;
+  paymentId: string;
+  items: OrderItemSnapshot[];
+  shippingAddress: AddressSnapshot;
+  createdAt: string;
+}
+
+export interface OrderPaidEvent extends Event<OrderPaidData> {
+  eventType: OrderEventType.PAID;
+}
+
 // Event Envelopes
 export interface PaymentIntentCreatedEvent
   extends Event<PaymentIntentCreatedData> {
@@ -228,8 +265,11 @@ export interface OrderCancelledEvent extends Event<OrderCancelledData> {
   eventType: OrderEventType.CANCELLED;
 }
 
+export type DomainEvent = ProductEvent | UserEvent | OrderEvent | InvoiceEvent;
+
 export type OrderEvent =
   | OrderCreatedEvent
   | OrderCancelledEvent
   | PaymentIntentCreatedEvent
-  | PaymentIntentFailedEvent;
+  | PaymentIntentFailedEvent
+  | OrderPaidEvent;

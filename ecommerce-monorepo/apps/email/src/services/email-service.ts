@@ -1,16 +1,13 @@
 import nodemailer from "nodemailer";
 import {
-  LoggerFactory,
   OrderCancelledEvent,
-  OrderCreatedEvent,
+  OrderPaidEvent,
   UserForgotPasswordEvent,
   UserRegisteredEvent,
   UserVerifiedEvent,
 } from "@ecommerce/common";
 import { env } from "../config/env";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
-
-const logger = LoggerFactory.create("EmailService");
 
 class EmailService {
   private transporter: nodemailer.Transporter;
@@ -89,36 +86,103 @@ class EmailService {
 
     await this.send(email, "Welcome to Our Platform", html);
   }
+  async sendOrderConfirmation(event: OrderPaidEvent["data"]) {
+    const { userEmail, userName, orderId, totalAmount, items } = event;
 
-  async sendOrderConfirmation(event: OrderCreatedEvent["data"]) {
-    const { userEmail, orderId, totalAmount, items } = event;
-    const html = this.createEmailWrapper(
-      "Order Confirmed",
-      `<p>Order #${orderId} received.</p>`,
-    );
-    await this.send(userEmail, `Order #${orderId} Confirmed`, html);
+    // 1. Build the Items List (HTML Table Rows)
+    const itemsListHtml = items
+      .map(
+        (item) => `
+          <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 10px 0; color: #333;">${item.name} <span style="color: #888; font-size: 12px;">(x${item.quantity})</span></td>
+            <td style="padding: 10px 0; text-align: right; color: #333;">$${item.price.toFixed(2)}</td>
+          </tr>
+        `,
+      )
+      .join("");
+
+    // 2. Build the Main Content
+    const contentHtml = `
+        <div style="font-family: Arial, sans-serif; color: #333;">
+          <h2 style="color: #4CAF50;">Payment Successful!</h2>
+          <p>Hi <strong>${userName}</strong>,</p>
+          <p>Thank you for your purchase. We have received your payment and are getting your order ready.</p>
+
+          <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <p style="margin: 0; color: #888; font-size: 12px; text-transform: uppercase;">Order ID</p>
+            <p style="margin: 5px 0 0 0; font-weight: bold; font-size: 16px;">#${orderId}</p>
+          </div>
+
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+            <thead>
+              <tr>
+                <th style="text-align: left; padding-bottom: 10px; border-bottom: 2px solid #eee; color: #888;">Item</th>
+                <th style="text-align: right; padding-bottom: 10px; border-bottom: 2px solid #eee; color: #888;">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsListHtml}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td style="padding-top: 15px; font-weight: bold; text-align: right;">Total Paid:</td>
+                <td style="padding-top: 15px; font-weight: bold; text-align: right; font-size: 18px;">$${totalAmount.toFixed(2)}</td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <p style="font-size: 14px; color: #888; margin-top: 30px;">
+            You will receive another email once your items have shipped.
+          </p>
+        </div>
+      `;
+
+    const html = this.createEmailWrapper("Order Confirmed", contentHtml);
+    await this.send(userEmail, `Order Confirmation #${orderId}`, html);
   }
 
   async sendOrderCancelled(event: OrderCancelledEvent["data"]) {
-    const { userEmail, orderId } = event;
-    const html = this.createEmailWrapper(
-      "Order Cancelled",
-      `<p>Order #${orderId} was cancelled.</p>`,
-    );
+    const { userEmail, userName, orderId } = event;
+
+    const contentHtml = `
+        <div style="font-family: Arial, sans-serif; color: #333;">
+          <h2 style="color: #E53935;">Order Cancelled</h2>
+          <p>Hi <strong>${userName || "there"}</strong>,</p>
+
+          <p>This email is to confirm that Order <strong>#${orderId}</strong> has been cancelled.</p>
+
+          <div style="background-color: #fff3f3; border-left: 4px solid #E53935; padding: 15px; margin: 20px 0;">
+            <strong>Refund Status:</strong><br/>
+            If you have already been charged, a full refund has been initiated to your original payment method. Please allow 5-10 business days for it to appear on your statement.
+          </div>
+
+          <p>If you did not request this cancellation, please reply to this email immediately.</p>
+        </div>
+      `;
+
+    const html = this.createEmailWrapper("Order Cancelled", contentHtml);
     await this.send(userEmail, `Order #${orderId} Cancelled`, html);
   }
-
   private async send(to: string, subject: string, html: string) {
     try {
+      if (!to) {
+        console.warn(
+          `[Email Warning] ⚠️ Skipping email "${subject}": No recipient (to) defined.`,
+        );
+        console.warn(
+          `[Email Warning] This is likely an old event from before the fix.`,
+        );
+        return;
+      }
+
       const info = await this.transporter.sendMail({
-        from: env.SMTP_FROM,
+        from: `"Ecommerce App" <${env.SMTP_FROM}>`,
         to,
         subject,
         html,
       });
-      console.log(`[Email] Sent to ${to} (ID: ${info.messageId})`);
     } catch (error) {
-      logger.error(`[Email] Failed to send to ${to}`, error);
+      console.error(`[Email] Failed to send to ${to}`, error);
       throw error;
     }
   }

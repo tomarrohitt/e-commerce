@@ -8,7 +8,6 @@ import {
   HttpClient,
   CircuitBreakerOpenError,
   RedisService,
-  LoggerFactory,
 } from "@ecommerce/common";
 import { env } from "../config/env";
 
@@ -21,8 +20,6 @@ const redis = new RedisService({
 const IDENTITY_PATH = "/api/internal/validate-session";
 const INTERNAL_SERVICE_SECRET = env.INTERNAL_SERVICE_SECRET;
 const TOKEN_CACHE_TTL = 3600;
-
-const logger = LoggerFactory.create("GatewayService");
 
 interface IdentityResponse {
   valid: boolean;
@@ -62,7 +59,7 @@ async function validateWithIdentityService(
     throw new NotAuthorizedError();
   } catch (error: any) {
     if (error instanceof CircuitBreakerOpenError) {
-      logger.error("[Auth] Identity Circuit Open - Fast Failing");
+      console.error("[Auth] Identity Circuit Open - Fast Failing");
       throw new DatabaseOpError("Login temporarily unavailable");
     }
 
@@ -70,7 +67,7 @@ async function validateWithIdentityService(
       if (error.response?.status === 401) {
         throw new NotAuthorizedError();
       }
-      logger.error("Identity service error:", error.message);
+      console.error("Identity service error:", error.message);
     }
 
     throw new DatabaseOpError("Authentication service unavailable");

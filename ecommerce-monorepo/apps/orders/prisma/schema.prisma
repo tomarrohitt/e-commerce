@@ -19,19 +19,22 @@ enum OrderStatus {
 }
 
 model Order {
-  id          String      @id @default(cuid())
-  userId      String      @map("user_id")
+  id        String @id @default(cuid())
+  userId    String @map("user_id")
+  userEmail String @map("customer_email")
+  userName  String @map("customer_name")
+
+  invoiceUrl String? @map("invoice_url")
+
   status      OrderStatus @default(CREATED)
   totalAmount Decimal     @map("total_amount") @db.Decimal(10, 2)
   currency    String      @default("USD")
 
-  // Payment
-  paymentId String? @map("payment_id") // Stripe PaymentIntent ID
+  paymentId String? @map("payment_id")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  // Relations
   items           OrderItem[]
   shippingAddress OrderAddress? @relation("ShippingAddress")
   billingAddress  OrderAddress? @relation("BillingAddress")
@@ -45,7 +48,6 @@ model OrderItem {
   orderId   String @map("order_id")
   productId String @map("product_id")
 
-  // SNAPSHOTS (Frozen Data)
   name      String
   sku       String
   price     Decimal @db.Decimal(10, 2)
@@ -67,7 +69,6 @@ model OrderAddress {
   country     String
   phoneNumber String? @map("phone_number")
 
-  // Relations back to Order
   orderShipping   Order?  @relation("ShippingAddress", fields: [orderShippingId], references: [id])
   orderShippingId String? @unique
 

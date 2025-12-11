@@ -3,31 +3,39 @@ import { safeQuery, OrderEventType } from "@ecommerce/common";
 import { OrderStatus, Prisma } from "@prisma/client";
 import { CreateOrderInput } from "../lib/order-validation-schema";
 
-type OrderItemsInput = CreateOrderInput["items"];
-type AddressInput = CreateOrderInput["shippingAddress"];
-
 class OrderRepository {
   async create(
-    userId: string,
-    cartItems: OrderItemsInput,
-    totalAmount: number,
-    shippingAddress: AddressInput,
-    billingAddress: AddressInput,
+    input: CreateOrderInput & {
+      userId: string;
+      userEmail: string;
+      userName: string;
+    },
     paymentId: null,
   ) {
+    const {
+      userId,
+      userEmail,
+      userName,
+      totalAmount,
+      shippingAddress,
+      billingAddress,
+      items,
+    } = input;
     return await safeQuery(
       async () => {
         return await prisma.$transaction(async (tx) => {
           const order = await tx.order.create({
             data: {
               userId,
+              userEmail,
+              userName,
               totalAmount,
               status: OrderStatus.CREATED,
               paymentId,
               shippingAddress: { create: shippingAddress },
               billingAddress: { create: billingAddress || shippingAddress },
               items: {
-                create: cartItems.map((item) => ({
+                create: items.map((item) => ({
                   ...item,
                 })),
               },
@@ -42,13 +50,15 @@ class OrderRepository {
               payload: {
                 orderId: order.id,
                 userId,
+                userEmail,
+                userName,
                 totalAmount: Number(order.totalAmount),
                 status: order.status,
-                items: order.items.map((item) => ({
+                items: items.map((item) => ({
                   ...item,
                   price: Number(item.price),
                 })),
-                shippingAddress: order.shippingAddress,
+                shippingAddress: shippingAddress,
               },
             },
           });
@@ -149,6 +159,8 @@ class OrderRepository {
                 payload: {
                   orderId: order.id,
                   userId: order.userId,
+                  userName: order.userName,
+                  userEmail: order.userEmail,
                   paymentId: order.paymentId,
                   items: order.items.map((item) => ({
                     productId: item.productId,
@@ -165,6 +177,19 @@ class OrderRepository {
       { model: "Order", operation: "updateStatus" },
     );
   }
+  async updateInvoiceUrl(id: string, invoiceUrl: string) {
+    return await safeQuery(
+      async () => {
+        return await prisma.$transaction(async (tx) => {
+          const order = await tx.order.update({
+            where: { id },
+            data: { invoiceUrl },
+          });
+        });
+      },
+      { model: "Order", operation: "updateStatus" },
+    );
+  }
   async findByPaymentIntent(paymentId: string) {
     return await safeQuery(
       () =>
@@ -172,7 +197,7 @@ class OrderRepository {
           where: {
             paymentId: paymentId,
           },
-          include: { items: true },
+          include: { items: true, shippingAddress: true, billingAddress: true },
         }),
       { model: "Order", operation: "findByPaymentIntent" },
     );

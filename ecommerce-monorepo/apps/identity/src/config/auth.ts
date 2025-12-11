@@ -12,8 +12,8 @@ const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false,
-    autoSignInAfterVerification: false,
+    requireEmailVerification: true,
+    autoSignInAfterVerification: true,
     sendResetPassword: async ({ user, url }) => {
       await dispatchUserEvent(UserEventType.FORGOT_PASSWORD, user, {
         link: url,

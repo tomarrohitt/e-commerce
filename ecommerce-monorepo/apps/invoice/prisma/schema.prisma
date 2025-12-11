@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum EventStatus {
+  PENDING
+  PROCESSING
+  PROCESSED
+  FAILED
+}
+
+model Invoice {
+  id      String  @id @default(cuid())
+  orderId String  @unique
+  userId  String
+  amount  Decimal
+  status  String  @default("GENERATED")
+  pdfUrl  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OutboxEvent {
+  id          String      @id @default(uuid())
+  aggregateId String      @map("aggregate_id")
+  eventType   String      @map("event_type")
+  payload     Json
+  status      EventStatus @default(PENDING)
+  createdAt   DateTime    @default(now()) @map("created_at")
+  publishedAt DateTime?   @map("published_at")
+  retries     Int         @default(0)
+  error       String?
+
+  @@index([status, createdAt])
+  @@index([aggregateId])
+  @@map("outbox_events")
+}

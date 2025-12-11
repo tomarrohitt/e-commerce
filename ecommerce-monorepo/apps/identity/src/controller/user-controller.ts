@@ -1,6 +1,11 @@
 import { Request, Response } from "express";
 import { prisma } from "../config/prisma";
-import { LoggerFactory, RedisService } from "@ecommerce/common";
+import {
+  LoggerFactory,
+  RedisService,
+  sendError,
+  sendSuccess,
+} from "@ecommerce/common";
 import { env } from "../config/env";
 
 const logger = LoggerFactory.create("IdentityService");
@@ -24,12 +29,6 @@ class UserController {
           },
         });
 
-        // await userEventLog.queueUserUpdated(tx, {
-        //   id: user.id,
-        //   email: user.email,
-        //   name: user.name,
-        // });
-
         return user;
       });
 
@@ -42,10 +41,10 @@ class UserController {
         name: updatedUser.name,
       });
 
-      res.json(updatedUser);
+      sendSuccess(res, updatedUser);
     } catch (error) {
       logger.error("Update profile failed:", error);
-      res.status(500).json({ error: "Failed to update profile" });
+      sendError(res, 500, "Failed to update profile");
     }
   }
 }

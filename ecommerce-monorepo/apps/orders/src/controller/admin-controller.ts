@@ -41,10 +41,7 @@ class AdminController {
       status as OrderStatus,
     );
 
-    return sendSuccess(res, {
-      message: `Order status updated to ${status}`,
-      data: order,
-    });
+    return sendSuccess(res, order, `Order status updated to ${status}`);
   }
 
   // POST /api/admin/orders/:id/cancel
@@ -54,20 +51,14 @@ class AdminController {
       OrderStatus.CANCELLED,
     );
 
-    return sendSuccess(res, {
-      message: "Order cancelled successfully",
-      data: updatedOrder,
-    });
+    return sendSuccess(res, updatedOrder, "Order cancelled successfully");
   }
 
   // POST /api/admin/orders/:id/refund
   async refundOrder(req: Request, res: Response) {
     const updatedOrder = await adminOrderService.refundOrder(req.params.id);
 
-    return sendSuccess(res, {
-      message: "Order refunded successfully",
-      data: updatedOrder,
-    });
+    return sendSuccess(res, updatedOrder, "Order refunded successfully");
   }
 }
 

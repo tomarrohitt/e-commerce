@@ -4,6 +4,8 @@ import {
   BadRequestError,
   sendSuccess,
   LoggerFactory,
+  OrderEventType,
+  sendCreated,
 } from "@ecommerce/common";
 import { orderService } from "../services/order-service";
 import { OrderStatus } from "@prisma/client";
@@ -13,11 +15,11 @@ import {
 } from "../lib/order-validation-schema";
 import { orderRepository } from "../repository/order-repository";
 import { stripeService } from "../services/stripe-service";
+import { prisma } from "../config/prisma";
 
-const logger = LoggerFactory.create("IdentityService");
+const logger = LoggerFactory.create("OrderService");
 
 class OrderController {
-  // POST /api/orders
   async createOrder(req: Request, res: Response) {
     const input = validateAndThrow<CreateOrderInput>(
       createOrderSchema,
@@ -25,23 +27,16 @@ class OrderController {
     );
 
     const user = {
-      id: req.user.id,
-      email: req.user.email,
+      userId: req.user.id,
+      userEmail: req.user.email,
+      userName: req.user.name,
     };
 
-    const result = await orderService.createOrder(user, input);
+    const result = await orderService.createOrder({ ...input, ...user });
 
-    return sendSuccess(
-      res,
-      {
-        message: "Order created successfully",
-        data: result,
-      },
-      201,
-    );
+    return sendCreated(res, result, "Order created successfully");
   }
 
-  // GET /api/orders/:id
   async getOrder(req: Request, res: Response) {
     const order = await orderService.getOrderById(req.params.id, req.user.id);
 
@@ -67,23 +62,17 @@ class OrderController {
   async cancelOrder(req: Request, res: Response) {
     const updatedOrder = await orderService.cancelOrder(
       req.params.id,
-      req.user.id,
+      req.user,
     );
 
-    return sendSuccess(res, {
-      message: "Order cancelled successfully",
-      order: updatedOrder,
-    });
+    return sendSuccess(res, updatedOrder, "Order cancelled successfully");
   }
 
-  // GET /api/orders/summary
   async getOrderSummary(req: Request, res: Response) {
     const summary = await orderService.getOrderSummary(req.user.id);
     return sendSuccess(res, summary);
   }
 
-  // POST /api/orders/webhook
-  // Note: We keep some logic here because Webhooks are technically an "Entry Point" adapter
   async handleStripeWebhook(req: Request, res: Response) {
     const sig = req.headers["stripe-signature"] as string;
 
@@ -93,25 +82,48 @@ class OrderController {
 
     try {
       const event = stripeService.constructEvent(req.body, sig);
-
       if (event.type === "payment_intent.succeeded") {
         const paymentIntent = event.data.object as any;
         const paymentId = paymentIntent.id;
-
-        console.log(`[Stripe] Payment Succeeded: ${paymentId}`);
-
-        const order = await orderRepository.findByPaymentIntent(paymentId);
+        const orderId = paymentIntent.metadata.orderId;
+        const order = await orderRepository.findById(orderId);
 
         if (order) {
           if (order.status === OrderStatus.CANCELLED) {
-            console.log(
-              `[Stripe] Order ${order.id} was cancelled. Refunding...`,
-            );
             await stripeService.refundPayment(paymentId);
             await orderRepository.updateStatus(order.id, OrderStatus.REFUNDED);
           } else {
-            console.log(`[Stripe] Marking Order ${order.id} as PAID`);
-            await orderRepository.updateStatus(order.id, OrderStatus.PAID);
+            await prisma.$transaction(async (tx) => {
+              await tx.order.update({
+                where: { id: order.id },
+                data: { status: OrderStatus.PAID },
+              });
+
+              await tx.outboxEvent.create({
+                data: {
+                  aggregateId: order.id,
+                  eventType: OrderEventType.PAID,
+                  payload: {
+                    orderId: order.id,
+                    userId: order.userId,
+                    userEmail: order.userEmail,
+                    userName: order.userName,
+                    totalAmount: Number(order.totalAmount),
+                    paymentId: paymentId,
+                    items: order.items.map((item) => ({
+                      productId: item.productId,
+                      name: item.name,
+                      price: Number(item.price),
+                      quantity: item.quantity,
+                    })),
+                    shippingAddress: order.shippingAddress,
+                    billingAddress: order.billingAddress,
+                    createdAt: new Date().toISOString(),
+                  },
+                },
+              });
+            });
+            return sendSuccess(res, { received: true });
           }
         } else {
           logger.error(
@@ -120,15 +132,16 @@ class OrderController {
         }
       }
 
-      // Respond to Stripe immediately
       return sendSuccess(res, { received: true });
     } catch (err: any) {
       logger.error(`Webhook Error: ${err.message}`);
-      throw new BadRequestError(`Webhook Error: ${err.message}`);
+      if (err.message.includes("signature")) {
+        throw new BadRequestError(`Webhook Error: ${err.message}`);
+      }
+      throw err;
     }
   }
 
-  // GET /api/orders/:id/payment-status
   async getPaymentStatus(req: Request, res: Response) {
     const orderId = req.params.id;
     const id = req.user.id;

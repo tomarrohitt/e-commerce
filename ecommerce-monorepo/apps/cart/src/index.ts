@@ -1,17 +1,10 @@
 import "express-async-errors";
 import express from "express";
-import {
-  EventBusService,
-  errorHandler,
-  currentUser,
-  LoggerFactory,
-} from "@ecommerce/common";
+import { EventBusService, errorHandler, currentUser } from "@ecommerce/common";
 import { ProductConsumer } from "./events/product-consumer";
 import cartRouter from "./router/cart-router";
 import { env } from "./config/env";
 import { OrderCreatedConsumer } from "./events/order-consumer";
-
-const logger = LoggerFactory.create("CartService");
 
 const app = express();
 const PORT = env.PORT || 4003;
@@ -25,6 +18,8 @@ const eventBus = new EventBusService({
 
 const productConsumer = new ProductConsumer(eventBus);
 const orderCreatedConsumer = new OrderCreatedConsumer(eventBus);
+
+app.use(errorHandler);
 
 async function start() {
   try {
@@ -47,7 +42,7 @@ async function start() {
       });
     }
   } catch (err) {
-    logger.error("Failed to start Cart Service", err);
+    console.error("Failed to start Cart Service", err);
     process.exit(1);
   }
 }

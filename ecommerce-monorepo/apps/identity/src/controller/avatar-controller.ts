@@ -6,7 +6,7 @@ import {
   generatePresignedUrls,
   StoragePrefix,
 } from "@ecommerce/storage-service";
-import { BadRequestError } from "@ecommerce/common";
+import { BadRequestError, sendCreated, sendSuccess } from "@ecommerce/common";
 
 class ImageUploadController {
   async getUploadUrl(req: Request, res: Response) {
@@ -15,17 +15,15 @@ class ImageUploadController {
     }
     const result = (await generatePresignedUrls(
       StoragePrefix.USER_PROFILE,
-      req.user.id
+      req.user.id,
     )) as { url: string; fields: Record<string, string>; key: string };
 
-    return res.status(200).json({
-      success: true,
-      message: "Presigned URL generated successfully.",
-      data: {
-        uploadUrl: result.url,
-        fields: result.fields,
-      },
-    });
+    const data = {
+      uploadUrl: result.url,
+      fields: result.fields,
+    };
+
+    return sendSuccess(res, data);
   }
 
   async confirmUpload(req: Request, res: Response) {
@@ -45,11 +43,7 @@ class ImageUploadController {
       headers: fromNodeHeaders(req.headers),
     });
 
-    res.json({
-      success: true,
-      message: "Profile image updated successfully.",
-      data: { image: key },
-    });
+    sendCreated(res, { image: key }, "Profile image updated successfully.");
   }
 }
 

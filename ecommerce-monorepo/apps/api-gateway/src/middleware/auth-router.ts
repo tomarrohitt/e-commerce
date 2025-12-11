@@ -2,31 +2,27 @@ import { Request, Response, NextFunction } from "express";
 import { GatewayAuthMiddleware } from "./auth-middleware";
 import { routeConfigs } from "../config/routes";
 import { RouteMatcher } from "./router-matcher";
-import { ForbiddenError } from "@ecommerce/common";
+import { ForbiddenError, sendError } from "@ecommerce/common";
 import { env } from "../config/env";
 
 export const conditionalAuth = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   const fullPath = new URL(req.originalUrl, env.BASE_URL).pathname;
 
   const config = RouteMatcher.findConfig(fullPath, routeConfigs);
 
   if (!config) {
-    res
-      .status(404)
-      .json({ success: false, errors: [{ message: "Service not found" }] });
+    sendError(res, 404, "Service not found");
     return;
   }
 
   const rule = RouteMatcher.findRule(req, config);
 
   if (!rule) {
-    res
-      .status(405)
-      .json({ success: false, errors: [{ message: "Method not allowed" }] });
+    sendError(res, 405, "Method not allowed");
     return;
   }
 
