@@ -17,14 +17,15 @@ import { adminService } from "../service/admin-service";
 import {
   AdminListAddressQuery,
   adminListAddressSchema,
-  updateAddressSchema,
+  AdminUpdateAddressInput,
+  adminUpdateAddressSchema,
 } from "../lib/address-validation-schema";
 
 class AdminController {
   async listUsers(req: Request, res: Response) {
     const filters = validateAndThrow<AdminListUsersQuery>(
       adminListUsersSchema,
-      req.query,
+      req.query
     );
     const result = await adminService.findAllUsers(filters);
     return sendSuccess(res, result);
@@ -43,7 +44,7 @@ class AdminController {
   async updateUser(req: Request, res: Response) {
     const data = validateAndThrow<AdminUpdateUserInput>(
       adminUpdateUserSchema,
-      req.body,
+      req.body
     );
 
     if (req.params.id === req.user.id && data.role === "user") {
@@ -66,7 +67,7 @@ class AdminController {
   async listAllAddressesAdmin(req: Request, res: Response) {
     const filters = validateAndThrow<AdminListAddressQuery>(
       adminListAddressSchema,
-      req.query,
+      req.query
     );
     const result = await adminService.findAllAddresses(filters);
     return sendSuccess(res, result);
@@ -84,13 +85,13 @@ class AdminController {
     return sendNoContent(res);
   }
   async updateAddress(req: Request, res: Response) {
-    const data = validateAndThrow<AdminUpdateUserInput>(
-      updateAddressSchema,
-      req.body,
+    const data = validateAndThrow<AdminUpdateAddressInput>(
+      adminUpdateAddressSchema,
+      req.body
     );
     const updatedAddress = await adminService.updateAddress(
       req.params.id,
-      data,
+      data
     );
     return sendSuccess(res, updatedAddress, "Address updated successfully");
   }

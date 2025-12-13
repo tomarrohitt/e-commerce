@@ -20,7 +20,7 @@ class AddressController {
   async createAddress(req: Request, res: Response) {
     const data = validateAndThrow<CreateAddressInput>(
       createAddressSchema,
-      req.body,
+      req.body
     );
     const userId = req.user.id;
 
@@ -47,6 +47,11 @@ class AddressController {
 
     return sendSuccess(res, defaultAddress);
   }
+  async getAddressCount(req: Request, res: Response) {
+    const userId = req.user.id;
+    const count = await addressService.findAddressCount(userId);
+    return sendSuccess(res, { count });
+  }
 
   async getAddressById(req: Request, res: Response) {
     const userId = req.user.id;
@@ -56,12 +61,11 @@ class AddressController {
   async updateAddress(req: Request, res: Response) {
     const data = validateAndThrow<UpdateAddressInput>(
       updateAddressSchema,
-      req.body,
+      req.body
     );
     const userId = req.user.id;
 
     const address = await addressService.update(userId, req.params.id, data);
-
     return sendSuccess(res, address);
   }
 
@@ -76,11 +80,7 @@ class AddressController {
   async setDefaultAddress(req: Request, res: Response) {
     const userId = req.user.id;
     const addressId = req.params.id;
-
-    const address = await addressService.update(userId, addressId, {
-      isDefault: true,
-    });
-
+    const address = await addressService.setToDefault(userId, addressId);
     return sendSuccess(res, address);
   }
 }

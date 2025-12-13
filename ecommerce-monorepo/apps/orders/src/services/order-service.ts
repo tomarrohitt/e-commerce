@@ -23,16 +23,20 @@ class OrderService {
       userId: string;
       userEmail: string;
       userName: string;
-    },
+    }
   ) {
-    const calculatedTotal = input.items.reduce(
+    const subtotal = input.items.reduce(
       (sum, item) => sum + item.price * item.quantity,
-      0,
+      0
     );
+
+    const taxAmount = Math.round(subtotal * env.TAX_RATE * 100) / 100;
+
+    const calculatedTotal = subtotal + taxAmount;
 
     if (Math.abs(calculatedTotal - input.totalAmount) > 0.05) {
       throw new BadRequestError(
-        "Total amount mismatch. Please refresh your cart.",
+        `Total amount mismatch. Backend: ${calculatedTotal}, Frontend: ${input.totalAmount}`
       );
     }
 
@@ -44,16 +48,19 @@ class OrderService {
         const remaining = await redis.decrement(stockKey, item.quantity);
         if (remaining < 0) {
           await redis.increment(stockKey, item.quantity);
-
-          throw new BadRequestError(
-            `Item "${item.name}" is out of stock (High Demand).`,
-          );
+          throw new BadRequestError(`Item "${item.name}" is out of stock.`);
         }
-
         reservedItems.push({ id: item.productId, qty: item.quantity });
       }
 
-      const order = await orderRepository.create(input, null);
+      const orderData = {
+        ...input,
+        subtotal,
+        tax: taxAmount,
+        totalAmount: calculatedTotal,
+      };
+
+      const order = await orderRepository.create(orderData, null);
 
       return {
         orderId: order.id,
@@ -62,9 +69,7 @@ class OrderService {
       };
     } catch (error) {
       if (reservedItems.length > 0) {
-        console.warn(
-          `[Order] Creation failed. Rolling back ${reservedItems.length} items in Redis.`,
-        );
+        console.warn(`[Order] Creation failed. Rolling back.`);
         for (const reserved of reservedItems) {
           await redis.increment(`stock:${reserved.id}`, reserved.qty);
         }
@@ -87,26 +92,18 @@ class OrderService {
 
   async getUserOrders(
     userId: string,
-    options: { status?: OrderStatus; limit: number; page: number },
+    options: { status?: OrderStatus; limit: number; page: number }
   ) {
     const offset = (options.page - 1) * options.limit;
 
-    const orders = await orderRepository.findByUserId(userId, {
+    const data = await orderRepository.findByUserId(userId, {
       status: options.status,
       limit: options.limit,
       offset,
     });
 
-    const total = await orderRepository.countUserOrders(userId, options.status);
-
     return {
-      orders,
-      pagination: {
-        total,
-        page: options.page,
-        limit: options.limit,
-        totalPages: Math.ceil(total / options.limit),
-      },
+      ...data,
     };
   }
 
@@ -140,14 +137,14 @@ class OrderService {
       ).includes(order.status)
     ) {
       throw new BadRequestError(
-        `Cannot cancel order in status ${order.status}`,
+        `Cannot cancel order in status ${order.status}`
       );
     }
 
     return await orderRepository.updateStatus(
       orderId,
       OrderStatus.CANCELLED,
-      "User Requested",
+      "User Requested"
     );
   }
 
@@ -195,7 +192,7 @@ class OrderService {
 
         default:
           console.warn(
-            `[Payment] Unhandled payment status: ${paymentIntent.status} for ${paymentId}`,
+            `[Payment] Unhandled payment status: ${paymentIntent.status} for ${paymentId}`
           );
       }
     } catch (error: any) {

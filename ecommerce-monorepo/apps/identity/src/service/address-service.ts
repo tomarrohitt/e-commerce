@@ -64,28 +64,44 @@ class AddressService {
     }
     return address;
   }
+  async findAddressCount(userId: string) {
+    const count = await safeQuery(
+      () =>
+        prisma.address.count({
+          where: { userId },
+        }),
+      { model: "Address", operation: "findOne" }
+    );
 
-  async update(userId: string, addressId: string, data: UpdateAddressInput) {
+    return count;
+  }
+
+  async update(
+    userId: string,
+    addressId: string,
+    data: UpdateAddressInput & { isDefault?: boolean }
+  ) {
     return await safeQuery(
-      async () => {
-        await this.findOne(userId, addressId);
-
-        return await prisma.$transaction(async (tx) => {
-          if (data.isDefault) {
-            await tx.address.updateMany({
-              where: { userId, isDefault: true, id: { not: addressId } },
-              data: { isDefault: false },
-            });
-          }
-
-          return await tx.address.update({
-            where: { id: addressId },
-            data,
-          });
-        });
-      },
+      () =>
+        prisma.address.update({
+          where: { id: addressId, userId },
+          data,
+        }),
       { model: "Address", operation: "update" }
     );
+  }
+  async setToDefault(userId: string, addressId: string) {
+    (prisma.$transaction(async (tx) => {
+      await tx.address.updateMany({
+        where: { userId, isDefault: true, id: { not: addressId } },
+        data: { isDefault: false },
+      });
+      return await tx.address.update({
+        where: { id: addressId, userId },
+        data: { isDefault: true },
+      });
+    }),
+      { model: "Address", operation: "update" });
   }
 
   async delete(userId: string, addressId: string) {

@@ -23,7 +23,6 @@ import productRepostiory from "../repository/product-repository";
 import {
   BadRequestError,
   sendCreated,
-  sendError,
   sendSuccess,
   validateAndThrow,
 } from "@ecommerce/common";
@@ -32,7 +31,7 @@ class ProductController {
   async createProduct(req: Request, res: Response) {
     const data = validateAndThrow<CreateProductInput>(
       createProductSchema,
-      req.body,
+      req.body
     );
     const product = await productRepostiory.create(data);
     return sendCreated(res, product, "Product created successfully");
@@ -46,7 +45,7 @@ class ProductController {
   async listProducts(req: Request, res: Response) {
     const filters = validateAndThrow<ListProductQuery>(
       listProductSchema,
-      req.query,
+      req.query
     );
     const products = await productRepostiory.findMany(filters);
 
@@ -56,7 +55,7 @@ class ProductController {
   async updateProduct(req: Request, res: Response) {
     const data = validateAndThrow<UpdateProductInput>(
       updateProductSchema,
-      req.body,
+      req.body
     );
 
     const products = await productRepostiory.update(req.params.id, data);
@@ -64,7 +63,7 @@ class ProductController {
     return sendSuccess(
       res,
       products,
-      `Product with productID:${req.params.id} has been updated successfully`,
+      `Product with productID:${req.params.id} has been updated successfully`
     );
   }
 
@@ -78,14 +77,14 @@ class ProductController {
         res,
         { failedImages: failed, deletedImagesCount: deleted.length },
         `Product deleted, but ${failed.length} images failed to delete and require manual cleanup.`,
-        400,
+        400
       );
     }
 
     return sendSuccess(
       res,
       null,
-      `Product with ProductID:${req.params.id} and all ${deleted.length} associated images have been deleted successfully.`,
+      `Product with ProductID:${req.params.id} and all ${deleted.length} associated images have been deleted successfully.`
     );
   }
 
@@ -93,7 +92,7 @@ class ProductController {
     const { stockQuantity: quantity } =
       validateAndThrow<UpdateProductStockInput>(
         updateProductStockSchema,
-        req.body,
+        req.body
       );
     const { id } = req.params;
 
@@ -110,7 +109,7 @@ class ProductController {
     return sendSuccess(
       res,
       product,
-      `Product stock for ID:${req.params.id} has been updated successfully`,
+      `Product stock for ID:${req.params.id} has been updated successfully`
     );
   }
 
@@ -129,20 +128,20 @@ class ProductController {
     const result = await generatePresignedUrls(
       StoragePrefix.PRODUCT,
       id,
-      imageCount,
+      imageCount
     );
 
     return sendSuccess(
       res,
       result,
-      "Product upload URLs generated successfully",
+      "Product upload URLs generated successfully"
     );
   }
 
   async addImage(req: Request, res: Response) {
     const { images } = validateAndThrow<AddImagesInput>(
       addImagesSchema,
-      req.body,
+      req.body
     );
     const id = req.params.id;
 
@@ -153,7 +152,7 @@ class ProductController {
   async reorderImages(req: Request, res: Response) {
     const { images } = validateAndThrow<AddImagesInput>(
       addImagesSchema,
-      req.body,
+      req.body
     );
     const { id } = req.params;
 

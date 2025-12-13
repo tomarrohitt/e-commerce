@@ -7,9 +7,8 @@ import {
 } from "../lib/admin-validation-schema";
 import {
   AdminListAddressQuery,
-  UpdateAddressInput,
+  AdminUpdateAddressInput,
 } from "../lib/address-validation-schema";
-import { addressService } from "./address-service";
 
 class AdminService {
   async findAllUsers(filters: AdminListUsersQuery) {
@@ -203,7 +202,7 @@ class AdminService {
     };
   }
 
-  async updateAddress(addressId: string, data: UpdateAddressInput) {
+  async updateAddress(addressId: string, data: AdminUpdateAddressInput) {
     return await safeQuery(
       async () => {
         const address = await this.findAddressById(addressId);

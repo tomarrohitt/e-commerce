@@ -1,16 +1,11 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, ErrorRequestHandler } from "express";
 import { CustomError } from "../errors/custom-error";
 import { LoggerFactory } from "../services/logger-service";
 import { ErrorResponse } from "../types/error-types";
 
 const logger = LoggerFactory.create("ErrorHandler");
 
-export const errorHandler = (
-  err: Error,
-  req: Request,
-  res: Response,
-  _next: NextFunction,
-): void => {
+export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   logger.error("Request error", err, {
     method: req.method,
     path: req.path,

@@ -24,13 +24,19 @@ model Order {
   userEmail String @map("customer_email")
   userName  String @map("customer_name")
 
+
+  subtotal  Decimal  @db.Decimal(10, 2)
+  tax       Decimal  @db.Decimal(10, 2)
+  totalAmount Decimal     @map("total_amount") @db.Decimal(10, 2)
+  
   invoiceUrl String? @map("invoice_url")
 
   status      OrderStatus @default(CREATED)
-  totalAmount Decimal     @map("total_amount") @db.Decimal(10, 2)
   currency    String      @default("USD")
 
   paymentId String? @map("payment_id")
+  paymentClientSecret String? @map("payment_client_secret")
+
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

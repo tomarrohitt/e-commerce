@@ -2,10 +2,10 @@ import axios from "axios";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
-const GATEWAY_URL = "http://127.0.0.1:4000";
+const GATEWAY_URL = "http://localhost:4000";
 
 const connectionString =
-  "postgresql://postgres:password@127.0.0.1:5432/identity";
+  "postgresql://postgres:password@localhost:5432/identity";
 
 const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ adapter });
@@ -65,16 +65,16 @@ async function main() {
         {
           headers: {
             "Content-Type": "application/json",
-            Origin: "http://127.0.0.1:4000",
+            Origin: "http://localhost:4000",
           },
-        },
+        }
       );
 
       const cookies = signUpResponse.headers["set-cookie"];
       if (!cookies) throw new Error("No cookies returned from Sign Up");
 
       const cookieHeader = cookies.find((c) =>
-        c.includes("better-auth.session_token"),
+        c.includes("better-auth.session_token")
       );
 
       if (!cookieHeader) {
@@ -101,9 +101,9 @@ async function main() {
           {
             headers: {
               Cookie: cookieHeader,
-              Origin: "http://127.0.0.1:4000",
+              Origin: "http://localhost:4000",
             },
-          },
+          }
         );
       }
 
@@ -117,7 +117,7 @@ async function main() {
     } catch (error: any) {
       if (error.response) {
         console.error(
-          `   ❌ Failed: ${error.response.status} - ${JSON.stringify(error.response.data)}`,
+          `   ❌ Failed: ${error.response.status} - ${JSON.stringify(error.response.data)}`
         );
       } else {
         console.error(`   ❌ Error: ${error.message}`);

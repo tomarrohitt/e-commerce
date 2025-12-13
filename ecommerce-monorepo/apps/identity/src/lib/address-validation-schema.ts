@@ -14,7 +14,10 @@ export const createAddressSchema = z.object({
   phoneNumber: z.string().min(8).max(20).optional(),
 });
 
-export const updateAddressSchema = createAddressSchema.partial();
+export const updateAddressSchema = createAddressSchema
+  .omit({ isDefault: true })
+  .partial();
+export const adminUpdateAddressSchema = createAddressSchema.partial();
 
 export const adminListAddressSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -32,4 +35,6 @@ export const adminListAddressSchema = z.object({
 
 export type CreateAddressInput = z.infer<typeof createAddressSchema>;
 export type UpdateAddressInput = z.infer<typeof updateAddressSchema>;
+export type AdminUpdateAddressInput = z.infer<typeof adminUpdateAddressSchema>;
+
 export type AdminListAddressQuery = z.infer<typeof adminListAddressSchema>;

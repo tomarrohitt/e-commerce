@@ -40,6 +40,7 @@ export const servicesUrlEnv = {
   CATALOG_SERVICE_URL: z.string(),
   CART_SERVICE_URL: z.string(),
   ORDERS_SERVICE_URL: z.string(),
+  INVOICE_SERVICE_URL: z.string(),
 };
 
 export const awsEnv = {
@@ -61,4 +62,8 @@ export const stripeEnv = {
   STRIPE_SECRET_KEY: z.string().min(3),
   STRIPE_WEBHOOK_SECRET: z.string().min(3),
   STRIPE_PUBLISHABLE_KEY: z.string().min(3),
+};
+
+export const taxRateEnv = {
+  TAX_RATE: z.coerce.number().default(0),
 };

@@ -11,13 +11,12 @@ import {
   listAdminOrdersSchema,
   ListOrderInput,
 } from "../lib/order-validation-schema";
-// Assuming you have a schema for list options
 
 class AdminController {
   async listAllOrdersAdmin(req: Request, res: Response) {
     const filters = validateAndThrow<ListOrderInput>(
       listAdminOrdersSchema,
-      req.query,
+      req.query
     );
     const result = await adminOrderService.listAllOrders({
       ...filters,
@@ -38,7 +37,7 @@ class AdminController {
 
     const order = await adminOrderService.updateOrderStatus(
       req.params.id,
-      status as OrderStatus,
+      status as OrderStatus
     );
 
     return sendSuccess(res, order, `Order status updated to ${status}`);
@@ -48,7 +47,7 @@ class AdminController {
   async cancelOrder(req: Request, res: Response) {
     const updatedOrder = await adminOrderService.updateOrderStatus(
       req.params.id,
-      OrderStatus.CANCELLED,
+      OrderStatus.CANCELLED
     );
 
     return sendSuccess(res, updatedOrder, "Order cancelled successfully");

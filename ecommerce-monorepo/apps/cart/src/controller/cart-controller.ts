@@ -14,11 +14,10 @@ import {
 } from "@ecommerce/common";
 
 class CartController {
-  // POST /api/cart
   async addToCart(req: Request, res: Response) {
     const { productId, quantity } = validateAndThrow<AddToCartInput>(
       addToCartSchema,
-      req.body,
+      req.body
     );
 
     const userId = req.user.id;
@@ -39,7 +38,7 @@ class CartController {
   async updateCartItem(req: Request, res: Response) {
     const { quantity } = validateAndThrow<UpdateQuantityInput>(
       updateQuantitySchema,
-      req.body,
+      req.body
     );
     const userId = req.user.id;
     const productId = req.params.productId;

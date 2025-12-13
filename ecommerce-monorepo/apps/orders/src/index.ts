@@ -18,6 +18,7 @@ import { OrderCreatedListener } from "./events/order-created-listener";
 import { PaymentConsumer } from "./events/payment-consumer";
 import { InventorySyncConsumer } from "./events/inventory-sync-consumer";
 import { InvoiceGeneratedConsumer } from "./events/invoice-generated-consumer";
+import { checkStaleOrders } from "./workers/order-timeout";
 
 const eventBus = new EventBusService({
   serviceName: "order-service",
@@ -41,7 +42,7 @@ const PORT = env.PORT;
 app.post(
   "/api/orders/webhook",
   express.raw({ type: "application/json" }),
-  orderController.handleStripeWebhook,
+  orderController.handleStripeWebhook
 );
 
 app.use(express.json());
@@ -62,6 +63,7 @@ async function startServer() {
     await paymentConsumer.start();
     await inventorySync.start();
     await invoiceGeneratedConsumer.start();
+    setInterval(async () => await checkStaleOrders(), 60 * 1000);
     app.listen(PORT, () => {
       console.log(`Order Service running on ${PORT}`);
       outboxProcessor.start();

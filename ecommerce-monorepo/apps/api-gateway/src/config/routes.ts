@@ -84,4 +84,9 @@ export const routeConfigs: RouteConfig[] = [
     target: env.ORDERS_SERVICE_URL,
     rules: [{ method: "POST", protected: false }],
   },
+  {
+    path: "/api/invoice",
+    target: env.INVOICE_SERVICE_URL,
+    rules: [{ method: "ALL", protected: false }],
+  },
 ];

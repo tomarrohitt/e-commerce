@@ -5,6 +5,7 @@ import {
 } from "@ecommerce/common";
 import cartRepository from "../repository/cart-repository";
 import productReplicasRepository from "../repository/product-replicas-repository";
+import { env } from "../config/env";
 
 class CartService {
   async addItem(userId: string, productId: string, quantity: number) {
@@ -52,17 +53,24 @@ class CartService {
     const cartItems = await cartRepository.getAllItems(userId);
 
     if (cartItems.length === 0) {
-      return { items: [], totalItems: 0, totalPrice: 0 };
+      return {
+        items: [],
+        totalItems: 0,
+        subtotal: 0,
+        tax: 0,
+        totalAmount: 0,
+      };
     }
 
     const productIds = cartItems.map((item) => item.productId);
     const products = await productReplicasRepository.findByIds(productIds);
-
     const productMap = new Map(products.map((p) => [p.id, p]));
 
     const items: CartItemWithProduct[] = [];
-    let totalPrice = 0;
+
+    let subtotal = 0;
     let totalItems = 0;
+
     for (const cartItem of cartItems) {
       const product = productMap.get(cartItem.productId);
 
@@ -79,7 +87,7 @@ class CartService {
             name: product.name,
             sku: product.sku,
             price: product.price.toNumber(),
-            thumbnail: product.thumbnail ? [product.thumbnail] : [],
+            thumbnail: product.thumbnail ? product.thumbnail : "",
             stockQuantity: product.stockQuantity,
           },
         });
@@ -108,18 +116,24 @@ class CartService {
           sku: product.sku,
           price: product.price.toNumber(),
           stockQuantity: product.stockQuantity,
-          thumbnail: product.thumbnail ? [product.thumbnail] : [],
+          thumbnail: product.thumbnail ? product.thumbnail : "",
         },
       });
 
-      totalPrice += itemTotal;
+      subtotal += itemTotal;
       totalItems += quantity;
     }
+
+    const tax = Math.round(subtotal * env.TAX_RATE * 100) / 100;
+
+    const totalAmount = subtotal + tax;
 
     return {
       items,
       totalItems,
-      totalPrice,
+      subtotal: subtotal.toFixed(2),
+      tax,
+      totalAmount,
     };
   }
 

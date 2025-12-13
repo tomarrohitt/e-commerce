@@ -97,7 +97,7 @@ class EmailService {
             <td style="padding: 10px 0; color: #333;">${item.name} <span style="color: #888; font-size: 12px;">(x${item.quantity})</span></td>
             <td style="padding: 10px 0; text-align: right; color: #333;">$${item.price.toFixed(2)}</td>
           </tr>
-        `,
+        `
       )
       .join("");
 
@@ -167,10 +167,10 @@ class EmailService {
     try {
       if (!to) {
         console.warn(
-          `[Email Warning] ⚠️ Skipping email "${subject}": No recipient (to) defined.`,
+          `[Email Warning] ⚠️ Skipping email "${subject}": No recipient (to) defined.`
         );
         console.warn(
-          `[Email Warning] This is likely an old event from before the fix.`,
+          `[Email Warning] This is likely an old event from before the fix.`
         );
         return;
       }
@@ -187,7 +187,7 @@ class EmailService {
     }
   }
 
-  private createEmailWrapper(title: string, content: string): string {
+  private createEmailWrapper(_: string, content: string): string {
     return `<html>...${content}...</html>`;
   }
 }

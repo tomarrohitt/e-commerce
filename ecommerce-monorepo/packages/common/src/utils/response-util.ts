@@ -13,7 +13,7 @@ export class ResponseUtil {
     res: Response,
     statusCode: number,
     message: string,
-    field?: string,
+    field?: string
   ): Response<ErrorResponse> {
     return res.status(statusCode).json({
       success: false,
@@ -26,11 +26,11 @@ export class ResponseUtil {
     data?: T,
     message?: string,
     statusCode: number = 200,
-    meta?: Record<string, any>,
+    meta?: Record<string, any>
   ): Response<SuccessResponse<T>> {
     return res.status(statusCode).json({
       success: true,
-      ...(data !== undefined && { data }),
+      ...(data !== undefined && { ...data }),
       ...(message && { message }),
       ...(meta && { meta }),
     });
@@ -39,7 +39,7 @@ export class ResponseUtil {
   static sendCreated<T>(
     res: Response,
     data: T,
-    message?: string,
+    message?: string
   ): Response<SuccessResponse<T>> {
     return this.sendSuccess(res, data, message, 201);
   }

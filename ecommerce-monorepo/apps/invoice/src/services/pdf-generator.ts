@@ -82,7 +82,7 @@ export class PdfGenerator {
 
   static async generate(
     data: InvoiceData,
-    options: InvoiceOptions = {},
+    options: InvoiceOptions = {}
   ): Promise<Buffer> {
     return new Promise((resolve, reject) => {
       const doc = new PDFDocument({ size: "A4", margin: 50 });
@@ -118,7 +118,7 @@ export class PdfGenerator {
   private static generateHeader(
     doc: PDFKit.PDFDocument,
     company: CompanyInfo,
-    colors: any,
+    colors: any
   ): void {
     // Company name and logo area
     doc
@@ -143,7 +143,7 @@ export class PdfGenerator {
       .text(
         `${company.address.city}, ${company.address.state} ${company.address.zipCode}`,
         50,
-        97,
+        97
       );
 
     if (company.address.country) {
@@ -168,7 +168,7 @@ export class PdfGenerator {
   private static generateInvoiceInfo(
     doc: PDFKit.PDFDocument,
     data: InvoiceData,
-    colors: any,
+    colors: any
   ): void {
     const startY = 190;
 
@@ -187,11 +187,11 @@ export class PdfGenerator {
       .font("Helvetica")
       .text(`Invoice Number:`, 60, startY + 30)
       .font("Helvetica-Bold")
-      .text(data.orderId, 150, startY + 30)
+      .text(data.orderId.toUpperCase(), 130, startY + 30)
       .font("Helvetica")
       .text(`Invoice Date:`, 60, startY + 45)
       .font("Helvetica-Bold")
-      .text(data.date, 150, startY + 45);
+      .text(data.date, 130, startY + 45);
 
     if (data.dueDate) {
       doc
@@ -243,7 +243,7 @@ export class PdfGenerator {
       .text(
         `${data.address.city}, ${data.address.state} ${data.address.zipCode}`,
         320,
-        startY + 83,
+        startY + 83
       );
 
     doc.moveDown(4);
@@ -253,7 +253,7 @@ export class PdfGenerator {
     doc: PDFKit.PDFDocument,
     data: InvoiceData,
     colors: any,
-    currency: string,
+    currency: string
   ): void {
     const tableTop = 330;
     const itemHeight = 30;
@@ -318,9 +318,9 @@ export class PdfGenerator {
     doc: PDFKit.PDFDocument,
     data: InvoiceData,
     colors: any,
-    currency: string,
+    currency: string
   ): void {
-    const rightAlign = 480;
+    const rightAlign = 520;
     const labelAlign = 380;
     let currentY = doc.y + 20;
 
@@ -360,38 +360,46 @@ export class PdfGenerator {
         .text(
           `${currency}${data.shippingCost.toFixed(2)}`,
           rightAlign,
-          currentY,
+          currentY
         );
       currentY += 20;
     }
 
-    // Line separator
-    doc
-      .strokeColor(colors.primary)
-      .lineWidth(2)
-      .moveTo(370, currentY)
-      .lineTo(550, currentY)
-      .stroke();
+    const totalLabel = "Total Amount:";
+    const totalValue = `${currency}${data.totalAmount.toFixed(2)}`;
 
-    currentY += 15;
+    const rightEdge = 550;
+    const gap = 10;
+    const labelWidth = 120;
 
-    // Total
-    doc
-      .fillColor(colors.primary)
-      .fontSize(14)
-      .font("Helvetica-Bold")
-      .text("Total Amount:", labelAlign, currentY)
-      .fontSize(16)
-      .text(`${currency}${data.totalAmount.toFixed(2)}`, rightAlign, currentY);
+    doc.font("Helvetica-Bold").fillColor(colors.primary);
+
+    doc.fontSize(16);
+    const valueWidth = doc.widthOfString(totalValue);
+
+    const valueX = rightEdge - valueWidth;
+    const labelX = valueX - gap - labelWidth;
+    const minLabelX = 320;
+    const safeLabelX = Math.max(labelX, minLabelX);
+
+    doc.fontSize(14).text(totalLabel, safeLabelX, currentY, {
+      width: labelWidth,
+      align: "right",
+    });
+
+    doc.fontSize(16).text(totalValue, valueX, currentY, {
+      lineBreak: false,
+    });
   }
 
   private static generateFooter(
     doc: PDFKit.PDFDocument,
     data: InvoiceData,
     company: CompanyInfo,
-    colors: any,
+    colors: any
   ): void {
     let footerY = doc.y + 40;
+    const amountWidth = 160;
 
     // Notes section
     if (data.notes) {
@@ -447,7 +455,7 @@ export class PdfGenerator {
         `For questions, contact: ${company.email || "support@company.com"}`,
         50,
         bottomY + 25,
-        { align: "center" },
+        { align: "center" }
       );
   }
 }

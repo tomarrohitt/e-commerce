@@ -45,7 +45,7 @@ class StripeService {
     return this.stripe.webhooks.constructEvent(
       payload,
       signature,
-      env.STRIPE_WEBHOOK_SECRET,
+      env.STRIPE_WEBHOOK_SECRET
     );
   }
 }

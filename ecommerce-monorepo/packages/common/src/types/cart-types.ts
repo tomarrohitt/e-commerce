@@ -10,7 +10,7 @@ export interface CartItemWithProduct extends CartItem {
     name: string;
     price: number;
     sku: string;
-    thumbnail: string[];
+    thumbnail: string;
     stockQuantity: number;
   };
 }
@@ -18,5 +18,5 @@ export interface CartItemWithProduct extends CartItem {
 export interface Cart {
   items: CartItemWithProduct[];
   totalItems: number;
-  totalPrice: number;
+  totalAmoumt: number;
 }

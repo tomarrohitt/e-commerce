@@ -12,6 +12,7 @@ const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    redirectTo: "/",
     requireEmailVerification: true,
     autoSignInAfterVerification: true,
     sendResetPassword: async ({ user, url }) => {
@@ -61,7 +62,7 @@ const auth = betterAuth({
   databaseHooks: {
     user: {
       create: {
-        after: async (user, ctx) => {
+        after: async (_, ctx) => {
           ctx?.context.adapter;
         },
       },

@@ -1,7 +1,6 @@
 import {
   EventBusService,
   InvoiceEventType,
-  Logger,
   OrderEventType,
   OrderPaidEvent,
 } from "@ecommerce/common";
@@ -18,7 +17,7 @@ export class InvoiceConsumer {
       [OrderEventType.PAID],
       async (event) => {
         await this.processInvoice(event.data);
-      },
+      }
     );
   }
 
@@ -70,7 +69,7 @@ export class InvoiceConsumer {
     } catch (error: any) {
       if (error.code === "P2002") {
         console.warn(
-          `[Invoice] Invoice already exists for order ${data.orderId}. Skipping.`,
+          `[Invoice] Invoice already exists for order ${data.orderId}. Skipping.`
         );
         return;
       }

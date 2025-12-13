@@ -19,7 +19,7 @@ export class OrderCreatedListener {
       [OrderEventType.CREATED],
       async (event) => {
         await this.handlePaymentCreation(event.data);
-      },
+      }
     );
   }
 
@@ -31,33 +31,25 @@ export class OrderCreatedListener {
           return await stripeService.createPaymentIntent(totalAmount, {
             userId,
             orderId,
+            userEmail,
+            userName,
           });
         },
-        { retries: 3, delay: 500 },
+        { retries: 3, delay: 500 }
       );
 
       await prisma.order.update({
         where: { id: orderId },
-        data: { paymentId: payment.id },
-      });
-
-      await prisma.outboxEvent.create({
         data: {
-          aggregateId: orderId,
-          eventType: OrderEventType.PAYMENT_INTENT_CREATED,
-          payload: {
-            orderId,
-            userEmail,
-            userName,
-            userId,
-            paymentId: payment.id,
-            clientSecret: payment.clientSecret,
-          },
+          paymentId: payment.id,
+          paymentClientSecret: payment.clientSecret,
+          userEmail,
+          userName,
         },
       });
     } catch (error: any) {
       if (error.type === "StripeInvalidRequestError") {
-        logger.error(`[Async Payment] ❌ Fatal Stripe Error: ${error.message}`);
+        logger.error(`[Async Payment] Fatal Stripe Error: ${error.message}`);
 
         await prisma.outboxEvent.create({
           data: {
@@ -70,7 +62,7 @@ export class OrderCreatedListener {
       }
 
       logger.error(
-        `[Async Payment] 🔄 Stripe unavailable after retries. Re-queueing.`,
+        `[Async Payment] 🔄 Stripe unavailable after retries. Re-queueing.`
       );
       throw error;
     }

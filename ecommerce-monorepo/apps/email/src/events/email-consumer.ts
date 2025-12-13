@@ -44,7 +44,7 @@ export class EmailConsumer {
           logger.error("Failed to process email event", error);
           throw error;
         }
-      },
+      }
     );
   }
 }

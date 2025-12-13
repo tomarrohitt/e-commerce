@@ -7,6 +7,7 @@ import {
 import { env } from "./config/env";
 import { InvoiceConsumer } from "./events/invoice-consumer";
 import { prisma } from "./config/prisma";
+import invoiceRouter from "./router/invoice-router";
 
 const eventBus = new EventBusService({
   serviceName: "invoice-service",
@@ -23,11 +24,16 @@ const app = express();
 const PORT = env.PORT || 3000;
 
 app.use(express.json());
-app.use(errorHandler);
+
+app.use(express.urlencoded({ extended: true }));
+
+app.use("/api/invoice/download", invoiceRouter);
 
 app.get("/health", (req, res) => {
   res.json({ status: "OK", service: "invoice-service" });
 });
+
+app.use(errorHandler);
 
 async function start() {
   try {

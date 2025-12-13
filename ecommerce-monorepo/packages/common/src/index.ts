@@ -34,6 +34,7 @@ export * from "./utils/response-util";
 export * from "./utils/retry-util";
 export * from "./utils/http-client";
 export * from "./utils/env-validator";
+export * from "./utils/async-wrapper";
 
 // Types
 export * from "./types/user-types";

@@ -8,20 +8,12 @@ class AdminOrderService {
   async listAllOrders(options: ListOrderInput) {
     const offset = (options.page - 1) * options.limit;
 
-    const { orders, total } = await orderRepository.findAll({
+    const data = await orderRepository.findAll({
       ...options,
       offset,
     });
 
-    return {
-      orders,
-      pagination: {
-        total,
-        page: options.page,
-        limit: options.limit,
-        totalPages: Math.ceil(total / options.limit),
-      },
-    };
+    return data;
   }
 
   async getOrderById(orderId: string) {

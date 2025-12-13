@@ -52,7 +52,7 @@ async function startServer() {
   try {
     await eventBus.connect();
     app.listen(PORT, () => {
-      console.log(`Catalog Service running on ${PORT}`);
+      console.log(`Identity Service running on ${PORT}`);
       outboxProcessor.start();
     });
   } catch (error) {

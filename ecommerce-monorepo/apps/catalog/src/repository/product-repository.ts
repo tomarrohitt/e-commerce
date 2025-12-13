@@ -31,7 +31,7 @@ class ProductRepository {
     tx: Prisma.TransactionClient,
     eventType: ProductEventType,
     product: Product,
-    extraData: Record<string, any> = {},
+    extraData: Record<string, any> = {}
   ) {
     await tx.outboxEvent.create({
       data: {
@@ -59,7 +59,7 @@ class ProductRepository {
           return product;
         });
       },
-      { model: "Product", operation: "create", field: "sku" },
+      { model: "Product", operation: "create", field: "sku" }
     );
   }
 
@@ -83,7 +83,7 @@ class ProductRepository {
           return product;
         });
       },
-      { model: "Product", operation: "update", field: "sku" },
+      { model: "Product", operation: "update", field: "sku" }
     );
   }
 
@@ -107,14 +107,14 @@ class ProductRepository {
           return product;
         });
       },
-      { model: "Product", operation: "delete" },
+      { model: "Product", operation: "delete" }
     );
   }
 
   async updateStock(
     id: string,
     quantity: number,
-    tx?: Prisma.TransactionClient,
+    tx?: Prisma.TransactionClient
   ) {
     return await safeQuery(
       async () => {
@@ -133,7 +133,7 @@ class ProductRepository {
         if (tx) return transaction(tx);
         return await prisma.$transaction(transaction);
       },
-      { model: "Product", operation: "updateStock" },
+      { model: "Product", operation: "updateStock" }
     );
   }
 
@@ -151,7 +151,7 @@ class ProductRepository {
           return product;
         });
       },
-      { model: "Product", operation: "addImage" },
+      { model: "Product", operation: "addImage" }
     );
   }
 
@@ -182,7 +182,7 @@ class ProductRepository {
           return updatedProduct;
         });
       },
-      { model: "Product", operation: "reorderImages" },
+      { model: "Product", operation: "reorderImages" }
     );
   }
 
@@ -194,7 +194,7 @@ class ProductRepository {
 
           include: { category: true },
         }),
-      { model: "Product", operation: "find" },
+      { model: "Product", operation: "find" }
     );
   }
 
@@ -206,22 +206,15 @@ class ProductRepository {
 
           include: { category: true },
         }),
-      { model: "Product", operation: "findByIds" },
+      { model: "Product", operation: "findByIds" }
     );
   }
 
   async findMany(filters: ListProductQuery) {
     return await safeQuery(
       async () => {
-        const {
-          page = 1,
-          limit = 20,
-          search,
-          inStock,
-          minPrice,
-          maxPrice,
-          categoryId,
-        } = filters;
+        const { page, limit, search, inStock, minPrice, maxPrice, categoryId } =
+          filters;
 
         const skip = (page - 1) * limit;
         const where: Prisma.ProductWhereInput = {
@@ -266,7 +259,7 @@ class ProductRepository {
           products,
           pagination: {
             total,
-            page: Math.floor(skip / limit) + 1, // Current page number
+            page: Math.floor(skip / limit) + 1,
             limit,
             totalPages: Math.ceil(total / limit),
             hasNextPage: skip + limit < total,
@@ -275,7 +268,7 @@ class ProductRepository {
         };
       },
 
-      { model: "Product", operation: "list" },
+      { model: "Product", operation: "list" }
     );
   }
 }

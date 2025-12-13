@@ -9,8 +9,10 @@ class OrderRepository {
       userId: string;
       userEmail: string;
       userName: string;
+      subtotal: number;
+      tax: number;
     },
-    paymentId: null,
+    paymentId: null
   ) {
     const {
       userId,
@@ -20,6 +22,8 @@ class OrderRepository {
       shippingAddress,
       billingAddress,
       items,
+      subtotal,
+      tax,
     } = input;
     return await safeQuery(
       async () => {
@@ -30,6 +34,8 @@ class OrderRepository {
               userEmail,
               userName,
               totalAmount,
+              tax,
+              subtotal,
               status: OrderStatus.CREATED,
               paymentId,
               shippingAddress: { create: shippingAddress },
@@ -66,7 +72,7 @@ class OrderRepository {
           return order;
         });
       },
-      { model: "Order", operation: "create" },
+      { model: "Order", operation: "create" }
     );
   }
 
@@ -81,25 +87,75 @@ class OrderRepository {
             billingAddress: true,
           },
         }),
-      { model: "Order", operation: "findById" },
+      { model: "Order", operation: "findById" }
     );
   }
 
   async findByUserId(
     userId: string,
-    options: { status?: OrderStatus; limit: number; offset: number },
+    options: { status?: OrderStatus; limit: number; offset: number }
   ) {
     const { status, limit, offset } = options;
+
     return await safeQuery(
-      () =>
-        prisma.order.findMany({
-          where: { userId, ...(status && { status }) },
-          include: { items: true },
-          orderBy: { createdAt: "desc" },
-          take: limit,
-          skip: offset,
-        }),
-      { model: "Order", operation: "findByUserId" },
+      async () => {
+        const where: Prisma.OrderWhereInput = {
+          userId,
+          ...(status && { status }),
+        };
+
+        const [orders, total] = await Promise.all([
+          prisma.order.findMany({
+            where,
+            orderBy: { createdAt: "desc" },
+            take: limit,
+            skip: offset,
+            select: {
+              id: true,
+              totalAmount: true,
+              status: true,
+              currency: true,
+              invoiceUrl: true,
+              createdAt: true,
+
+              items: {
+                select: {
+                  productId: true,
+                  name: true,
+                  price: true,
+                  thumbnail: true,
+                  quantity: true,
+                },
+              },
+
+              shippingAddress: {
+                select: {
+                  street: true,
+                  city: true,
+                  state: true,
+                  zipCode: true,
+                  country: true,
+                  phoneNumber: true,
+                },
+              },
+            },
+          }),
+          prisma.order.count({ where }),
+        ]);
+
+        return {
+          orders,
+          pagination: {
+            total,
+            limit,
+            page: Math.floor(offset / limit) + 1,
+            totalPages: Math.ceil(total / limit),
+            hasNextPage: offset + limit < total,
+            hasPrevPage: offset > 0,
+          },
+        };
+      },
+      { model: "Order", operation: "findByUserId" }
     );
   }
 
@@ -109,7 +165,7 @@ class OrderRepository {
         prisma.order.count({
           where: { userId, ...(status && { status }) },
         }),
-      { model: "Order", operation: "countUserOrders" },
+      { model: "Order", operation: "countUserOrders" }
     );
   }
 
@@ -122,6 +178,7 @@ class OrderRepository {
     sortOrder: "asc" | "desc";
   }) {
     const { status, userId, limit, offset, sortBy, sortOrder } = options;
+
     const where: Prisma.OrderWhereInput = {
       ...(status && { status }),
       ...(userId && { userId }),
@@ -138,7 +195,17 @@ class OrderRepository {
       prisma.order.count({ where }),
     ]);
 
-    return { orders, total };
+    return {
+      orders,
+      pagination: {
+        total,
+        limit,
+        page: Math.floor(offset / limit) + 1,
+        totalPages: Math.ceil(total / limit),
+        hasNextPage: offset + limit < total,
+        hasPrevPage: offset > 0,
+      },
+    };
   }
 
   async updateStatus(id: string, status: OrderStatus, reason?: string) {
@@ -174,7 +241,7 @@ class OrderRepository {
           return order;
         });
       },
-      { model: "Order", operation: "updateStatus" },
+      { model: "Order", operation: "updateStatus" }
     );
   }
   async updateInvoiceUrl(id: string, invoiceUrl: string) {
@@ -187,7 +254,7 @@ class OrderRepository {
           });
         });
       },
-      { model: "Order", operation: "updateStatus" },
+      { model: "Order", operation: "updateStatus" }
     );
   }
   async findByPaymentIntent(paymentId: string) {
@@ -199,7 +266,7 @@ class OrderRepository {
           },
           include: { items: true, shippingAddress: true, billingAddress: true },
         }),
-      { model: "Order", operation: "findByPaymentIntent" },
+      { model: "Order", operation: "findByPaymentIntent" }
     );
   }
 }

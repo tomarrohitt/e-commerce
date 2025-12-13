@@ -2,7 +2,7 @@ import { prisma } from "../config/prisma";
 import { OrderEventType, OrderStatus } from "@ecommerce/common";
 
 export async function checkStaleOrders() {
-  const time = new Date(Date.now() - 0.1 * 60 * 1000);
+  const time = new Date(Date.now() - 15 * 60 * 1000);
 
   const stuckOrders = await prisma.order.findMany({
     where: {
