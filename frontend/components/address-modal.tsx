@@ -5,27 +5,17 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addressService } from "@/lib/api";
 import toast from "react-hot-toast";
 import { X } from "lucide-react";
-import type { Address } from "@/types"; // Import your Address type
+import type { CreateAddressInput, GetAddressObj } from "@/types";
 
-// Define the shape of the form data
-type AddressFormData = {
-  type: "shipping" | "billing";
-  street: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  country: string;
-};
-
-// 1. Update props to accept an address
 interface AddAddressModalProps {
   isOpen: boolean;
   onClose: () => void;
-  addressToEdit: Address | null; // This is the new prop
+  addressToEdit: GetAddressObj | null;
 }
 
-const defaultFormState: AddressFormData = {
+const defaultFormState: CreateAddressInput = {
   type: "shipping",
+  name: "",
   street: "",
   city: "",
   state: "",
@@ -39,18 +29,17 @@ export default function AddAddressModal({
   addressToEdit,
 }: AddAddressModalProps) {
   const queryClient = useQueryClient();
-  const [formData, setFormData] = useState<AddressFormData>(defaultFormState);
+  const [formData, setFormData] =
+    useState<CreateAddressInput>(defaultFormState);
 
-  // 2. Check if we are in "edit mode"
   const isEditing = !!addressToEdit;
 
-  // 3. Pre-fill the form when the modal opens in edit mode
   useEffect(() => {
     if (isOpen) {
       if (isEditing) {
-        // We have an address to edit, fill the form
         setFormData({
           type: addressToEdit.type,
+          name: addressToEdit.name,
           street: addressToEdit.street,
           city: addressToEdit.city,
           state: addressToEdit.state,
@@ -58,15 +47,13 @@ export default function AddAddressModal({
           country: addressToEdit.country,
         });
       } else {
-        // No address, reset to default (for "Add New")
         setFormData(defaultFormState);
       }
     }
-  }, [isOpen, addressToEdit, isEditing]); // Re-run when modal opens or edit target changes
-
-  // 4. Create mutation (for creating new addresses)
+  }, [isOpen, addressToEdit, isEditing]);
   const { mutate: createAddress, isPending: isCreating } = useMutation({
-    mutationFn: (data: AddressFormData) => addressService.createAddress(data),
+    mutationFn: (data: CreateAddressInput) =>
+      addressService.createAddress(data),
     onSuccess: () => {
       toast.success("Address added successfully!");
       queryClient.invalidateQueries({ queryKey: ["addresses"] });
@@ -77,10 +64,8 @@ export default function AddAddressModal({
     },
   });
 
-  // 5. Update mutation (for editing existing addresses)
   const { mutate: updateAddress, isPending: isUpdating } = useMutation({
-    mutationFn: (data: AddressFormData) => {
-      // We know addressToEdit is not null if isEditing is true
+    mutationFn: (data: CreateAddressInput) => {
       return addressService.updateAddress(addressToEdit!.id, data);
     },
     onSuccess: () => {
@@ -92,13 +77,10 @@ export default function AddAddressModal({
       toast.error(error.error || "Failed to update address");
     },
   });
-
-  // Combine loading states
   const isPending = isCreating || isUpdating;
 
-  // Form input handlers (no change)
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -107,7 +89,6 @@ export default function AddAddressModal({
     }));
   };
 
-  // 6. Make the submit handler conditional
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isEditing) {
@@ -137,9 +118,7 @@ export default function AddAddressModal({
           </button>
         </div>
 
-        {/* Form (no changes to inputs) */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {/* Address Type */}
           <div>
             <label
               htmlFor="type"
@@ -159,7 +138,6 @@ export default function AddAddressModal({
             </select>
           </div>
 
-          {/* Street */}
           <div>
             <label
               htmlFor="street"
@@ -270,8 +248,8 @@ export default function AddAddressModal({
               {isPending
                 ? "Saving..."
                 : isEditing
-                ? "Save Changes"
-                : "Save Address"}
+                  ? "Save Changes"
+                  : "Save Address"}
             </button>
           </div>
         </form>

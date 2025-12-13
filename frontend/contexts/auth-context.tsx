@@ -2,15 +2,15 @@
 
 import { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { authService } from "@/lib/auth";
-import type { SignInData, User } from "@/types";
+import { authService } from "@/lib/api/auth";
+import type { LoginInput, RegistrationInput, User } from "@/types";
 import toast from "react-hot-toast";
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  signIn: (data: SignInData) => Promise<void>;
+  signIn: (data: RegistrationInput) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -37,9 +37,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     checkSession();
   }, []);
-  const signIn = async (data: SignInData) => {
+  const signIn = async (data: LoginInput) => {
     try {
-      const { user } = await authService.signIn(data);
+      const user = await authService.signIn(data);
       setUser(user);
     } catch (error: any) {
       toast.error(error.error || "Sign-in failed");

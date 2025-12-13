@@ -5,18 +5,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import toast from "react-hot-toast";
-import { authService } from "@/lib/auth";
-import type { ApiError } from "@/types";
-
-const signUpSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-type SignUpFormData = z.infer<typeof signUpSchema>;
+import { authService } from "@/lib/api";
+import {
+  registrationSchema,
+  type ApiError,
+  type RegistrationInput,
+} from "@/types";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -26,11 +21,11 @@ export default function SignUpPage() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignUpFormData>({
-    resolver: zodResolver(signUpSchema),
+  } = useForm<RegistrationInput>({
+    resolver: zodResolver(registrationSchema),
   });
 
-  const onSubmit = async (data: SignUpFormData) => {
+  const onSubmit = async (data: RegistrationInput) => {
     setIsLoading(true);
 
     try {
@@ -46,7 +41,6 @@ export default function SignUpPage() {
       const apiError = error as ApiError;
 
       if (apiError.details) {
-        // Show validation errors
         apiError.details.forEach((detail) => {
           toast.error(detail.message);
         });
@@ -60,17 +54,13 @@ export default function SignUpPage() {
 
   return (
     <div className="bg-white rounded-2xl shadow-2xl p-8">
-      {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
           Create Account
         </h1>
         <p className="text-gray-600">Join us and start shopping today</p>
       </div>
-
-      {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Name Field */}
         <div>
           <label
             htmlFor="name"
@@ -94,8 +84,6 @@ export default function SignUpPage() {
             <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
           )}
         </div>
-
-        {/* Email Field */}
         <div>
           <label
             htmlFor="email"
@@ -119,8 +107,6 @@ export default function SignUpPage() {
             <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
           )}
         </div>
-
-        {/* Password Field */}
         <div>
           <label
             htmlFor="password"
@@ -146,8 +132,6 @@ export default function SignUpPage() {
             </p>
           )}
         </div>
-
-        {/* Submit Button */}
         <button
           type="submit"
           disabled={isLoading}
@@ -182,8 +166,6 @@ export default function SignUpPage() {
           )}
         </button>
       </form>
-
-      {/* Divider */}
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-gray-300"></div>
@@ -194,8 +176,6 @@ export default function SignUpPage() {
           </span>
         </div>
       </div>
-
-      {/* Sign In Link */}
       <div className="text-center">
         <Link
           href="/sign-in"

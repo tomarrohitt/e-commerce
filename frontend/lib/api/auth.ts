@@ -1,36 +1,22 @@
-// src/lib/auth.ts
-import { SignUpData, SignInData, User } from "@/types";
-import api from "./api";
+import { LoginInput, LoginResponse, RegistrationInput, User } from "@/types";
+import api from ".";
 
 export const authService = {
-  /**
-   * Sign up new user
-   */
-  async signUp(data: SignUpData) {
+  async signUp(data: RegistrationInput): Promise<User> {
     const response = await api.post("/auth/sign-up/email", data);
     return response.data;
   },
 
-  /**
-   * Sign in user
-   */
-  async signIn(data: SignInData) {
-    const response = await api.post("/auth/sign-in/email", data);
-    return response.data;
+  async signIn(data: LoginInput): Promise<User> {
+    const response = await api.post<LoginResponse>("/auth/sign-in/email", data);
+    return response.data.user;
   },
 
-  /**
-   * Sign out user
-   */
   async signOut() {
     const response = await api.post("/auth/sign-out");
-    console.log(response.data);
     return response.data;
   },
 
-  /**
-   * Get current session
-   */
   async getSession(): Promise<{ user: User } | null> {
     try {
       const response = await api.get("/auth/get-session");

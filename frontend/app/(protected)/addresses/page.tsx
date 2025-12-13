@@ -3,11 +3,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { addressService } from "@/lib/api";
 import { useAuth } from "@/contexts/auth-context";
-import type { Address } from "@/types";
 import toast from "react-hot-toast";
 import { Plus, Home, Trash2, Edit, CheckCircle } from "lucide-react";
 import AddAddressModal from "@/components/address-modal";
 import { useAddressModal } from "@/hooks/use-address-modal";
+import { GetAddressObj } from "@/types";
 
 export default function AddressesPage() {
   const queryClient = useQueryClient();
@@ -27,7 +27,7 @@ export default function AddressesPage() {
     staleTime: 0,
   });
 
-  const addresses: Address[] = addressData || [];
+  const addresses: GetAddressObj[] = addressData || [];
 
   const { mutate: deleteAddress, isPending: isDeleting } = useMutation({
     mutationFn: (id: string) => addressService.deleteAddress(id),

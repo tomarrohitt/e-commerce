@@ -1,25 +1,23 @@
 import Link from "next/link";
 import type { Product } from "@/types";
-import AddToCartButton from "./add-to-cart"; // Ensure this path is correct
+import AddToCartButton from "./add-to-cart";
 
 interface ProductCardProps {
   product: Product;
 }
 
-// This is a Server Component, which is great for performance.
 export default function ProductCard({ product }: ProductCardProps) {
   const isOutOfStock = product.stockQuantity === 0;
 
   return (
-    <Link href={`/products/${product.id}`}>
-      <div className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 h-full flex flex-col">
-        {/* Image Section */}
-        <div className="relative h-48 bg-lineaer-to-br from-purple-400 to-indigo-600 overflow-hidden">
+    <div className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+      <Link href={`/products/${product.id}`} className="block">
+        <div className="relative h-48 bg-linear-to-br from-purple-400 to-indigo-600 overflow-hidden">
           {product.images.length > 0 ? (
             <img
               src={product.images[0]}
               alt={product.name}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
@@ -27,51 +25,49 @@ export default function ProductCard({ product }: ProductCardProps) {
             </div>
           )}
 
-          {/* Out of Stock Badge */}
           {isOutOfStock && (
-            <div className="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+            <span className="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
               Out of Stock
-            </div>
+            </span>
           )}
 
-          {/* Category Badge */}
           {product.category && (
-            <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-purple-600">
+            <span className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-purple-600">
               {product.category.name}
-            </div>
+            </span>
           )}
         </div>
+      </Link>
 
-        {/* Content Section */}
-        <div className="p-4 flex flex-col grow">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">
+      <div className="p-4 flex flex-col grow">
+        <Link href={`/products/${product.id}`}>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 hover:text-purple-600 transition-colors">
             {product.name}
           </h3>
+        </Link>
 
-          <p className="text-sm text-gray-600 mb-3 truncate">
-            {product.description}
-          </p>
+        <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+          {product.description}
+        </p>
 
-          {/* This is the new/restored section */}
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <span className="text-xl font-bold text-purple-600">
-                ${product.price}
-              </span>
-            </div>
-            <div className="text-sm text-gray-500">
-              {isOutOfStock ? (
-                <span className="text-red-500 font-medium">Out of stock</span>
-              ) : (
-                <span>{product.stockQuantity} left</span>
-              )}
-            </div>
-          </div>
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-xl font-bold text-purple-600">
+            ${product.price}
+          </span>
 
-          <div className="grow"></div>
+          <span
+            className={`text-sm font-medium ${
+              isOutOfStock ? "text-red-500" : "text-gray-500"
+            }`}
+          >
+            {isOutOfStock ? "Out of stock" : `${product.stockQuantity} left`}
+          </span>
+        </div>
+
+        <div className="mt-auto">
           <AddToCartButton productId={product.id} isOutOfStock={isOutOfStock} />
         </div>
       </div>
-    </Link>
+    </div>
   );
 }

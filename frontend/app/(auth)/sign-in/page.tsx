@@ -5,18 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import toast from "react-hot-toast";
-import { authService } from "@/lib/auth";
-import type { ApiError } from "@/types";
+import { loginSchema, type ApiError, type LoginInput } from "@/types";
 import { useAuth } from "@/contexts/auth-context";
-
-const signInSchema = z.object({
-  email: z.email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
-});
-
-type SignInFormData = z.infer<typeof signInSchema>;
 
 export default function SignInPage() {
   const router = useRouter();
@@ -31,11 +22,11 @@ export default function SignInPage() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignInFormData>({
-    resolver: zodResolver(signInSchema),
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = async (data: SignInFormData) => {
+  const onSubmit = async (data: LoginInput) => {
     setIsLoading(true);
 
     try {
@@ -96,8 +87,6 @@ export default function SignInPage() {
             <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
           )}
         </div>
-
-        {/* Password Field */}
         <div>
           <div className="flex items-center justify-between mb-2">
             <label
@@ -133,7 +122,6 @@ export default function SignInPage() {
           )}
         </div>
 
-        {/* Remember Me */}
         <div className="flex items-center">
           <input
             id="remember-me"
@@ -148,7 +136,6 @@ export default function SignInPage() {
           </label>
         </div>
 
-        {/* Submit Button */}
         <button
           type="submit"
           disabled={loading}
@@ -184,7 +171,6 @@ export default function SignInPage() {
         </button>
       </form>
 
-      {/* Divider */}
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-gray-300"></div>
@@ -196,7 +182,6 @@ export default function SignInPage() {
         </div>
       </div>
 
-      {/* Sign Up Link */}
       <div className="text-center">
         <Link
           href="/sign-up"
