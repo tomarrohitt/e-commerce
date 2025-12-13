@@ -48,6 +48,7 @@ export interface Product {
   stockQuantity: number;
   sku: string;
   images: string[];
+  thumbnail?: string;
   categoryId?: string;
   category?: {
     id: string;
@@ -72,7 +73,6 @@ export interface Category {
   id: string;
   name: string;
   slug: string;
-  description?: string;
   _count?: {
     products: number;
   };
@@ -144,6 +144,6 @@ export interface PaginatedOrders {
 }
 
 export interface PaginatedProducts {
-  products: Product[];
+  data: { products: Product[] };
   pagination: Pagination;
 }

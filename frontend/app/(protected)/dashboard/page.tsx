@@ -28,12 +28,10 @@ export default function DashboardPage() {
     staleTime: 0,
   });
 
-  const isLoading = isLoadingAddressCount || isLoadingOrderSummary;
-
   const stats = [
     {
       title: "Total Orders",
-      value: orderSummary.totalOrders,
+      value: orderSummary.total,
       icon: "📦",
       href: "/orders",
     },

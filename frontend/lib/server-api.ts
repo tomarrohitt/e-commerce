@@ -1,4 +1,3 @@
-import { useAuth } from "@/contexts/auth-context";
 import type { Category, Product } from "@/types";
 import { notFound } from "next/navigation";
 
@@ -7,18 +6,20 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 export const serverCategoryService = {
   async getCategories(): Promise<{ categories: Category[] }> {
     try {
-      const res = await fetch(`${API_URL}/category`, {
-        /* ... */
-      });
+      const res = await fetch(`${API_URL}/category`);
 
       if (!res.ok) {
         console.error(`Failed to fetch categories: ${res.statusText}`);
-        return { categories: [] }; // <-- PROBLEM HERE
+        return { categories: [] };
       }
-      return res.json();
+
+      const apiResponse = await res.json();
+      return {
+        categories: apiResponse.data || [],
+      };
     } catch (error) {
       console.error("Error in getCategories:", error);
-      return { categories: [] }; // <-- OR PROBLEM HERE
+      return { categories: [] };
     }
   },
 };

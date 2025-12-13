@@ -9,10 +9,10 @@ import { z } from "zod";
 import toast from "react-hot-toast";
 import { authService } from "@/lib/auth";
 import type { ApiError } from "@/types";
+import { useAuth } from "@/contexts/auth-context";
 
-// Validation schema
 const signInSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
 });
 
@@ -22,6 +22,8 @@ export default function SignInPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
+
+  const { signIn, isLoading: isAuthLoading } = useAuth();
 
   const redirectTo = searchParams.get("redirect") || "/";
 
@@ -37,7 +39,10 @@ export default function SignInPage() {
     setIsLoading(true);
 
     try {
-      await authService.signIn(data);
+      await signIn({
+        email: data.email,
+        password: data.password,
+      });
 
       toast.success("Welcome back!");
       router.push(redirectTo);
@@ -57,17 +62,16 @@ export default function SignInPage() {
     }
   };
 
+  const loading = isLoading || isAuthLoading;
+
   return (
     <div className="bg-white rounded-2xl shadow-2xl p-8">
-      {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
         <p className="text-gray-600">Sign in to your account to continue</p>
       </div>
 
-      {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Email Field */}
         <div>
           <label
             htmlFor="email"
@@ -79,7 +83,7 @@ export default function SignInPage() {
             {...register("email")}
             type="email"
             id="email"
-            disabled={isLoading}
+            disabled={loading}
             className={`w-full px-4 py-3 rounded-lg border ${
               errors.email
                 ? "border-red-500 focus:ring-red-500"
@@ -113,7 +117,7 @@ export default function SignInPage() {
             {...register("password")}
             type="password"
             id="password"
-            disabled={isLoading}
+            disabled={loading}
             className={`w-full px-4 py-3 rounded-lg border ${
               errors.password
                 ? "border-red-500 focus:ring-red-500"
@@ -147,10 +151,10 @@ export default function SignInPage() {
         {/* Submit Button */}
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={loading}
           className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center"
         >
-          {isLoading ? (
+          {loading ? (
             <>
               <svg
                 className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
@@ -200,17 +204,6 @@ export default function SignInPage() {
         >
           Create an account
         </Link>
-      </div>
-
-      {/* Demo Credentials */}
-      <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <p className="text-xs text-gray-600 text-center mb-2 font-medium">
-          Demo Credentials (for testing)
-        </p>
-        <div className="text-xs text-gray-500 space-y-1">
-          <p>Email: test@example.com</p>
-          <p>Password: password123</p>
-        </div>
       </div>
     </div>
   );

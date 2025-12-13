@@ -10,8 +10,7 @@ interface ProductDetailsPageProps {
 export default async function ProductDetailsPage({
   params,
 }: ProductDetailsPageProps) {
-  const { id } = await params;
-  // 1. Fetch data on the server. This will be cached.
+  const { id } = params;
   const product = await serverProductService.getProduct(id);
 
   return (

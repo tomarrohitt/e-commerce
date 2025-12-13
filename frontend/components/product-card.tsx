@@ -56,7 +56,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <div className="flex items-center justify-between mb-3">
             <div>
               <span className="text-xl font-bold text-purple-600">
-                ${product.price.toFixed(2)}
+                ${product.price}
               </span>
             </div>
             <div className="text-sm text-gray-500">

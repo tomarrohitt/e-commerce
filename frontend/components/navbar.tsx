@@ -3,18 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/contexts/cart-context";
-import { useAuth } from "@/contexts/auth-context"; // 1. We already have useAuth
+import { useAuth } from "@/contexts/auth-context";
 
 export default function Navbar() {
   const { cartCount } = useCart();
 
-  // 2. Get the isLoading state from the hook
   const { user, isAuthenticated, signOut, isLoading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  // 3. Helper function to render the auth buttons
   const renderAuthSection = () => {
-    // 4. If we are loading, show a placeholder
     if (isLoading) {
       return (
         <div className="flex items-center justify-end space-x-4 animate-pulse min-w-40">
@@ -24,7 +20,6 @@ export default function Navbar() {
       );
     }
 
-    // 5. If we are done loading and authenticated
     if (isAuthenticated) {
       return (
         <>
@@ -49,7 +44,6 @@ export default function Navbar() {
               </svg>
             </button>
 
-            {/* Dropdown Menu */}
             <div className="absolute right-[-10] top-10 w-38 bg-white rounded-lg shadow-lg py-2 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
               <Link
                 href="/profile"
@@ -78,9 +72,7 @@ export default function Navbar() {
       );
     }
 
-    // 6. If we are done loading and NOT authenticated
     return (
-      // Added min-w, flex, justify-end, and space-x
       <div className="min-w-40 flex items-center justify-end space-x-4">
         <Link
           href="/sign-in"

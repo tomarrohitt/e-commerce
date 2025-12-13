@@ -18,7 +18,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true); // Start as true
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -29,7 +29,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(session.user);
         }
       } catch (error) {
-        // This is normal if the user isn't logged in
         setUser(null);
       } finally {
         setIsLoading(false);
@@ -37,26 +36,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     checkSession();
-  }, []); // The empty array [] means this runs only once
-
-  // 5. Define app-wide sign-in function
+  }, []);
   const signIn = async (data: SignInData) => {
     try {
       const { user } = await authService.signIn(data);
-      setUser(user); // Update the state (our cache)
-      toast.success("Welcome back!");
-      router.push("/");
+      setUser(user);
     } catch (error: any) {
       toast.error(error.error || "Sign-in failed");
       throw error;
     }
   };
 
-  // 6. Define app-wide sign-out function
   const signOut = async () => {
     try {
       await authService.signOut();
-      setUser(null); // Clear the state (our cache)
+      setUser(null);
       toast.success("Signed out successfully");
       router.push("/sign-in");
     } catch (error: any) {
@@ -65,8 +59,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const isAuthenticated = !!user;
-
-  // 7. Provide all values to the app
   return (
     <AuthContext.Provider
       value={{ user, isAuthenticated, isLoading, signIn, signOut }}
@@ -76,7 +68,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// 8. Create the custom hook for easy access
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {

@@ -10,7 +10,6 @@ import toast from "react-hot-toast";
 import { authService } from "@/lib/auth";
 import type { ApiError } from "@/types";
 
-// Validation schema
 const signUpSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.email("Invalid email address"),

@@ -51,7 +51,6 @@ export default function ProductDetailsClient({
       return;
     }
 
-    // 6. We don't know if addToCart succeeded, so refresh first
     try {
       setAddingToCart(true);
       await cartService.addToCart(product.id, quantity);
@@ -101,9 +100,9 @@ export default function ProductDetailsClient({
         <div>
           {/* Main Image */}
           <div className="aspect-square bg-linear-to-br from-purple-400 to-indigo-600 rounded-2xl overflow-hidden mb-4">
-            {product.images.length > 0 ? (
+            {product.thumbnail ? (
               <img
-                src={product.images[selectedImage]}
+                src={product.thumbnail}
                 alt={product.name}
                 className="w-full h-full object-cover"
               />

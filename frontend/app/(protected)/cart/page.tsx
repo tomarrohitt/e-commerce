@@ -12,11 +12,9 @@ export default function CartPage() {
   const { cart, loading, refreshCart } = useCart();
   const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set());
 
-  console.log(updatingItems);
-
   const handleUpdateQuantity = async (
     productId: string,
-    newQuantity: number
+    newQuantity: number,
   ) => {
     if (newQuantity < 1) return;
 
@@ -84,7 +82,7 @@ export default function CartPage() {
     );
   }
 
-  if (!cart || cart.items.length === 0) {
+  if (!cart || cart?.items?.length === 0) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-white rounded-xl shadow-md p-12 text-center">
@@ -106,10 +104,10 @@ export default function CartPage() {
     );
   }
 
-  const hasStockIssues = cart.items.some(
+  const hasStockIssues = cart?.items?.some(
     (item) =>
       item.product.stockQuantity === 0 ||
-      item.quantity > item.product.stockQuantity
+      item.quantity > item.product.stockQuantity,
   );
 
   return (
@@ -126,7 +124,7 @@ export default function CartPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-4">
-          {cart.items.map((item) => {
+          {cart?.items?.map((item) => {
             const isUpdating = updatingItems.has(item.productId);
             const isOutOfStock = item.product.stockQuantity === 0;
 
@@ -137,7 +135,7 @@ export default function CartPage() {
               >
                 <Link href={`/products/${item.productId}`} className="shrink-0">
                   <div className="w-24 h-24 bg-linear-linear-br from-purple-400 to-indigo-600 rounded-lg overflow-hidden">
-                    {item.product.images.length > 0 ? (
+                    {item?.product?.images?.length > 0 ? (
                       <img
                         src={item.product.images[0]}
                         alt={item.product.name}
@@ -182,7 +180,7 @@ export default function CartPage() {
                         onClick={() =>
                           handleUpdateQuantity(
                             item.productId,
-                            item.quantity - 1
+                            item.quantity - 1,
                           )
                         }
                         disabled={isUpdating || item.quantity <= 1}
@@ -197,7 +195,7 @@ export default function CartPage() {
                         onClick={() =>
                           handleUpdateQuantity(
                             item.productId,
-                            item.quantity + 1
+                            item.quantity + 1,
                           )
                         }
                         disabled={
@@ -242,7 +240,7 @@ export default function CartPage() {
             <div className="space-y-3 mb-6">
               <div className="flex justify-between text-gray-600">
                 <span>Subtotal ({cart.totalItems} items)</span>
-                <span>${cart.totalPrice.toFixed(2)}</span>
+                <span>${cart.subtotal}</span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span>Shipping</span>
@@ -250,13 +248,13 @@ export default function CartPage() {
               </div>
               <div className="flex justify-between text-gray-600">
                 <span>Tax</span>
-                <span>${(cart.totalPrice * 0.1).toFixed(2)}</span>
+                <span>${cart.tax}</span>
               </div>
               <div className="border-t pt-3">
                 <div className="flex justify-between">
                   <span className="text-lg font-bold text-gray-900">Total</span>
                   <span className="text-2xl font-bold text-purple-600">
-                    ${(cart.totalPrice * 1.1).toFixed(2)}
+                    ${cart.totalAmount}
                   </span>
                 </div>
               </div>

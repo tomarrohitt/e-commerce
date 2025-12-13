@@ -1,24 +1,24 @@
 "use client";
 
-import { useState } from "react";
-// Remove Link from next/link, we don't need it
-import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { addressService } from "@/lib/api";
 import { useAuth } from "@/contexts/auth-context";
 import type { Address } from "@/types";
 import toast from "react-hot-toast";
 import { Plus, Home, Trash2, Edit, CheckCircle } from "lucide-react";
-import AddAddressModal from "@/components/address-modal"; // Import the modal
+import AddAddressModal from "@/components/address-modal";
+import { useAddressModal } from "@/hooks/use-address-modal";
 
 export default function AddressesPage() {
-  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const queryClient = useQueryClient();
-
-  // 1. Add state to control the modal
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  // 2. This state will hold the address we're editing
-  const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const {
+    isModalOpen,
+    openAddModal,
+    closeModal,
+    editingAddress,
+    openEditModal,
+  } = useAddressModal();
 
   const { data: addressData, isLoading: isAddressesLoading } = useQuery({
     queryKey: ["addresses"],
@@ -27,9 +27,8 @@ export default function AddressesPage() {
     staleTime: 0,
   });
 
-  const addresses: Address[] = addressData?.addresses || [];
+  const addresses: Address[] = addressData || [];
 
-  // ... (delete mutation is unchanged)
   const { mutate: deleteAddress, isPending: isDeleting } = useMutation({
     mutationFn: (id: string) => addressService.deleteAddress(id),
     onSuccess: () => {
@@ -41,7 +40,6 @@ export default function AddressesPage() {
     },
   });
 
-  // ... (setDefault mutation is unchanged)
   const { mutate: setDefaultAddress, isPending: isSettingDefault } =
     useMutation({
       mutationFn: (id: string) => addressService.setDefaultAddress(id),
@@ -56,44 +54,26 @@ export default function AddressesPage() {
 
   const isLoading = isAuthLoading || isAddressesLoading;
 
-  // 3. Handlers to open/close the modal
-  const openAddModal = () => {
-    setEditingAddress(null); // Set to null for "add" mode
-    setIsModalOpen(true);
-  };
-
-  const openEditModal = (address: Address) => {
-    setEditingAddress(address); // Pass the address for "edit" mode
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    // We can set editingAddress to null on close
-    setEditingAddress(null);
-  };
-
   if (isLoading) {
     return <AddressSkeleton />;
   }
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900">My Addresses</h1>
 
-        {/* 4. Update button to use the handler */}
-        <button
-          onClick={openAddModal}
-          className="inline-flex items-center bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Add New Address
-        </button>
+        {addresses.length > 0 && (
+          <button
+            onClick={openAddModal}
+            className="inline-flex items-center bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Add New Address
+          </button>
+        )}
       </div>
 
-      {/* Empty State */}
       {addresses.length === 0 ? (
         <div className="bg-white rounded-xl shadow-md p-12 text-center">
           <Home className="w-16 h-16 mx-auto text-gray-400 mb-4" />
@@ -111,7 +91,6 @@ export default function AddressesPage() {
           </button>
         </div>
       ) : (
-        // Address List
         <div className="space-y-6">
           {addresses.map((address) => (
             <div
@@ -119,7 +98,6 @@ export default function AddressesPage() {
               className="bg-white rounded-xl shadow-md overflow-hidden"
             >
               <div className="p-6 flex justify-between items-start">
-                {/* ... (address details) ... */}
                 <div>
                   <div className="flex items-center gap-3 mb-2">
                     <span className="text-lg font-semibold text-gray-900 capitalize">
@@ -138,9 +116,7 @@ export default function AddressesPage() {
                   </address>
                 </div>
 
-                {/* Action Buttons */}
                 <div className="flex space-x-2">
-                  {/* 5. Update Edit button to use handler */}
                   <button
                     onClick={() => openEditModal(address)}
                     className="p-2 text-gray-500 hover:text-purple-600 transition-colors"
@@ -164,7 +140,6 @@ export default function AddressesPage() {
                   </button>
                 </div>
               </div>
-              {/* Set as Default Button */}
               {!address.isDefault && (
                 <div className="bg-gray-50 px-6 py-3">
                   <button
@@ -181,17 +156,17 @@ export default function AddressesPage() {
         </div>
       )}
 
-      {/* 6. Render the modal with the correct props */}
       <AddAddressModal
         isOpen={isModalOpen}
-        onClose={closeModal}
+        onClose={() => {
+          closeModal();
+        }}
         addressToEdit={editingAddress}
       />
     </div>
   );
 }
 
-// Skeleton component (unchanged)
 function AddressSkeleton() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

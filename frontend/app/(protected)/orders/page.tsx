@@ -3,15 +3,58 @@
 import Link from "next/link";
 import { orderService } from "@/lib/api";
 import { useAuth } from "@/contexts/auth-context";
-import { Order } from "@/types";
-// 1. Make sure you import the HOOK 'useQueryClient'
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+
+export interface OrderItem {
+  id: string;
+  orderId: string;
+  productId: string;
+  name: string;
+  sku: string;
+  price: string;
+  thumbnail: string;
+  quantity: number;
+}
+
+export interface ShippingAddress {
+  id?: string;
+  street: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+  phoneNumber?: string;
+}
+
+export interface Order {
+  id: string;
+  userId: string;
+  userEmail: string;
+  userName: string;
+  subtotal: string;
+  tax: string;
+  totalAmount: string;
+  status: string;
+  currency: string;
+  paymentId: string | null;
+  paymentClientSecret: string | null;
+  invoiceUrl: string | null;
+  shippingAddress: ShippingAddress;
+  billingAddress?: ShippingAddress;
+  items: OrderItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+const fetchOrderById = async (orderId: string): Promise<Order> => {
+  const response = await orderService.getOrder(orderId);
+  return response.data;
+};
 
 export default function OrdersPage() {
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
 
-  // 2. Make sure you are CALLING the hook here to get the instance
   const queryClient = useQueryClient();
 
   const { data: ordersData, isLoading: isDataLoading } = useQuery({
@@ -34,18 +77,24 @@ export default function OrdersPage() {
     },
   });
 
+  const downloadInvoice = async (orderId: string) => {
+    const url = await orderService.downloadInvoice(orderId);
+    window.open(url, "_blank");
+  };
+
   const orders: Order[] = ordersData?.orders || [];
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      pending: "bg-yellow-100 text-yellow-800",
-      processing: "bg-blue-100 text-blue-800",
-      shipped: "bg-purple-100 text-purple-800",
-      delivered: "bg-green-100 text-green-800",
-      cancelled: "bg-red-100 text-red-800",
-      refunded: "bg-gray-100 text-gray-800",
+      PENDING: "bg-yellow-100 text-yellow-800",
+      PROCESSING: "bg-blue-100 text-blue-800",
+      SHIPPED: "bg-purple-100 text-purple-800",
+      DELIVERED: "bg-green-100 text-green-800",
+      PAID: "bg-green-100 text-green-800",
+      CANCELLED: "bg-red-100 text-red-800",
+      REFUNDED: "bg-gray-100 text-gray-800",
     };
-    return colors[status.toLowerCase()] || "bg-gray-100 text-gray-800";
+    return colors[status] || "bg-gray-100 text-gray-800";
   };
 
   const loading = isAuthLoading || isDataLoading;
@@ -99,7 +148,7 @@ export default function OrdersPage() {
                   <div>
                     <p className="text-sm text-gray-600">Order ID</p>
                     <p className="font-mono font-semibold text-gray-900">
-                      {order.id}
+                      {order.id.toUpperCase()}
                     </p>
                   </div>
 
@@ -124,7 +173,7 @@ export default function OrdersPage() {
                   <div>
                     <span
                       className={`inline-block px-4 py-2 rounded-full text-sm font-semibold ${getStatusColor(
-                        order.status
+                        order.status,
                       )}`}
                     >
                       {order.status.charAt(0).toUpperCase() +
@@ -136,16 +185,16 @@ export default function OrdersPage() {
 
               <div className="p-6">
                 <div className="space-y-4 mb-4">
-                  {order.orderItems.map((item) => (
+                  {order.items.map((item) => (
                     <div
                       key={item.id}
                       className="flex items-center space-x-4 py-3 border-b border-gray-100 last:border-0"
                     >
                       <div className="w-16 h-16 bg-linear-to-br from-purple-400 to-indigo-600 rounded-lg flex items-center justify-center">
-                        {item.product.images.length > 0 ? (
+                        {item.thumbnail.length > 0 ? (
                           <img
-                            src={item.product.images[0]}
-                            alt={item.product.name}
+                            src={item.thumbnail}
+                            alt={item.name}
                             className="w-full h-full object-cover rounded-lg"
                           />
                         ) : (
@@ -155,16 +204,16 @@ export default function OrdersPage() {
 
                       <div className="flex-1">
                         <p className="font-semibold text-gray-900">
-                          {item.product.name}
+                          {item.name}
                         </p>
                         <p className="text-sm text-gray-600">
-                          Quantity: {item.quantity} × ${item.priceAtPurchase}
+                          Quantity: {item.quantity} × ${item.price}
                         </p>
                       </div>
 
                       <div className="text-right">
                         <p className="font-semibold text-gray-900">
-                          ${item.quantity * item.priceAtPurchase}
+                          ${item.quantity * Number(item.price)}
                         </p>
                       </div>
                     </div>
@@ -176,22 +225,29 @@ export default function OrdersPage() {
                     Shipping Address:
                   </p>
                   <p className="text-sm text-gray-600">
-                    {order.shippingAddress.street}, {order.shippingAddress.city}
-                    , {order.shippingAddress.state}{" "}
-                    {order.shippingAddress.zipCode},{" "}
-                    {order.shippingAddress.country}
+                    {order?.shippingAddress?.street},{" "}
+                    {order?.shippingAddress?.city},{" "}
+                    {order?.shippingAddress?.state},{" "}
+                    {order?.shippingAddress?.country},{" "}
+                    {order?.shippingAddress?.zipCode}
                   </p>
                 </div>
 
                 <div className="flex flex-wrap gap-3 mt-8">
                   <Link
-                    href={`/orders/${order.id}`}
+                    href={`/orders/${order?.id}`}
                     className="text-center bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
                   >
                     View Details
                   </Link>
 
-                  {order.status === "pending" && (
+                  {![
+                    "CANCELLED",
+                    "SHIPPED",
+                    "DELIVERED",
+                    "FAILED",
+                    "REFUNDED",
+                  ].includes(order.status) && (
                     <button
                       onClick={() => cancelOrder(order.id)}
                       disabled={isCancelling}
@@ -200,12 +256,9 @@ export default function OrdersPage() {
                       Cancel Order
                     </button>
                   )}
-
-                  {order.status === "delivered" && (
+                  {order.status === "PAID" && (
                     <button
-                      onClick={() => {
-                        console.log("Download invoice:", order.id);
-                      }}
+                      onClick={() => downloadInvoice(order.id)}
                       className="text-center bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
                     >
                       Download Invoice

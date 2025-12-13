@@ -1,19 +1,16 @@
-// src/lib/api.ts
 import axios, { AxiosError } from "axios";
-import type { PaginatedProducts, Category } from "@/types";
-import { CloudCog } from "lucide-react";
+import type { PaginatedProducts } from "@/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const api = axios.create({
   baseURL: API_URL,
-  withCredentials: true, // Important for cookies
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Request interceptor to add auth token if needed
 api.interceptors.request.use(
   (config) => {
     return config;
@@ -22,6 +19,7 @@ api.interceptors.request.use(
     return Promise.reject(error);
   },
 );
+
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
@@ -47,12 +45,7 @@ api.interceptors.response.use(
   },
 );
 
-// src/lib/api.ts (ADD these functions at the end)
-
 export const productService = {
-  /**
-   * Get all products with filters
-   */
   async getProducts(params?: {
     page?: number;
     limit?: number;
@@ -63,7 +56,7 @@ export const productService = {
     inStock?: boolean;
   }): Promise<PaginatedProducts> {
     const response = await api.get("/products", { params });
-    return response.data;
+    return response.data.data;
   },
 
   /**
@@ -80,28 +73,28 @@ export const addressService = {
    * Get all addresses for current user
    */
   async getAddresses() {
-    const response = await api.get("/address");
-    return response.data;
+    const response = await api.get("/addresses");
+    return response.data.data;
   },
 
   /**
-   * Get single address
+   * Get single addresses
    */
   async getAddress(id: string) {
-    const response = await api.get(`/address/${id}`);
+    const response = await api.get(`/addresses/${id}`);
     return response.data;
   },
 
   /**
-   * Get address count for current user
+   * Get addresses count for current user
    */
   async getAddressCount() {
-    const response = await api.get("/address/count");
-    return response.data;
+    const response = await api.get("/addresses/count");
+    return response.data.data;
   },
 
   /**
-   * Create new address
+   * Create new addresses
    */
   async createAddress(data: {
     type: "shipping" | "billing";
@@ -111,12 +104,12 @@ export const addressService = {
     zipCode: string;
     country: string;
   }) {
-    const response = await api.post("/address", data);
+    const response = await api.post("/addresses", data);
     return response.data;
   },
 
   /**
-   * Update address
+   * Update addresses
    */
   async updateAddress(
     id: string,
@@ -129,31 +122,31 @@ export const addressService = {
       country?: string;
     },
   ) {
-    const response = await api.patch(`/address/${id}`, data);
+    const response = await api.patch(`/addresses/${id}`, data);
     return response.data;
   },
 
   /**
-   * Delete address
+   * Delete addresses
    */
   async deleteAddress(id: string) {
-    const response = await api.delete(`/address/${id}`);
+    const response = await api.delete(`/addresses/${id}`);
     return response.data;
   },
 
   /**
-   * Set address as default
+   * Set addresses as default
    */
   async setDefaultAddress(id: string) {
-    const response = await api.patch(`/address/${id}/default`);
+    const response = await api.patch(`/addresses/${id}/default`);
     return response.data;
   },
 
   /**
-   * Get default address
+   * Get default addresses
    */
   async getDefaultAddress() {
-    const response = await api.get("/address/default");
+    const response = await api.get("/addresses/default");
     return response.data;
   },
 };
@@ -183,7 +176,7 @@ export const orderService = {
    */
   async getOrders(params?: { page?: number; limit?: number; status?: string }) {
     const response = await api.get("/orders", { params });
-    return response.data;
+    return response.data.data;
   },
 
   /**
@@ -199,7 +192,7 @@ export const orderService = {
    */
   async getOrderSummary() {
     const response = await api.get("/orders/summary");
-    return response.data;
+    return response.data.data;
   },
 
   // Admin only endpoints
@@ -230,6 +223,11 @@ export const orderService = {
   }) {
     const response = await api.get("/orders/admin/all", { params });
     return response.data;
+  },
+
+  async downloadInvoice(orderId: string): Promise<string> {
+    const response = await api.get(`/invoice/download/${orderId}`);
+    return response.data.url;
   },
 };
 
@@ -275,7 +273,7 @@ export const cartService = {
    */
   async getCart() {
     const response = await api.get("/cart");
-    return response.data;
+    return response.data.data;
   },
 
   /**
@@ -283,8 +281,6 @@ export const cartService = {
    */
   async updateCartItem(productId: string, quantity: number) {
     const response = await api.patch(`/cart/${productId}`, { quantity }); // Changed from /cart/items/:id
-    console.log({ response });
-
     return response.data;
   },
 

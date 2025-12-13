@@ -31,21 +31,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const { data: cart, isLoading: isCartLoading } = useQuery({
     queryKey: ["cart"],
     queryFn: () => cartService.getCart(),
-    enabled: isAuthenticated, // This is still correct
+    enabled: isAuthenticated,
     staleTime: 1000 * 60 * 5,
   });
   const refreshCart = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ["cart"] });
   }, [queryClient]);
 
-  // 4. The REAL loading state is if auth OR the cart is loading
   const loading = isAuthLoading || isCartLoading;
-
   return (
     <CartContext.Provider
       value={{
         cart: cart || null,
-        loading, // 5. Pass the combined loading state
+        loading,
         refreshCart,
         cartCount: cart?.totalItems || 0,
       }}

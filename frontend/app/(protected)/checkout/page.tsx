@@ -1,4 +1,3 @@
-// src/app/(protected)/checkout/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -8,6 +7,8 @@ import { addressService, orderService } from "@/lib/api";
 import toast from "react-hot-toast";
 import { useAuth } from "@/contexts/auth-context";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import AddAddressModal from "@/components/address-modal";
+import { useAddressModal } from "@/hooks/use-address-modal";
 
 interface Address {
   id: string;
@@ -18,51 +19,55 @@ interface Address {
   zipCode: string;
   country: string;
   isDefault: boolean;
+  phoneNumber?: string;
 }
 
 export default function CheckoutPage() {
   const router = useRouter();
 
+  const {
+    isModalOpen,
+    openAddModal,
+    closeModal,
+    editingAddress,
+    openEditModal,
+  } = useAddressModal();
+
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const { cart, loading: cartLoading } = useCart();
   const [selectedAddressId, setSelectedAddressId] = useState<string>("");
   const [paymentMethod, setPaymentMethod] = useState<"stripe" | "cod">(
-    "stripe"
+    "stripe",
   );
+
+  const [isLocked, setIsLocked] = useState(false);
 
   const { data: addressData, isLoading: addressesLoading } = useQuery({
     queryKey: ["addresses"],
     queryFn: addressService.getAddresses,
-    // 3. Add 'enabled' flag to wait for auth
     enabled: isAuthenticated,
   });
 
-  const addresses: Address[] = addressData?.addresses || [];
+  const addresses: Address[] = addressData || [];
 
   const { mutate: placeOrder, isPending: isSubmitting } = useMutation({
-    // ... mutationFn, onSuccess, onError (all correct) ...
-    mutationFn: (data: {
-      shippingAddressId: string;
-      paymentMethod: "stripe" | "cod";
-    }) => orderService.createOrder(data),
-
+    mutationFn: (orderData: any) => orderService.createOrder(orderData),
     onSuccess: (response) => {
       toast.success("Order placed successfully!");
-      if (paymentMethod === "stripe" && response.order.clientSecret) {
-        router.push(
-          `/checkout/payment?orderId=${response.order.id}&clientSecret=${response.order.clientSecret}`
-        );
-      } else {
-        router.push(`/orders/${response.order.id}`);
-      }
+      console.log({ response });
+      router.push(`/orders/${response.data.orderId}`);
     },
     onError: (error: any) => {
       toast.error(error.error || "Failed to place order");
     },
   });
 
-  // 4. This useEffect auto-selects the default address.
-  // This was in my original refactor but missing from your code.
+  useEffect(() => {
+    if (!cartLoading && (!cart || cart.items.length === 0)) {
+      router.push("/cart");
+    }
+  }, [cart, cartLoading, router]);
+
   useEffect(() => {
     if (addresses.length > 0 && !selectedAddressId) {
       const defaultAddress = addresses.find((a) => a.isDefault);
@@ -70,23 +75,56 @@ export default function CheckoutPage() {
         setSelectedAddressId(defaultAddress.id);
       }
     }
-  }, [addressData?.addresses, selectedAddressId]);
+  }, [addresses, selectedAddressId]);
 
   const handlePlaceOrder = async () => {
+    if (isLocked) return;
+    setIsLocked(true);
+
     if (!selectedAddressId) {
       toast.error("Please select a shipping address");
+      setIsLocked(false);
       return;
     }
-    placeOrder({
-      shippingAddressId: selectedAddressId,
+
+    if (!cart) return;
+
+    const selectedAddress = addresses.find((a) => a.id === selectedAddressId);
+    if (!selectedAddress) {
+      toast.error("Selected address not found");
+      return;
+    }
+
+    const orderItems = cart.items.map((item) => ({
+      productId: item.productId,
+      name: item.product.name,
+      price: item.product.price,
+      quantity: item.quantity,
+      sku: item.product.sku,
+    }));
+
+    const payload = {
+      shippingAddress: {
+        street: selectedAddress.street,
+        city: selectedAddress.city,
+        state: selectedAddress.state,
+        zipCode: selectedAddress.zipCode,
+        country: selectedAddress.country,
+        phoneNumber: selectedAddress.phoneNumber || "",
+      },
       paymentMethod,
+      totalAmount: cart?.totalAmount,
+      items: orderItems,
+    };
+
+    placeOrder(payload, {
+      onError: () => setIsLocked(false),
     });
   };
 
-  // 5. Combine ALL loading states
   const isLoading = isAuthLoading || addressesLoading || cartLoading;
 
-  if (isLoading || cartLoading) {
+  if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="animate-pulse">
@@ -104,30 +142,25 @@ export default function CheckoutPage() {
     );
   }
 
-  if (!cart || cart.items.length === 0) {
-    router.push("/cart");
-    return null;
-  }
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Checkout Form */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Shipping Address */}
           <div className="bg-white rounded-xl shadow-md p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold text-gray-900">
                 Shipping Address
               </h2>
-              <button
-                onClick={() => router.push("/addresses/new?returnTo=/checkout")}
-                className="text-purple-600 hover:text-purple-700 font-semibold"
-              >
-                + Add New
-              </button>
+              {addressData.length !== 0 && (
+                <button
+                  onClick={openAddModal}
+                  className="text-purple-600 hover:text-purple-700 font-semibold"
+                >
+                  + Add New
+                </button>
+              )}
             </div>
 
             {addresses.length === 0 ? (
@@ -136,9 +169,7 @@ export default function CheckoutPage() {
                   You don't have any saved addresses
                 </p>
                 <button
-                  onClick={() =>
-                    router.push("/addresses/new?returnTo=/checkout")
-                  }
+                  onClick={openAddModal}
                   className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
                 >
                   Add Address
@@ -175,13 +206,13 @@ export default function CheckoutPage() {
                           <p className="text-gray-600 text-sm">
                             {address.country}
                           </p>
-                          {address.isDefault && (
-                            <span className="inline-block mt-1 px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded">
-                              Default
-                            </span>
-                          )}
                         </div>
                       </div>
+                      {address.isDefault && (
+                        <span className="inline-block mt-1 px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded">
+                          Default
+                        </span>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -258,12 +289,12 @@ export default function CheckoutPage() {
 
             {/* Order Items */}
             <div className="space-y-3 mb-6 max-h-64 overflow-y-auto">
-              {cart.items.map((item) => (
+              {cart?.items.map((item) => (
                 <div key={item.productId} className="flex space-x-3">
                   <div className="w-16 h-16 bg-linear-to-br from-purple-400 to-indigo-600 rounded-lg overflow-hidden shrink-0">
-                    {item.product.images[0] ? (
+                    {item.product.thumbnail ? (
                       <img
-                        src={item.product.images[0]}
+                        src={item.product.thumbnail}
                         alt={item.product.name}
                         className="w-full h-full object-cover"
                       />
@@ -292,27 +323,26 @@ export default function CheckoutPage() {
             <div className="space-y-3 mb-6">
               <div className="flex justify-between text-gray-600">
                 <span>Subtotal</span>
-                <span>${cart.totalPrice.toFixed(2)}</span>
+                <span>${cart?.subtotal}</span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span>Shipping</span>
                 <span className="text-green-600">FREE</span>
               </div>
               <div className="flex justify-between text-gray-600">
-                <span>Tax (10%)</span>
-                <span>${(cart.totalPrice * 0.1).toFixed(2)}</span>
+                <span>Tax (18%)</span>
+                <span>${cart?.tax}</span>
               </div>
               <div className="border-t pt-3">
                 <div className="flex justify-between">
                   <span className="text-lg font-bold text-gray-900">Total</span>
                   <span className="text-2xl font-bold text-purple-600">
-                    ${(cart.totalPrice * 1.1).toFixed(2)}
+                    ${cart?.totalAmount}
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Place Order Button */}
             <button
               onClick={handlePlaceOrder}
               disabled={!selectedAddressId || isSubmitting}
@@ -328,6 +358,13 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
+      <AddAddressModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          closeModal();
+        }}
+        addressToEdit={editingAddress}
+      />
     </div>
   );
 }

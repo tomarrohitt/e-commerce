@@ -20,9 +20,10 @@ export default function ProductPageClient({
     searchQuery,
     setSearchQuery,
     handleFilterChange,
-  } = useProductFilters(categories);
+  } = useProductFilters(categories, {
+    defaultLimit: 12,
+  });
 
-  // Form submit handler is simple
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     handleFilterChange("search", searchQuery);
@@ -30,9 +31,7 @@ export default function ProductPageClient({
 
   return (
     <>
-      {/* Hero Section */}
       <section className="bg-linear-to-r from-purple-600 to-indigo-700 text-white py-20">
-        {/* Search Bar */}
         <form onSubmit={handleSearchSubmit} className="max-w-2xl mx-auto">
           <div className="flex gap-2">
             <input
@@ -52,7 +51,6 @@ export default function ProductPageClient({
         </form>
       </section>
 
-      {/* Categories Section */}
       <section className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-8">
@@ -71,7 +69,7 @@ export default function ProductPageClient({
               All Products
             </button>
 
-            {categories.map((category) => (
+            {categories?.map((category) => (
               <button
                 key={category.id}
                 onClick={() => handleFilterChange("category", category.slug)}
