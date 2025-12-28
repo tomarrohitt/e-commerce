@@ -5,12 +5,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addressService } from "@/lib/api";
 import toast from "react-hot-toast";
 import { X } from "lucide-react";
-import type { CreateAddressInput, GetAddressObj } from "@/types";
+import type { CreateAddressInput, Address } from "@/types";
 
 interface AddAddressModalProps {
   isOpen: boolean;
   onClose: () => void;
-  addressToEdit: GetAddressObj | null;
+  addressToEdit: Address | null;
 }
 
 const defaultFormState: CreateAddressInput = {
@@ -105,7 +105,6 @@ export default function AddAddressModal({
   return (
     <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg">
-        {/* 7. Dynamic Header */}
         <div className="flex justify-between items-center p-6 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900">
             {isEditing ? "Edit Address" : "Add New Address"}

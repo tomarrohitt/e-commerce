@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { GetAddressObj } from "@/types";
+import { Address } from "@/types";
 
 interface ShippingSectionProps {
-  addresses: GetAddressObj[];
+  addresses: Address[];
   selectedAddressId: string;
   onSelectAddress: (id: string) => void;
   onAddNewAddress: () => void;
@@ -59,7 +59,7 @@ function AddressCard({
   isSelected,
   onSelect,
 }: {
-  address: GetAddressObj;
+  address: Address;
   isSelected: boolean;
   onSelect: () => void;
 }) {

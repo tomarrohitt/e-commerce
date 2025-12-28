@@ -1,5 +1,5 @@
 import { api } from "./client";
-import type { CreateAddressInput, GetAddressObj } from "@/types";
+import type { CreateAddressInput, Address } from "@/types";
 
 export const addressService = {
   async getAddresses() {
@@ -17,7 +17,7 @@ export const addressService = {
     return response.data.data;
   },
 
-  async createAddress(data: CreateAddressInput): Promise<GetAddressObj> {
+  async createAddress(data: CreateAddressInput): Promise<Address> {
     const response = await api.post("/addresses", data);
     return response.data;
   },

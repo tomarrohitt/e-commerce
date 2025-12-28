@@ -99,26 +99,28 @@ export default function Navbar() {
             <span className="text-xl font-bold text-purple-600">E-Store</span>
           </Link>
 
-          <div className="hidden md:flex items-center space-x-8">
-            <Link
-              href="/"
-              className="text-gray-700 hover:text-purple-600 transition-colors"
-            >
-              Home
-            </Link>
-            <Link
-              href="/dashboard"
-              className="text-gray-700 hover:text-purple-600 transition-colors"
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/orders"
-              className="text-gray-700 hover:text-purple-600 transition-colors"
-            >
-              My Orders
-            </Link>
-          </div>
+          {isAuthenticated && (
+            <div className="hidden md:flex items-center space-x-8">
+              <Link
+                href="/"
+                className="text-gray-700 hover:text-purple-600 transition-colors"
+              >
+                Home
+              </Link>
+              <Link
+                href="/dashboard"
+                className="text-gray-700 hover:text-purple-600 transition-colors"
+              >
+                Dashboard
+              </Link>
+              <Link
+                href="/orders"
+                className="text-gray-700 hover:text-purple-600 transition-colors"
+              >
+                My Orders
+              </Link>
+            </div>
+          )}
 
           <div className="hidden md:flex items-center space-x-4">
             <Link

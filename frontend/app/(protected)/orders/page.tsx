@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useOrders } from "@/hooks/use-orders";
 import { OrderCard } from "@/components/orders/order-card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonList } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 
 export default function OrdersPage() {
@@ -59,15 +59,8 @@ function EmptyOrdersState() {
 
 function OrdersPageSkeleton() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="animate-pulse space-y-6">
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="bg-white rounded-xl shadow-md p-6">
-            <Skeleton className="h-6 w-1/4 mb-4" />
-            <Skeleton className="h-4 w-1/2" />
-          </div>
-        ))}
-      </div>
+    <div className="max-w-7xl mx-auto px-4 py-12">
+      <SkeletonList count={3} />
     </div>
   );
 }

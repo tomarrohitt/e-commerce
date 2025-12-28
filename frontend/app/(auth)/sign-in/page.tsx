@@ -1,23 +1,23 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
+import { useMutation } from "@tanstack/react-query";
+
 import { loginSchema, type ApiError, type LoginInput } from "@/types";
 import { useAuth } from "@/contexts/auth-context";
 
 export default function SignInPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [isLoading, setIsLoading] = useState(false);
-
-  const { signIn, isLoading: isAuthLoading } = useAuth();
+  const { signIn } = useAuth(); // We use mutation state for loading instead
 
   const redirectTo = searchParams.get("redirect") || "/";
 
+  // 1. Setup Form
   const {
     register,
     handleSubmit,
@@ -26,19 +26,19 @@ export default function SignInPage() {
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = async (data: LoginInput) => {
-    setIsLoading(true);
-
-    try {
-      await signIn({
+  // 2. Setup Mutation (Replaces manual try/catch & useState)
+  const { mutate: handleLogin, isPending: isLoading } = useMutation({
+    mutationFn: (data: LoginInput) =>
+      signIn({
         email: data.email,
         password: data.password,
-      });
-
+      }),
+    onSuccess: () => {
       toast.success("Welcome back!");
       router.push(redirectTo);
-      router.refresh();
-    } catch (error) {
+      router.refresh(); // ✅ Refresh ensures Server Components (like Header) update immediately
+    },
+    onError: (error: any) => {
       const apiError = error as ApiError;
 
       if (apiError.details) {
@@ -48,12 +48,12 @@ export default function SignInPage() {
       } else {
         toast.error(apiError.error || "Invalid email or password");
       }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+  });
 
-  const loading = isLoading || isAuthLoading;
+  const onSubmit = (data: LoginInput) => {
+    handleLogin(data);
+  };
 
   return (
     <div className="bg-white rounded-2xl shadow-2xl p-8">
@@ -63,6 +63,7 @@ export default function SignInPage() {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Email Field */}
         <div>
           <label
             htmlFor="email"
@@ -74,19 +75,21 @@ export default function SignInPage() {
             {...register("email")}
             type="email"
             id="email"
-            disabled={loading}
+            disabled={isLoading}
+            autoComplete="email"
             className={`w-full px-4 py-3 rounded-lg border ${
               errors.email
                 ? "border-red-500 focus:ring-red-500"
                 : "border-gray-300 focus:ring-purple-500"
             } focus:ring-2 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
             placeholder="you@example.com"
-            autoComplete="email"
           />
           {errors.email && (
             <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
           )}
         </div>
+
+        {/* Password Field */}
         <div>
           <div className="flex items-center justify-between mb-2">
             <label
@@ -106,14 +109,14 @@ export default function SignInPage() {
             {...register("password")}
             type="password"
             id="password"
-            disabled={loading}
+            disabled={isLoading}
+            autoComplete="current-password"
             className={`w-full px-4 py-3 rounded-lg border ${
               errors.password
                 ? "border-red-500 focus:ring-red-500"
                 : "border-gray-300 focus:ring-purple-500"
             } focus:ring-2 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
             placeholder="••••••••"
-            autoComplete="current-password"
           />
           {errors.password && (
             <p className="mt-1 text-sm text-red-600">
@@ -122,6 +125,7 @@ export default function SignInPage() {
           )}
         </div>
 
+        {/* Remember Me Checkbox */}
         <div className="flex items-center">
           <input
             id="remember-me"
@@ -136,12 +140,13 @@ export default function SignInPage() {
           </label>
         </div>
 
+        {/* Submit Button */}
         <button
           type="submit"
-          disabled={loading}
+          disabled={isLoading}
           className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center"
         >
-          {loading ? (
+          {isLoading ? (
             <>
               <svg
                 className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"

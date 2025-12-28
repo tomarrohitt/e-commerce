@@ -27,7 +27,6 @@ export function OrderCard({
               {order.id.toUpperCase()}
             </p>
           </div>
-
           <div>
             <p className="text-sm text-gray-600">Date</p>
             <p className="font-medium text-gray-900">
@@ -38,20 +37,18 @@ export function OrderCard({
               })}
             </p>
           </div>
-
           <div>
             <p className="text-sm text-gray-600">Total</p>
             <p className="text-lg font-bold text-purple-600">
               ${order.totalAmount}
             </p>
           </div>
-
           <OrderStatusBadge status={order.status} />
         </div>
       </CardHeader>
-
       <CardContent>
-        <OrderItemsList orderItems={order.items} />
+        {/* Pass status to OrderItemsList so it can show review buttons */}
+        <OrderItemsList orderItems={order.items} status={order.status} />
 
         <div className="bg-gray-50 rounded-lg p-4 mb-4">
           <p className="text-sm font-semibold text-gray-700 mb-2">

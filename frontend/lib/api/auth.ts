@@ -13,7 +13,8 @@ export const authService = {
   },
 
   async signOut() {
-    const response = await api.post("/auth/sign-out");
+    const response = await api.post("/auth/sign-out", {});
+    console.log({ response });
     return response.data;
   },
 
@@ -24,5 +25,23 @@ export const authService = {
     } catch (error) {
       return null;
     }
+  },
+
+  async resendVerificationEmail(email: string) {
+    const response = await api.post("/auth/resend-verification-email", {
+      email,
+    });
+    return response.data;
+  },
+
+  async forgotPassword(email: string) {
+    const response = await api.post("/auth/request-password-reset", {
+      email,
+    });
+    return response.data;
+  },
+  resetPassword: async (data: { token: string; newPassword: string }) => {
+    const response = await api.post("/auth/reset-password", data);
+    return response.data;
   },
 };

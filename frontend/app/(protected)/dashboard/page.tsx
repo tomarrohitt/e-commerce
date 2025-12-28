@@ -92,7 +92,7 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link
-            href="/"
+            href="/products"
             className="flex items-center space-x-3 p-4 rounded-lg border-2 border-gray-200 hover:border-purple-600 hover:bg-purple-50 transition-all"
           >
             <span className="text-2xl">🛍️</span>

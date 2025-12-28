@@ -1,9 +1,9 @@
 import Link from "next/link";
-import type { Product } from "@/types";
+import type { Product, ProductListProduct } from "@/types";
 import AddToCartButton from "./add-to-cart";
 
 interface ProductCardProps {
-  product: Product;
+  product: ProductListProduct;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
@@ -13,9 +13,9 @@ export default function ProductCard({ product }: ProductCardProps) {
     <div className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 h-full flex flex-col">
       <Link href={`/products/${product.id}`} className="block">
         <div className="relative h-48 bg-linear-to-br from-purple-400 to-indigo-600 overflow-hidden">
-          {product.images.length > 0 ? (
+          {product.thumbnail ? (
             <img
-              src={product.images[0]}
+              src={product.thumbnail}
               alt={product.name}
               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
@@ -45,10 +45,6 @@ export default function ProductCard({ product }: ProductCardProps) {
             {product.name}
           </h3>
         </Link>
-
-        <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-          {product.description}
-        </p>
 
         <div className="flex items-center justify-between mb-4">
           <span className="text-xl font-bold text-purple-600">

@@ -1,22 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthProvider } from "@/contexts/auth-context"; // 1. Import
+import { AuthProvider } from "@/contexts/auth-context";
 import { Toaster } from "react-hot-toast";
 import { CartProvider } from "@/contexts/cart-context";
 
-export default function Providers({ children }: { children: React.ReactNode }) {
+// ✅ Memoize to prevent re-creating providers on parent re-renders
+export default memo(function Providers({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 5 * 1000 * 60,
+            staleTime: 1000 * 60 * 5, // 5 minutes
+            gcTime: 1000 * 60 * 10, // 10 minutes
             refetchOnWindowFocus: false,
+            refetchOnMount: false,
+            retry: 1,
           },
         },
-      })
+      }),
   );
 
   return (
@@ -27,4 +35,4 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       </AuthProvider>
     </QueryClientProvider>
   );
-}
+});

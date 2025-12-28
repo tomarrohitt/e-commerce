@@ -3,7 +3,7 @@ import { api } from "./client";
 export const categoryService = {
   async getCategories() {
     const response = await api.get("/category");
-    return response.data;
+    return response.data.data;
   },
 
   async getCategory(id: string) {

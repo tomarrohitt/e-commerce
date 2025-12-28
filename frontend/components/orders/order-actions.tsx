@@ -27,22 +27,15 @@ export function OrderActions({
   ].includes(status);
 
   return (
-    <div className="flex flex-wrap gap-3 mt-8">
+    <div className="flex flex-wrap gap-3 mt-6">
       <Link href={`/orders/${orderId}`}>
-        <Button>View Details</Button>
+        <Button variant="primary">View Details</Button>
       </Link>
-
       {canCancel && (
-        <Button
-          variant="danger"
-          onClick={onCancel}
-          disabled={isCancelling}
-          isLoading={isCancelling}
-        >
-          Cancel Order
+        <Button variant="danger" onClick={onCancel} disabled={isCancelling}>
+          {isCancelling ? "Cancelling..." : "Cancel Order"}
         </Button>
       )}
-
       {invoiceUrl && (
         <Button variant="secondary" onClick={onDownloadInvoice}>
           Download Invoice

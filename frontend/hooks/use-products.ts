@@ -1,32 +1,34 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-
 import { productService } from "@/lib/api";
+import { QUERY_KEYS, CACHE_TIMES } from "@/lib/query-config";
+import { useOptimizedQuery } from "./use-optimized-query";
+import { ListProductQuery } from "@/types";
 
-import type { Pagination, Product } from "@/types";
+export function useProducts(filters: ListProductQuery) {
+  const normalizedFilters = {
+    page: filters.page || 1,
+    limit: filters.limit || 24,
+    ...(filters.search && { search: filters.search }),
+    ...(filters.categoryId && { categoryId: filters.categoryId }),
+    ...(filters.inStock !== undefined && { inStock: filters.inStock }),
+  };
 
-const emptyPagination: Pagination = {
-  total: 0,
-  page: 1,
-  limit: 12,
-  totalPages: 0,
-};
-
-export function useProducts(queryParams: Record<string, unknown>) {
-  const { data, isLoading } = useQuery({
-    queryKey: ["products", queryParams],
-
-    queryFn: () => productService.getProducts(queryParams),
-
-    placeholderData: (prev) => prev,
+  const { data, isLoading, error } = useOptimizedQuery({
+    queryKey: QUERY_KEYS.products(normalizedFilters),
+    queryFn: () => productService.getProducts(normalizedFilters),
+    cacheTime: CACHE_TIMES.products,
   });
 
   return {
-    products: (data?.products ?? []) as Product[],
-
-    pagination: (data?.pagination ?? emptyPagination) as Pagination,
-
-    loading: isLoading,
+    products: data?.products ?? [],
+    pagination: data?.pagination ?? {
+      total: 0,
+      page: 1,
+      limit: 24,
+      totalPages: 0,
+    },
+    isLoading,
+    error,
   };
 }

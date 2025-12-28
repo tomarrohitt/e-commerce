@@ -21,6 +21,7 @@ export const orderService = {
     status?: string;
   }): Promise<PaginatedOrders> {
     const response = await api.get<OrdersListResponse>("/orders", { params });
+
     return response.data.data;
   },
 

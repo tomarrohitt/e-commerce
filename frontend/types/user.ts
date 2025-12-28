@@ -26,7 +26,7 @@ export const registrationSchema = z.object({
     ),
 });
 
-export const loginSchema = registrationSchema.omit({ name: true }).partial();
+export const loginSchema = registrationSchema.omit({ name: true });
 
 export const createAddressSchema = z.object({
   type: z.enum(["shipping", "billing"]).default("shipping"),
@@ -72,7 +72,7 @@ export type LoginResponse = {
   redirect: boolean;
 };
 
-export type GetAddressObj = CreateAddressInput & {
+export type Address = CreateAddressInput & {
   id: string;
   isDefault: boolean;
   createdAt?: string;

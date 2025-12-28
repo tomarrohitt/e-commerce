@@ -1,5 +1,5 @@
 import { Pagination } from "./common";
-import { GetAddressObj } from "./user";
+import { Address } from "./user";
 
 export interface OrderItem {
   id: string;
@@ -23,6 +23,9 @@ export interface Order {
   totalAmount: string;
   currency: string;
 
+  paid: boolean;
+  refunded: boolean;
+
   status:
     | "AWAITING_PAYMENT"
     | "PAID"
@@ -36,8 +39,8 @@ export interface Order {
 
   // Relations
   items: OrderItem[];
-  shippingAddress: GetAddressObj;
-  billingAddress?: GetAddressObj;
+  shippingAddress: Address;
+  billingAddress?: Address;
 
   // Timestamps
   createdAt: string;
@@ -63,3 +66,33 @@ export interface CreateOrderRequest {
   shippingAddressId: string;
   paymentMethod?: "stripe" | "cod";
 }
+
+export enum OrderStatusType {
+  PENDING = "PENDING",
+  CREATED = "CREATED",
+  CONFIRMED = "CONFIRMED",
+  PAID = "PAID",
+  SHIPPED = "SHIPPED",
+  DELIVERED = "DELIVERED",
+  CANCELLED = "CANCELLED",
+  REFUNDED = "REFUNDED",
+}
+
+export interface OrderItemsListProps {
+  orderItems: Array<{
+    productId: string;
+    name: string;
+    thumbnail: string;
+    quantity: number;
+    price: string;
+  }>;
+  status: string;
+}
+
+export type ListOrderInput = Partial<{
+  page: number;
+  limit: number;
+  sortBy: "totalAmount" | "createdAt";
+  sortOrder: "asc" | "desc";
+  status?: "PAID" | "FAILED" | "CANCELLED" | "DELIVERED" | "REFUNDED";
+}>;

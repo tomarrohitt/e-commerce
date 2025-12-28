@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
+import { useMutation } from "@tanstack/react-query";
+
 import { authService } from "@/lib/api";
 import {
   registrationSchema,
@@ -15,8 +16,6 @@ import {
 
 export default function SignUpPage() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-
   const {
     register,
     handleSubmit,
@@ -25,19 +24,24 @@ export default function SignUpPage() {
     resolver: zodResolver(registrationSchema),
   });
 
-  const onSubmit = async (data: RegistrationInput) => {
-    setIsLoading(true);
-
-    try {
-      await authService.signUp({
+  const { mutate: registerUser, isPending: isLoading } = useMutation({
+    mutationFn: (data: RegistrationInput) =>
+      authService.signUp({
         name: data.name,
         email: data.email,
         password: data.password,
-      });
-
-      toast.success("Account created successfully! Please sign in.");
-      router.push("/sign-in");
-    } catch (error) {
+      }),
+    onSuccess: (_, variable) => {
+      toast.success("Account created successfully! Please verify your email.");
+      setTimeout(
+        () =>
+          router.push(
+            "/email-verification?email=" + encodeURIComponent(variable.email),
+          ),
+        1200,
+      );
+    },
+    onError: (error: any) => {
       const apiError = error as ApiError;
 
       if (apiError.details) {
@@ -47,9 +51,11 @@ export default function SignUpPage() {
       } else {
         toast.error(apiError.error || "Failed to create account");
       }
-    } finally {
-      setIsLoading(false);
-    }
+    },
+  });
+
+  const onSubmit = (data: RegistrationInput) => {
+    registerUser(data);
   };
 
   return (
@@ -60,7 +66,9 @@ export default function SignUpPage() {
         </h1>
         <p className="text-gray-600">Join us and start shopping today</p>
       </div>
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Name Field */}
         <div>
           <label
             htmlFor="name"
@@ -84,6 +92,8 @@ export default function SignUpPage() {
             <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
           )}
         </div>
+
+        {/* Email Field */}
         <div>
           <label
             htmlFor="email"
@@ -107,6 +117,8 @@ export default function SignUpPage() {
             <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
           )}
         </div>
+
+        {/* Password Field */}
         <div>
           <label
             htmlFor="password"
@@ -132,6 +144,8 @@ export default function SignUpPage() {
             </p>
           )}
         </div>
+
+        {/* Submit Button */}
         <button
           type="submit"
           disabled={isLoading}
@@ -166,6 +180,7 @@ export default function SignUpPage() {
           )}
         </button>
       </form>
+
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-gray-300"></div>
@@ -176,6 +191,7 @@ export default function SignUpPage() {
           </span>
         </div>
       </div>
+
       <div className="text-center">
         <Link
           href="/sign-in"

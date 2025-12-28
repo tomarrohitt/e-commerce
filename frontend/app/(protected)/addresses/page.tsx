@@ -7,7 +7,8 @@ import toast from "react-hot-toast";
 import { Plus, Home, Trash2, Edit, CheckCircle } from "lucide-react";
 import AddAddressModal from "@/components/address-modal";
 import { useAddressModal } from "@/hooks/use-address-modal";
-import { GetAddressObj } from "@/types";
+import { Address } from "@/types";
+import { SkeletonList } from "@/components/ui/skeleton";
 
 export default function AddressesPage() {
   const queryClient = useQueryClient();
@@ -27,7 +28,7 @@ export default function AddressesPage() {
     staleTime: 0,
   });
 
-  const addresses: GetAddressObj[] = addressData || [];
+  const addresses: Address[] = addressData || [];
 
   const { mutate: deleteAddress, isPending: isDeleting } = useMutation({
     mutationFn: (id: string) => addressService.deleteAddress(id),
@@ -55,7 +56,7 @@ export default function AddressesPage() {
   const isLoading = isAuthLoading || isAddressesLoading;
 
   if (isLoading) {
-    return <AddressSkeleton />;
+    return <AddressesPageSkeleton />;
   }
 
   return (
@@ -166,30 +167,10 @@ export default function AddressesPage() {
     </div>
   );
 }
-
-function AddressSkeleton() {
+function AddressesPageSkeleton() {
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="flex justify-between items-center mb-8 animate-pulse">
-        <div className="h-8 bg-gray-300 rounded w-1/3"></div>
-        <div className="h-10 bg-gray-300 rounded-lg w-40"></div>
-      </div>
-      <div className="space-y-6 animate-pulse">
-        {[...Array(2)].map((_, i) => (
-          <div key={i} className="bg-white rounded-xl shadow-md">
-            <div className="p-6">
-              <div className="h-5 bg-gray-300 rounded w-1/4 mb-4"></div>
-              <div className="space-y-2">
-                <div className="h-4 bg-gray-300 rounded w-1/2"></div>
-                <div className="h-4 bg-gray-300 rounded w-2/3"></div>
-              </div>
-            </div>
-            <div className="bg-gray-50 px-6 py-4">
-              <div className="h-4 bg-gray-300 rounded w-32"></div>
-            </div>
-          </div>
-        ))}
-      </div>
+    <div className="max-w-4xl mx-auto px-4 py-12">
+      <SkeletonList count={2} />
     </div>
   );
 }

@@ -1,12 +1,10 @@
 "use client";
 
-import { createContext, useContext, ReactNode, useCallback } from "react";
+import { createContext, useContext, useMemo, useCallback, memo } from "react";
 import { cartService } from "@/lib/api";
 import { useAuth } from "./auth-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Cart } from "../../backend/src/types/index";
-
-// ... (Your CartItem and Cart interfaces are perfect) ...
+import { Cart } from "@/types";
 
 interface CartContextType {
   cart: Cart | null;
@@ -22,35 +20,43 @@ const CartContext = createContext<CartContextType>({
   cartCount: 0,
 });
 
-export function CartProvider({ children }: { children: ReactNode }) {
-  // 1. Get BOTH values from useAuth, and rename isLoading
+// ✅ Memoize provider to prevent re-renders when auth changes but cart doesn't
+export const CartProvider = memo(function CartProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const queryClient = useQueryClient();
 
-  // 2. Rename the isLoading from useQuery
   const { data: cart, isLoading: isCartLoading } = useQuery({
     queryKey: ["cart"],
     queryFn: () => cartService.getCart(),
     enabled: isAuthenticated,
-    staleTime: 1000 * 60 * 5,
+    // ✅ CRITICAL FIX: Don't refetch on every mount
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 10, // 10 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
+
+  // ✅ Memoize callback
   const refreshCart = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ["cart"] });
   }, [queryClient]);
 
-  const loading = isAuthLoading || isCartLoading;
-  return (
-    <CartContext.Provider
-      value={{
-        cart: cart || null,
-        loading,
-        refreshCart,
-        cartCount: cart?.totalItems || 0,
-      }}
-    >
-      {children}
-    </CartContext.Provider>
+  // ✅ Memoize context value
+  const value = useMemo(
+    () => ({
+      cart: cart || null,
+      loading: isAuthLoading || isCartLoading,
+      refreshCart,
+      cartCount: cart?.totalItems || 0,
+    }),
+    [cart, isAuthLoading, isCartLoading, refreshCart],
   );
-}
+
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+});
 
 export const useCart = () => useContext(CartContext);

@@ -1,16 +1,23 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/lib/api/auth";
-import type { LoginInput, RegistrationInput, User } from "@/types";
+import type { User } from "@/types";
 import toast from "react-hot-toast";
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  signIn: (data: RegistrationInput) => Promise<void>;
+  signIn: (data: any) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -22,22 +29,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const session = await authService.getSession();
-        if (session) {
-          setUser(session.user);
-        }
-      } catch (error) {
-        setUser(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     checkSession();
   }, []);
-  const signIn = async (data: LoginInput) => {
+
+  const checkSession = async () => {
+    try {
+      const session = await authService.getSession();
+      if (session) {
+        setUser(session.user);
+      }
+    } catch (error) {
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ✅ Memoize callbacks to prevent re-renders
+  const signIn = useCallback(async (data: any) => {
     try {
       const user = await authService.signIn(data);
       setUser(user);
@@ -45,9 +54,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       toast.error(error.error || "Sign-in failed");
       throw error;
     }
-  };
+  }, []);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     try {
       await authService.signOut();
       setUser(null);
@@ -56,16 +65,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error: any) {
       toast.error(error.error || "Sign-out failed");
     }
-  };
+  }, [router]);
 
-  const isAuthenticated = !!user;
-  return (
-    <AuthContext.Provider
-      value={{ user, isAuthenticated, isLoading, signIn, signOut }}
-    >
-      {children}
-    </AuthContext.Provider>
+  // ✅ Memoize context value to prevent unnecessary re-renders
+  const value = useMemo(
+    () => ({
+      user,
+      isAuthenticated: !!user,
+      isLoading,
+      signIn,
+      signOut,
+    }),
+    [user, isLoading, signIn, signOut],
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export const useAuth = () => {

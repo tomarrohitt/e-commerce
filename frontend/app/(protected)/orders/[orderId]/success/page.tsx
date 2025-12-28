@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams, useParams } from "next/navigation";
-import { orderService } from "@/lib/api"; // Assuming you have this
+import { orderService } from "@/lib/api";
 import Link from "next/link";
 
 interface OrderItem {

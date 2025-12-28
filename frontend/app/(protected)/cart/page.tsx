@@ -6,7 +6,7 @@ import { useCart } from "@/contexts/cart-context";
 import { CartItem } from "@/components/cart/cart-item";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonTable } from "@/components/ui/skeleton";
 import { useCartActions } from "@/hooks/use-cart-action";
 import { formatPrice } from "@/lib/format";
 
@@ -134,18 +134,8 @@ function EmptyCartState() {
 
 function CartPageSkeleton() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="animate-pulse space-y-6">
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="bg-white rounded-xl p-6 flex space-x-4">
-            <Skeleton className="w-24 h-24 rounded-lg" />
-            <div className="flex-1 space-y-3">
-              <Skeleton className="h-4 w-1/2" />
-              <Skeleton className="h-6 w-1/4" />
-            </div>
-          </div>
-        ))}
-      </div>
+    <div className="max-w-7xl mx-auto px-4 py-12">
+      <SkeletonTable rows={3} />
     </div>
   );
 }

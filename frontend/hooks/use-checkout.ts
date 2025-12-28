@@ -27,7 +27,6 @@ export function useCheckout() {
 
   const addresses: Address[] = addressData || [];
 
-  // Auto-select default address
   useEffect(() => {
     if (addresses.length > 0 && !selectedAddressId) {
       const defaultAddress = addresses.find((a) => a.isDefault);
@@ -36,8 +35,6 @@ export function useCheckout() {
       }
     }
   }, [addresses, selectedAddressId]);
-
-  // Redirect if cart is empty
   useEffect(() => {
     if (!cartLoading && (!cart || cart.items.length === 0)) {
       router.push("/cart");

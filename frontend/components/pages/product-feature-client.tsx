@@ -5,9 +5,10 @@ import { useProducts } from "@/hooks/use-products";
 import { RenderingProducts } from "../product/rendering-products";
 
 export default function ProductFeaturePage() {
-  const { products, loading } = useProducts({
+  const { products, pagination, isLoading } = useProducts({
     inStock: true,
     limit: 12,
+    page: 1,
   });
 
   return (
@@ -26,7 +27,7 @@ export default function ProductFeaturePage() {
               View All →
             </Link>
           </div>
-          <RenderingProducts products={products} loading={loading} />
+          <RenderingProducts products={products} isLoading={isLoading} />
         </div>
       </section>
     </>

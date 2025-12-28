@@ -24,7 +24,6 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import toast from "react-hot-toast";
 
-// Dummy user data matching your API structure
 const DUMMY_USER = {
   id: "vaJuwrf0lUP9LCQyE73rxQyOBEYUohxp",
   name: "Yexila",
@@ -36,7 +35,6 @@ const DUMMY_USER = {
   role: "user",
 };
 
-// Additional stats (you can fetch from API)
 const USER_STATS = {
   totalOrders: 12,
   totalSpent: 3456.78,
@@ -50,30 +48,25 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(user.image);
 
-  // Form state
   const [formData, setFormData] = useState({
     name: user.name,
     email: user.email,
     image: user.image,
   });
 
-  // Handle image upload
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast.error("Image size must be less than 5MB");
         return;
       }
 
-      // Validate file type
       if (!file.type.startsWith("image/")) {
         toast.error("Please upload an image file");
         return;
       }
 
-      // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -83,12 +76,10 @@ export default function ProfilePage() {
     }
   };
 
-  // Handle form submission
   const handleSave = async () => {
     setIsSaving(true);
 
     try {
-      // Validate
       if (!formData.name.trim()) {
         toast.error("Name cannot be empty");
         setIsSaving(false);
@@ -106,8 +97,6 @@ export default function ProfilePage() {
 
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Update user state
       setUser({
         ...user,
         name: formData.name,
@@ -125,7 +114,6 @@ export default function ProfilePage() {
     }
   };
 
-  // Cancel editing
   const handleCancel = () => {
     setFormData({
       name: user.name,
@@ -136,7 +124,6 @@ export default function ProfilePage() {
     setIsEditing(false);
   };
 
-  // Format date
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -145,7 +132,6 @@ export default function ProfilePage() {
     });
   };
 
-  // Get initials for avatar
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -158,7 +144,6 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">My Profile</h1>
           <p className="text-gray-600 mt-1">
@@ -167,13 +152,10 @@ export default function ProfilePage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Profile Card */}
           <div className="lg:col-span-1 space-y-6">
-            {/* Main Profile Card */}
             <Card>
               <CardContent className="pt-6">
                 <div className="flex flex-col items-center">
-                  {/* Avatar */}
                   <div className="relative">
                     <div className="w-32 h-32 rounded-full overflow-hidden bg-linear-to-br from-purple-400 to-indigo-600 flex items-center justify-center shadow-xl">
                       {imagePreview ? (
@@ -189,7 +171,6 @@ export default function ProfilePage() {
                       )}
                     </div>
 
-                    {/* Camera Button */}
                     {isEditing && (
                       <label
                         htmlFor="avatar-upload"
@@ -207,15 +188,11 @@ export default function ProfilePage() {
                     )}
                   </div>
 
-                  {/* Name */}
                   <h2 className="text-2xl font-bold text-gray-900 mt-4">
                     {user.name}
                   </h2>
-
-                  {/* Email */}
                   <p className="text-gray-600 mt-1">{user.email}</p>
 
-                  {/* Role Badge */}
                   <Badge
                     variant="default"
                     className="mt-3 capitalize bg-purple-100 text-purple-700"
@@ -223,8 +200,6 @@ export default function ProfilePage() {
                     <Shield className="w-3 h-3 mr-1" />
                     {user.role}
                   </Badge>
-
-                  {/* Email Verified Badge */}
                   {user.emailVerified && (
                     <div className="mt-3 flex items-center space-x-1 text-green-600">
                       <CheckCircle className="w-4 h-4" />
@@ -234,7 +209,6 @@ export default function ProfilePage() {
                     </div>
                   )}
 
-                  {/* Edit Button */}
                   {!isEditing && (
                     <Button
                       onClick={() => setIsEditing(true)}
@@ -248,8 +222,6 @@ export default function ProfilePage() {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Stats Card */}
             <Card>
               <CardHeader>
                 <h3 className="text-lg font-bold text-gray-900">
@@ -310,8 +282,6 @@ export default function ProfilePage() {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Quick Links */}
             <Card>
               <CardHeader>
                 <h3 className="text-lg font-bold text-gray-900">Quick Links</h3>
@@ -349,9 +319,7 @@ export default function ProfilePage() {
             </Card>
           </div>
 
-          {/* Right Column - Detailed Information */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Personal Information */}
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -383,7 +351,6 @@ export default function ProfilePage() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Name Field */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     <User className="w-4 h-4 inline mr-1" />
@@ -405,8 +372,6 @@ export default function ProfilePage() {
                     </div>
                   )}
                 </div>
-
-                {/* Email Field */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     <Mail className="w-4 h-4 inline mr-1" />
@@ -444,7 +409,6 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
 
-            {/* Account Information (Read-only) */}
             <Card>
               <CardHeader>
                 <h3 className="text-xl font-bold text-gray-900">
@@ -453,7 +417,6 @@ export default function ProfilePage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* User ID */}
                   <div className="p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-center space-x-2 text-gray-600 mb-1">
                       <Shield className="w-4 h-4" />
@@ -464,7 +427,6 @@ export default function ProfilePage() {
                     </p>
                   </div>
 
-                  {/* Role */}
                   <div className="p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-center space-x-2 text-gray-600 mb-1">
                       <Shield className="w-4 h-4" />
@@ -476,8 +438,6 @@ export default function ProfilePage() {
                       {user.role}
                     </p>
                   </div>
-
-                  {/* Member Since */}
                   <div className="p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-center space-x-2 text-gray-600 mb-1">
                       <Calendar className="w-4 h-4" />
@@ -489,8 +449,6 @@ export default function ProfilePage() {
                       {formatDate(user.createdAt)}
                     </p>
                   </div>
-
-                  {/* Last Updated */}
                   <div className="p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-center space-x-2 text-gray-600 mb-1">
                       <Calendar className="w-4 h-4" />
@@ -504,7 +462,6 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                {/* Email Verification Status */}
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center justify-between">
                     <div>
@@ -534,8 +491,6 @@ export default function ProfilePage() {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Security Section */}
             <Card>
               <CardHeader>
                 <h3 className="text-xl font-bold text-gray-900">
@@ -595,8 +550,6 @@ export default function ProfilePage() {
                 </button>
               </CardContent>
             </Card>
-
-            {/* Danger Zone */}
             <Card className="border-red-200">
               <CardHeader>
                 <h3 className="text-xl font-bold text-red-600">Danger Zone</h3>
