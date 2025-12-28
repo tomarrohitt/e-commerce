@@ -15,7 +15,7 @@ class ImageUploadController {
     }
     const result = (await generatePresignedUrls(
       StoragePrefix.USER_PROFILE,
-      req.user.id,
+      req.user.id
     )) as { url: string; fields: Record<string, string>; key: string };
 
     const data = {

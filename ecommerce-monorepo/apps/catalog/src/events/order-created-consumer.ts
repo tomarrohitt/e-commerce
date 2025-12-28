@@ -18,7 +18,7 @@ export class OrderCreatedConsumer {
       [OrderEventType.CREATED],
       async (event) => {
         await this.handleStockReservation(event.data);
-      },
+      }
     );
   }
 
@@ -33,7 +33,7 @@ export class OrderCreatedConsumer {
           });
           if (!product || product.stockQuantity < item.quantity) {
             throw new Error(
-              `Product ${product?.name || item.productId} is out of stock`,
+              `Product ${product?.name || item.productId} is out of stock`
             );
           }
 
@@ -42,7 +42,7 @@ export class OrderCreatedConsumer {
 
           if (Math.abs(dbPrice - orderPrice) > 0.01) {
             throw new Error(
-              `Price mismatch for ${product.name}. Real price: ${dbPrice}`,
+              `Price mismatch for ${product.name}. Real price: ${dbPrice}`
             );
           }
 
@@ -57,14 +57,7 @@ export class OrderCreatedConsumer {
               aggregateId: updatedProduct.id,
               payload: {
                 id: updatedProduct.id,
-                name: updatedProduct.name,
-                price: updatedProduct.price.toString(),
-                sku: updatedProduct.sku,
                 stockQuantity: updatedProduct.stockQuantity,
-                isActive: updatedProduct.isActive,
-                images: updatedProduct.images,
-                categoryId: updatedProduct.categoryId,
-                createdAt: updatedProduct.createdAt.toISOString(),
               },
             },
           });

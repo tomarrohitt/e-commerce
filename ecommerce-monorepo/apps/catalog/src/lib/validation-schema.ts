@@ -45,6 +45,7 @@ export const createProductSchema = z.object({
       error: "Category is required",
     })
     .min(1, "Category ID cannot be empty"),
+  attributes: z.record(z.string(), z.any()).optional().default({}),
 });
 
 export const updateProductSchema = createProductSchema.partial();
@@ -88,7 +89,29 @@ export const listProductSchema = z.object({
   categoryId: z.string().optional(),
 });
 
-// --- Type Exports ---
+export const createReviewSchema = z.object({
+  productId: z.string({ error: "Product ID is required" }),
+  rating: z.coerce
+    .number()
+    .int()
+    .min(1, "Rating must be at least 1")
+    .max(5, "Rating cannot be more than 5"),
+  comment: z
+    .string()
+    .max(1000, "Comment cannot exceed 1000 characters")
+    .optional(),
+});
+
+export const updateReviewSchema = createReviewSchema.partial();
+
+export const listReviewsSchema = z.object({
+  productId: z.string({
+    error: "Product ID is required to fetch reviews",
+  }),
+  page: z.coerce.number().min(1).optional().default(1),
+  limit: z.coerce.number().min(1).max(100).optional().default(10),
+});
+
 export type CreateProductInput = z.infer<typeof createProductSchema>;
 export type UpdateProductInput = z.infer<typeof updateProductSchema>;
 export type ListProductQuery = z.infer<typeof listProductSchema>;
@@ -99,3 +122,7 @@ export type AddImagesInput = z.infer<typeof addImagesSchema>;
 
 export type CreateCategoryInput = z.infer<typeof createCategorySchema>;
 export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>;
+
+export type CreateReviewInput = z.infer<typeof createReviewSchema>;
+export type UpdateReviewInput = z.infer<typeof updateReviewSchema>;
+export type ListReviewsQuery = z.infer<typeof listReviewsSchema>;

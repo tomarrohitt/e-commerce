@@ -11,7 +11,7 @@ const INTERNAL_SECRET = env.INTERNAL_SERVICE_SECRET;
 
 if (!INTERNAL_SECRET) {
   logger.error(
-    "FATAL: INTERNAL_SERVICE_SECRET is not set. Internal APIs are insecure.",
+    "FATAL: INTERNAL_SERVICE_SECRET is not set. Internal APIs are insecure."
   );
   process.exit(1);
 }
@@ -19,7 +19,7 @@ if (!INTERNAL_SECRET) {
 const requireInternalAuth = (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction,
+  next: express.NextFunction
 ) => {
   const secret = req.headers["x-internal-secret"];
 
@@ -57,7 +57,7 @@ internalRouter.post(
         error: "Internal error",
       });
     }
-  },
+  }
 );
 
 export default internalRouter;

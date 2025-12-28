@@ -51,13 +51,14 @@ const auth = betterAuth({
     autoSignInAfterVerification: true,
     expiresIn: 86400,
     sendVerificationEmail: async ({ user, url }) => {
-      const link = url.split("&")[0] + "&callbackURL=/";
+      const link = url.split("&")[0] + `&callbackURL=${env.CLIENT_URL}`;
       await dispatchUserEvent(UserEventType.REGISTERED, user, { link });
     },
     async afterEmailVerification(user) {
       await dispatchUserEvent(UserEventType.VERIFIED, user);
     },
   },
+
   trustedOrigins: [env.CLIENT_URL],
   databaseHooks: {
     user: {

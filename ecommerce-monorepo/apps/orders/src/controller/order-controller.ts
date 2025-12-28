@@ -23,7 +23,7 @@ class OrderController {
   async createOrder(req: Request, res: Response) {
     const input = validateAndThrow<CreateOrderInput>(
       createOrderSchema,
-      req.body,
+      req.body
     );
 
     const user = {
@@ -43,7 +43,6 @@ class OrderController {
     return sendSuccess(res, order);
   }
 
-  // GET /api/orders
   async getUserOrders(req: Request, res: Response) {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 20;
@@ -62,7 +61,7 @@ class OrderController {
   async cancelOrder(req: Request, res: Response) {
     const updatedOrder = await orderService.cancelOrder(
       req.params.id,
-      req.user,
+      req.user
     );
 
     return sendSuccess(res, updatedOrder, "Order cancelled successfully");
@@ -90,13 +89,18 @@ class OrderController {
 
         if (order) {
           if (order.status === OrderStatus.CANCELLED) {
-            await stripeService.refundPayment(paymentId);
-            await orderRepository.updateStatus(order.id, OrderStatus.REFUNDED);
+            await prisma.$transaction(async (tx) => {
+              await tx.order.update({
+                where: { id: order.id },
+                data: { status: OrderStatus.REFUNDED, refunded: true },
+              });
+              await stripeService.refundPayment(paymentId);
+            });
           } else {
             await prisma.$transaction(async (tx) => {
               await tx.order.update({
                 where: { id: order.id },
-                data: { status: OrderStatus.PAID },
+                data: { status: OrderStatus.PAID, paid: true },
               });
 
               await tx.outboxEvent.create({
@@ -127,7 +131,7 @@ class OrderController {
           }
         } else {
           logger.error(
-            `[Stripe] ❌ No order found for Payment ID: ${paymentId}`,
+            `[Stripe] ❌ No order found for Payment ID: ${paymentId}`
           );
         }
       }

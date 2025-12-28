@@ -20,7 +20,6 @@ export class ResponseUtil {
       errors: [{ message, field }],
     });
   }
-
   static sendSuccess<T>(
     res: Response,
     data?: T,
@@ -30,9 +29,9 @@ export class ResponseUtil {
   ): Response<SuccessResponse<T>> {
     return res.status(statusCode).json({
       success: true,
-      ...(data !== undefined && { ...data }),
-      ...(message && { message }),
-      ...(meta && { meta }),
+      message: message || undefined,
+      data: data,
+      meta: meta || undefined,
     });
   }
 
@@ -49,8 +48,7 @@ export class ResponseUtil {
   }
 }
 
-// Backward compatibility exports
-export const sendError = ResponseUtil.sendError.bind(ResponseUtil);
 export const sendSuccess = ResponseUtil.sendSuccess.bind(ResponseUtil);
 export const sendCreated = ResponseUtil.sendCreated.bind(ResponseUtil);
+export const sendError = ResponseUtil.sendError.bind(ResponseUtil);
 export const sendNoContent = ResponseUtil.sendNoContent.bind(ResponseUtil);

@@ -19,12 +19,12 @@ export class PaymentConsumer {
           const { orderId } = event.data;
           await orderRepository.updateStatus(orderId, OrderStatus.CANCELLED);
         } else if (event.eventType === OrderEventType.CANCELLED) {
-          const { paymentId } = event.data;
+          const { paymentId, orderId } = event.data;
           if (paymentId) {
-            await orderService.processPaymentReversal(paymentId);
+            await orderService.processPaymentReversal(paymentId, orderId);
           }
         }
-      },
+      }
     );
   }
 }

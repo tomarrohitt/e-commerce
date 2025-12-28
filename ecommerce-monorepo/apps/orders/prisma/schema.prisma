@@ -21,22 +21,23 @@ enum OrderStatus {
 model Order {
   id        String @id @default(cuid())
   userId    String @map("user_id")
-  userEmail String @map("customer_email")
-  userName  String @map("customer_name")
+  userEmail String @map("user_email")
+  userName  String @map("user_name")
 
+  subtotal    Decimal @db.Decimal(10, 2)
+  tax         Decimal @db.Decimal(10, 2)
+  totalAmount Decimal @map("total_amount") @db.Decimal(10, 2)
 
-  subtotal  Decimal  @db.Decimal(10, 2)
-  tax       Decimal  @db.Decimal(10, 2)
-  totalAmount Decimal     @map("total_amount") @db.Decimal(10, 2)
-  
+  paid Boolean @default(false)
+
+  refunded Boolean @default(false)
   invoiceUrl String? @map("invoice_url")
 
-  status      OrderStatus @default(CREATED)
-  currency    String      @default("USD")
+  status   OrderStatus @default(CREATED)
+  currency String      @default("USD")
 
-  paymentId String? @map("payment_id")
+  paymentId           String? @map("payment_id")
   paymentClientSecret String? @map("payment_client_secret")
-
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -55,7 +56,6 @@ model OrderItem {
   productId String @map("product_id")
 
   name      String
-  sku       String
   price     Decimal @db.Decimal(10, 2)
   thumbnail String?
   quantity  Int

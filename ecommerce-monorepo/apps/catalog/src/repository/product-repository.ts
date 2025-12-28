@@ -11,26 +11,35 @@ import {
   UpdateProductInput,
 } from "../lib/validation-schema";
 
+const EVENT_SELECT = {
+  id: true,
+  name: true,
+  price: true,
+  stockQuantity: true,
+  thumbnail: true,
+  isActive: true,
+} satisfies Prisma.ProductSelect;
+
+type ProductEventPayload = Prisma.ProductGetPayload<{
+  select: typeof EVENT_SELECT;
+}>;
+
 class ProductRepository {
-  private toEventPayload(product: Product) {
+  private toEventPayload(product: ProductEventPayload) {
     return {
       id: product.id,
       name: product.name,
       price: product.price.toString(),
       stockQuantity: product.stockQuantity,
+      thumbnail: product.thumbnail ?? undefined,
       isActive: product.isActive,
-      images: product.images,
-      sku: product.sku,
-      categoryId: product.categoryId,
-      createdAt: product.createdAt.toISOString(),
-      updatedAt: product.updatedAt.toISOString(),
     };
   }
 
   private async emitEvent(
     tx: Prisma.TransactionClient,
     eventType: ProductEventType,
-    product: Product,
+    product: ProductEventPayload,
     extraData: Record<string, any> = {}
   ) {
     await tx.outboxEvent.create({
@@ -51,12 +60,11 @@ class ProductRepository {
         return await prisma.$transaction(async (tx) => {
           const product = await tx.product.create({
             data,
-            include: { category: true },
+            select: EVENT_SELECT,
           });
 
           await this.emitEvent(tx, ProductEventType.CREATED, product);
-
-          return product;
+          return { id: product.id };
         });
       },
       { model: "Product", operation: "create", field: "sku" }
@@ -75,12 +83,12 @@ class ProductRepository {
           const product = await tx.product.update({
             where: { id },
             data: safeData,
-            include: { category: true },
+            select: EVENT_SELECT,
           });
 
           await this.emitEvent(tx, ProductEventType.UPDATED, product);
 
-          return product;
+          return { id };
         });
       },
       { model: "Product", operation: "update", field: "sku" }
@@ -91,7 +99,9 @@ class ProductRepository {
     return await safeQuery(
       async () => {
         return await prisma.$transaction(async (tx) => {
-          const product = await tx.product.delete({ where: { id } });
+          const product = await tx.product.deleteMany({
+            where: { id },
+          });
 
           await tx.outboxEvent.create({
             data: {
@@ -104,7 +114,7 @@ class ProductRepository {
             },
           });
 
-          return product;
+          return { id };
         });
       },
       { model: "Product", operation: "delete" }
@@ -122,6 +132,7 @@ class ProductRepository {
           const product = await db.product.update({
             where: { id },
             data: { stockQuantity: { increment: quantity } },
+            select: EVENT_SELECT,
           });
 
           await this.emitEvent(db, ProductEventType.STOCK_CHANGED, product, {
@@ -144,10 +155,8 @@ class ProductRepository {
           const product = await tx.product.update({
             where: { id },
             data: { images: { push: images } },
+            select: EVENT_SELECT,
           });
-
-          await this.emitEvent(tx, ProductEventType.UPDATED, product);
-
           return product;
         });
       },
@@ -159,11 +168,12 @@ class ProductRepository {
     return await safeQuery(
       async () => {
         return await prisma.$transaction(async (tx) => {
-          const product = await tx.product.findUniqueOrThrow({
+          const current = await tx.product.findUniqueOrThrow({
             where: { id: productId },
+            select: { images: true },
           });
 
-          const currentSet = new Set(product.images);
+          const currentSet = new Set(current.images);
           const newSet = new Set(newOrderKeys);
           if (
             currentSet.size !== newSet.size ||
@@ -172,14 +182,12 @@ class ProductRepository {
             throw new BadRequestError("Image mismatch during reorder");
           }
 
-          const updatedProduct = await tx.product.update({
+          const product = await tx.product.update({
             where: { id: productId },
             data: { images: newOrderKeys },
+            select: EVENT_SELECT,
           });
-
-          await this.emitEvent(tx, ProductEventType.UPDATED, updatedProduct);
-
-          return updatedProduct;
+          return product;
         });
       },
       { model: "Product", operation: "reorderImages" }
@@ -191,8 +199,15 @@ class ProductRepository {
       () =>
         prisma.product.findUniqueOrThrow({
           where: { id },
-
-          include: { category: true },
+          include: {
+            category: {
+              select: {
+                name: true,
+                slug: true,
+                attributeSchema: true,
+              },
+            },
+          },
         }),
       { model: "Product", operation: "find" }
     );
@@ -203,8 +218,19 @@ class ProductRepository {
       () =>
         prisma.product.findMany({
           where: { id: { in: ids } },
-
-          include: { category: true },
+          select: {
+            id: true,
+            name: true,
+            price: true,
+            images: true,
+            stockQuantity: true,
+            category: {
+              select: {
+                name: true,
+                slug: true,
+              },
+            },
+          },
         }),
       { model: "Product", operation: "findByIds" }
     );
@@ -243,7 +269,7 @@ class ProductRepository {
               id: true,
               name: true,
               price: true,
-              images: true,
+              thumbnail: true,
               stockQuantity: true,
               category: {
                 select: {

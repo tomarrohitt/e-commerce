@@ -6,6 +6,7 @@ import { DatabaseOpError } from "../errors/db-error";
 import { NotFoundError } from "../errors/not-found-error";
 import { FIELD_LABELS } from "../constants";
 import { LoggerFactory } from "../services/logger-service";
+import { CustomError } from "../errors/custom-error";
 
 const logger = LoggerFactory.create("PrismaHandler");
 
@@ -112,7 +113,7 @@ class PrismaErrorHandler {
 
     return new BadRequestError(
       `${modelName} with this ${humanLabel} already exists`,
-      fieldName,
+      fieldName
     );
   }
 
@@ -124,7 +125,7 @@ class PrismaErrorHandler {
 
     return new BadRequestError(
       `Invalid ${label}. The related record does not exist`,
-      rawField,
+      rawField
     );
   }
 
@@ -161,8 +162,11 @@ const handler = new PrismaErrorHandler();
 
 export function handlePrismaError(
   error: unknown,
-  context?: ErrorContext,
+  context?: ErrorContext
 ): Error {
+  if (error instanceof CustomError) {
+    return error;
+  }
   if (!isPrismaError(error)) {
     logger.error("Non-Prisma error passed to handler", error as Error);
     return new DatabaseOpError("Database operation failed");
@@ -194,7 +198,7 @@ export function handlePrismaError(
 // Wrapper for safe query execution
 export async function safeQuery<T>(
   query: () => Promise<T>,
-  context?: ErrorContext,
+  context?: ErrorContext
 ): Promise<T> {
   try {
     return await query();
@@ -206,10 +210,10 @@ export async function safeQuery<T>(
 // Batch query wrapper with error aggregation
 export async function safeBatchQuery<T>(
   queries: Array<() => Promise<T>>,
-  context?: ErrorContext,
+  context?: ErrorContext
 ): Promise<T[]> {
   const results = await Promise.allSettled(
-    queries.map((query) => safeQuery(query, context)),
+    queries.map((query) => safeQuery(query, context))
   );
 
   const errors: Error[] = [];

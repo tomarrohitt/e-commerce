@@ -46,7 +46,13 @@ class OrderRepository {
                 })),
               },
             },
-            include: { items: true, shippingAddress: true },
+            select: {
+              id: true,
+              totalAmount: true,
+              status: true,
+              items: true,
+              shippingAddress: true,
+            },
           });
 
           await tx.outboxEvent.create({
@@ -215,7 +221,21 @@ class OrderRepository {
           const order = await tx.order.update({
             where: { id },
             data: { status },
-            include: { items: true },
+            select: {
+              id: true,
+              userId: true,
+              userEmail: true,
+              userName: true,
+              totalAmount: true,
+              status: true,
+              items: {
+                select: {
+                  productId: true,
+                  quantity: true,
+                },
+              },
+              paymentId: true,
+            },
           });
 
           if (status === OrderStatus.CANCELLED) {
@@ -234,6 +254,20 @@ class OrderRepository {
                     quantity: item.quantity,
                   })),
                   reason: reason,
+                },
+              },
+            });
+          }
+          if (status === OrderStatus.DELIVERED) {
+            await tx.outboxEvent.create({
+              data: {
+                eventType: OrderEventType.DELIVERED,
+                aggregateId: order.id,
+                payload: {
+                  userId: order.userId,
+                  items: order.items.map((item) => ({
+                    productId: item.productId,
+                  })),
                 },
               },
             });

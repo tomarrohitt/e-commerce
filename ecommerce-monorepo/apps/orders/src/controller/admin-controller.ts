@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import {
   BadRequestError,
-  Role,
   sendSuccess,
   validateAndThrow,
 } from "@ecommerce/common";
@@ -27,7 +26,6 @@ class AdminController {
     return sendSuccess(res, result);
   }
 
-  // PATCH /api/admin/orders/:id/status
   async updateOrderStatus(req: Request, res: Response) {
     const { status } = req.body;
 
@@ -40,7 +38,7 @@ class AdminController {
       status as OrderStatus
     );
 
-    return sendSuccess(res, order, `Order status updated to ${status}`);
+    return sendSuccess(res, order);
   }
 
   // POST /api/admin/orders/:id/cancel

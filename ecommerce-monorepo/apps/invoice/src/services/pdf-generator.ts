@@ -320,76 +320,107 @@ export class PdfGenerator {
     colors: any,
     currency: string
   ): void {
-    const rightAlign = 520;
-    const labelAlign = 380;
+    const rightAlign = 500; // Aligned with the right edge of standard content
+    const labelAlign = 350; // Where "Subtotal:" starts
     let currentY = doc.y + 20;
 
-    // Subtotal
+    // Helper to safely format currency (handles Strings and Numbers)
+    const formatMoney = (amount: number | string | undefined) => {
+      const num = Number(amount || 0);
+      return `${currency}${num.toFixed(2)}`;
+    };
+
+    doc.fontSize(10).font("Helvetica");
+
+    // 1. Subtotal
     if (data.subtotal) {
       doc
         .fillColor(colors.text)
-        .fontSize(10)
-        .font("Helvetica")
         .text("Subtotal:", labelAlign, currentY)
-        .text(`${currency}${data.subtotal.toFixed(2)}`, rightAlign, currentY);
+        .text(formatMoney(data.subtotal), rightAlign, currentY, {
+          align: "right",
+        });
       currentY += 20;
     }
 
-    // Discount
-    if (data.discount && data.discount > 0) {
+    // 2. Discount (Green text if applied)
+    if (data.discount && Number(data.discount) > 0) {
       doc
-        .fillColor("#10b981")
+        .fillColor("#10b981") // Green
         .text("Discount:", labelAlign, currentY)
-        .text(`-${currency}${data.discount.toFixed(2)}`, rightAlign, currentY);
+        .text(`- ${formatMoney(data.discount)}`, rightAlign, currentY, {
+          align: "right",
+        });
       currentY += 20;
     }
 
-    // Tax
-    if (data.tax && data.tax > 0) {
+    // 3. Tax
+    if (data.tax && Number(data.tax) > 0) {
       doc
         .fillColor(colors.text)
-        .text("Tax:", labelAlign, currentY)
-        .text(`${currency}${data.tax.toFixed(2)}`, rightAlign, currentY);
+        .text("Tax / VAT:", labelAlign, currentY)
+        .text(formatMoney(data.tax), rightAlign, currentY, { align: "right" });
       currentY += 20;
     }
 
-    // Shipping
-    if (data.shippingCost && data.shippingCost > 0) {
+    // 4. Shipping
+    if (data.shippingCost && Number(data.shippingCost) > 0) {
       doc
         .text("Shipping:", labelAlign, currentY)
-        .text(
-          `${currency}${data.shippingCost.toFixed(2)}`,
-          rightAlign,
-          currentY
-        );
+        .text(formatMoney(data.shippingCost), rightAlign, currentY, {
+          align: "right",
+        });
       currentY += 20;
     }
 
-    const totalLabel = "Total Amount:";
-    const totalValue = `${currency}${data.totalAmount.toFixed(2)}`;
+    // --- DIVIDER LINE ---
+    currentY += 5;
+    doc
+      .strokeColor("#e5e7eb")
+      .lineWidth(1)
+      .moveTo(labelAlign, currentY)
+      .lineTo(rightAlign + 50, currentY) // Extend slightly past the numbers
+      .stroke();
+    currentY += 15;
 
-    const rightEdge = 550;
-    const gap = 10;
-    const labelWidth = 120;
+    // 5. Total Amount (Large & Bold)
+    doc.font("Helvetica-Bold").fontSize(14).fillColor(colors.primary);
 
-    doc.font("Helvetica-Bold").fillColor(colors.primary);
+    doc.text("Total Amount:", labelAlign, currentY, { width: 120 });
+    doc
+      .fontSize(16)
+      .text(formatMoney(data.totalAmount), rightAlign, currentY - 2, {
+        align: "right",
+      });
 
-    doc.fontSize(16);
-    const valueWidth = doc.widthOfString(totalValue);
+    currentY += 35;
 
-    const valueX = rightEdge - valueWidth;
-    const labelX = valueX - gap - labelWidth;
-    const minLabelX = 320;
-    const safeLabelX = Math.max(labelX, minLabelX);
+    // 6. Payment Status Badge (Optional but professional)
+    if (data.paymentStatus) {
+      const statusColor =
+        data.paymentStatus === "Paid"
+          ? "#10b981" // Green
+          : data.paymentStatus === "Overdue"
+            ? "#ef4444" // Red
+            : "#f59e0b"; // Orange (Pending)
 
-    doc.fontSize(14).text(totalLabel, safeLabelX, currentY, {
-      width: labelWidth,
-      align: "right",
-    });
+      doc.fontSize(10).font("Helvetica-Bold").fillColor(colors.text);
+      doc.text("Payment Status:", labelAlign, currentY);
 
-    doc.fontSize(16).text(totalValue, valueX, currentY, {
-      lineBreak: false,
-    });
+      doc
+        .fillColor(statusColor)
+        .text(data.paymentStatus.toUpperCase(), rightAlign, currentY, {
+          align: "right",
+        });
+      currentY += 15;
+    }
+
+    // 7. Payment Method (e.g. "Credit Card ending in 4242")
+    if (data.paymentMethod) {
+      doc.font("Helvetica").fillColor(colors.text);
+      doc.text("Payment Method:", labelAlign, currentY);
+      doc.text(data.paymentMethod, rightAlign, currentY, { align: "right" });
+    }
   }
 
   private static generateFooter(

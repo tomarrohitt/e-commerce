@@ -15,7 +15,6 @@ const orderItemSchema = z.object({
   quantity: z.coerce.number().int().positive(),
   price: z.coerce.number().positive(),
   name: z.string().min(1),
-  sku: z.string().min(1),
   thumbnail: z.string().optional().default(""),
 });
 

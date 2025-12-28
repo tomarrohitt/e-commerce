@@ -2,6 +2,7 @@ import { EventBusService, ProductEventType, Event } from "@ecommerce/common";
 import { orderRepository } from "../repository/order-repository";
 import { stripeService } from "../services/stripe-service";
 import { OrderStatus } from "@prisma/client";
+import { prisma } from "../config/prisma";
 
 export class StockConsumer {
   constructor(private eventBus: EventBusService) {}
@@ -16,7 +17,7 @@ export class StockConsumer {
         if (event.eventType === ProductEventType.STOCK_RESERVED) {
           await orderRepository.updateStatus(
             orderId,
-            OrderStatus.AWAITING_PAYMENT,
+            OrderStatus.AWAITING_PAYMENT
           );
         } else if (event.eventType === ProductEventType.STOCK_FAILED) {
           const order = await orderRepository.findById(orderId);
@@ -36,7 +37,7 @@ export class StockConsumer {
           await orderRepository.updateStatus(
             orderId,
             OrderStatus.CANCELLED,
-            "Inventory Error",
+            "Inventory Error"
           );
 
           if (order.paymentId) {
@@ -45,15 +46,17 @@ export class StockConsumer {
             } catch (err: any) {
               if (err.code === "payment_intent_unexpected_state") {
                 await stripeService.refundPayment(order.paymentId);
-                await orderRepository.updateStatus(
-                  orderId,
-                  OrderStatus.REFUNDED,
-                );
+                await prisma.order.update({
+                  where: {
+                    id: orderId,
+                  },
+                  data: { status: OrderStatus.REFUNDED, refunded: true },
+                });
               }
             }
           }
         }
-      },
+      }
     );
   }
 }

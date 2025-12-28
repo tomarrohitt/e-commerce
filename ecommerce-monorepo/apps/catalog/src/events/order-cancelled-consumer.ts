@@ -18,7 +18,7 @@ export class OrderCancelledConsumer {
       [OrderEventType.CANCELLED],
       async (event) => {
         await this.handleRestock(event.data);
-      },
+      }
     );
   }
 
@@ -42,14 +42,7 @@ export class OrderCancelledConsumer {
               aggregateId: updatedProduct.id,
               payload: {
                 id: updatedProduct.id,
-                name: updatedProduct.name,
-                price: updatedProduct.price.toString(),
-                sku: updatedProduct.sku,
                 stockQuantity: updatedProduct.stockQuantity,
-                isActive: updatedProduct.isActive,
-                images: updatedProduct.images,
-                categoryId: updatedProduct.categoryId,
-                createdAt: updatedProduct.createdAt.toISOString(),
               },
             },
           });

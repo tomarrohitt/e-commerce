@@ -85,7 +85,6 @@ class CartService {
           product: {
             id: product.id,
             name: product.name,
-            sku: product.sku,
             price: product.price.toNumber(),
             thumbnail: product.thumbnail ? product.thumbnail : "",
             stockQuantity: product.stockQuantity,
@@ -113,7 +112,6 @@ class CartService {
         product: {
           id: product.id,
           name: product.name,
-          sku: product.sku,
           price: product.price.toNumber(),
           stockQuantity: product.stockQuantity,
           thumbnail: product.thumbnail ? product.thumbnail : "",
@@ -121,7 +119,7 @@ class CartService {
       });
 
       subtotal += itemTotal;
-      totalItems += quantity;
+      totalItems = items.length;
     }
 
     const tax = Math.round(subtotal * env.TAX_RATE * 100) / 100;

@@ -10,6 +10,7 @@ import {
   UserContext,
 } from "@ecommerce/common";
 import { env } from "../config/env";
+import { prisma } from "../config/prisma";
 
 const redis = new RedisService({
   url: env.REDIS_URL,
@@ -167,22 +168,28 @@ class OrderService {
     };
   }
 
-  async processPaymentReversal(paymentId: string) {
+  async processPaymentReversal(paymentId: string, orderId: string) {
     try {
       const paymentIntent =
         await stripeService.retrievePaymentIntent(paymentId);
 
       switch (paymentIntent.status) {
         case "succeeded":
-          console.log(`[Payment] Refund required for ${paymentId}`);
-          await stripeService.refundPayment(paymentId);
+          await prisma.$transaction(async (tx) => {
+            await tx.order.update({
+              where: {
+                id: orderId,
+              },
+              data: { refunded: true },
+            });
+            await stripeService.refundPayment(paymentId);
+          });
           break;
 
         case "requires_payment_method":
         case "requires_capture":
         case "requires_confirmation":
         case "requires_action":
-          console.log(`[Payment] Cancelling pending intent ${paymentId}`);
           await stripeService.cancelPaymentIntent(paymentId);
           break;
 

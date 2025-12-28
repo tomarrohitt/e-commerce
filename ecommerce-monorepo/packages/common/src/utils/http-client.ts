@@ -69,10 +69,9 @@ export class HttpClient {
       (error) => {
         this.logger.error("Request interceptor error", error);
         return Promise.reject(error);
-      },
+      }
     );
 
-    // Response interceptor
     this.client.interceptors.response.use(
       (response) => {
         this.logger.debug("HTTP response", {
@@ -87,7 +86,7 @@ export class HttpClient {
           url: error.config?.url,
         });
         return Promise.reject(error);
-      },
+      }
     );
   }
 
@@ -101,7 +100,7 @@ export class HttpClient {
   async post<T, D = any>(
     url: string,
     data?: D,
-    config?: AxiosRequestConfig,
+    config?: AxiosRequestConfig
   ): Promise<T> {
     return this.breaker.execute(async () => {
       const response = await this.client.post<T>(url, data, config);
@@ -112,7 +111,7 @@ export class HttpClient {
   async put<T, D = any>(
     url: string,
     data?: D,
-    config?: AxiosRequestConfig,
+    config?: AxiosRequestConfig
   ): Promise<T> {
     return this.breaker.execute(async () => {
       const response = await this.client.put<T>(url, data, config);
@@ -123,7 +122,7 @@ export class HttpClient {
   async patch<T, D = any>(
     url: string,
     data?: D,
-    config?: AxiosRequestConfig,
+    config?: AxiosRequestConfig
   ): Promise<T> {
     return this.breaker.execute(async () => {
       const response = await this.client.patch<T>(url, data, config);
@@ -141,7 +140,7 @@ export class HttpClient {
   // Get full response with headers and status
   async getWithResponse<T>(
     url: string,
-    config?: AxiosRequestConfig,
+    config?: AxiosRequestConfig
   ): Promise<HttpResponse<T>> {
     return this.breaker.execute(async () => {
       const response = await this.client.get<T>(url, config);

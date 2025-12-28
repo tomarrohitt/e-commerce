@@ -47,6 +47,7 @@ export enum UserEventType {
   REGISTERED = "user.registered",
   VERIFIED = "user.verified",
   FORGOT_PASSWORD = "user.forgot_password",
+  UPDATED = "user.updated",
 }
 
 export interface UserAuthLinkData {
@@ -64,6 +65,7 @@ export interface UserVerifiedData {
   userId: string;
   email: string;
   name: string;
+  image: string;
 }
 
 export interface UserVerifiedEvent extends Event<UserVerifiedData> {
@@ -95,27 +97,26 @@ export interface StockReservedEvent extends Event<{ orderId: string }> {
   eventType: ProductEventType.STOCK_RESERVED;
 }
 
-export interface StockFailedEvent
-  extends Event<{ orderId: string; reason: string }> {
+export interface StockFailedEvent extends Event<{
+  orderId: string;
+  reason: string;
+}> {
   eventType: ProductEventType.STOCK_FAILED;
 }
 
 export interface ProductCreatedData {
   id: string;
   name: string;
-  description?: string;
   price: string;
   stockQuantity: number;
-  sku: string;
-  images: string[];
-  categoryId?: string;
+  thumbnail?: string;
   isActive: boolean;
   createdAt: string;
 }
 
-export interface ProductUpdatedData extends ProductCreatedData {
-  updatedAt: string;
-}
+export type ProductUpdatedData = Partial<ProductCreatedData> & {
+  id: string;
+};
 
 export interface ProductDeletedData {
   id: string;
@@ -216,6 +217,13 @@ export interface OrderCancelledData {
   items: OrderItemRestockData[];
 }
 
+export interface OrderDeliveredData {
+  userId: string;
+  items: {
+    productId: string;
+  }[];
+}
+
 export interface PaymentIntentCreatedData {
   orderId: string;
   userId: string;
@@ -247,13 +255,11 @@ export interface OrderPaidEvent extends Event<OrderPaidData> {
 }
 
 // Event Envelopes
-export interface PaymentIntentCreatedEvent
-  extends Event<PaymentIntentCreatedData> {
+export interface PaymentIntentCreatedEvent extends Event<PaymentIntentCreatedData> {
   eventType: OrderEventType.PAYMENT_INTENT_CREATED;
 }
 
-export interface PaymentIntentFailedEvent
-  extends Event<PaymentIntentFailedData> {
+export interface PaymentIntentFailedEvent extends Event<PaymentIntentFailedData> {
   eventType: OrderEventType.PAYMENT_INTENT_FAILED;
 }
 
@@ -263,6 +269,9 @@ export interface OrderCreatedEvent extends Event<OrderCreatedData> {
 
 export interface OrderCancelledEvent extends Event<OrderCancelledData> {
   eventType: OrderEventType.CANCELLED;
+}
+export interface OrderDeliveredEvent extends Event<OrderDeliveredData> {
+  eventType: OrderEventType.DELIVERED;
 }
 
 export type DomainEvent = ProductEvent | UserEvent | OrderEvent | InvoiceEvent;

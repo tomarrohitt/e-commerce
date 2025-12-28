@@ -9,7 +9,6 @@ export interface CartItemWithProduct extends CartItem {
     id: string;
     name: string;
     price: number;
-    sku: string;
     thumbnail: string;
     stockQuantity: number;
   };

@@ -5,8 +5,8 @@ const logger = LoggerFactory.create("IdentityService");
 
 export async function dispatchUserEvent(
   eventType: UserEventType,
-  user: { id: string; name: string | null; email: string },
-  extras: Record<string, any> = {},
+  user: { id: string; name: string | null; email?: string },
+  extras: Record<string, any> = {}
 ) {
   try {
     await withRetry(async () => {
@@ -26,7 +26,7 @@ export async function dispatchUserEvent(
   } catch (error) {
     logger.error(
       "CRITICAL_FAILURE",
-      `User created (${user.id}) but Outbox Event (${eventType}) FAILED after retries. Error: ${error}`,
+      `User created (${user.id}) but Outbox Event (${eventType}) FAILED after retries. Error: ${error}`
     );
   }
 }

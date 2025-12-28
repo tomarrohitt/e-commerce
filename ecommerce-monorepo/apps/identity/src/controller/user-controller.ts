@@ -5,8 +5,10 @@ import {
   RedisService,
   sendError,
   sendSuccess,
+  UserEventType,
 } from "@ecommerce/common";
 import { env } from "../config/env";
+import { dispatchUserEvent } from "../service/outbox-dispatcher";
 
 const logger = LoggerFactory.create("IdentityService");
 
@@ -40,6 +42,12 @@ class UserController {
         sessionId: req.user.sessionId,
         name: updatedUser.name,
       });
+
+      await dispatchUserEvent(
+        UserEventType.UPDATED,
+        { id: updatedUser.id, name: updatedUser.name },
+        { image: updatedUser.image }
+      );
 
       sendSuccess(res, updatedUser);
     } catch (error) {

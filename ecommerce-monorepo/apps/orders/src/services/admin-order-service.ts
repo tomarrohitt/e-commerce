@@ -38,8 +38,6 @@ class AdminOrderService {
       throw new BadRequestError("Order already refunded");
     }
 
-    console.log(`[Admin] Refunding order ${orderId}`);
-
     try {
       await stripeService.refundPayment(order.paymentId);
     } catch (error: any) {

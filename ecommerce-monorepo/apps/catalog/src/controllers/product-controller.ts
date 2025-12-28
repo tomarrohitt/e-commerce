@@ -11,15 +11,12 @@ import {
   UpdateProductInput,
   UpdateProductStockInput,
 } from "../lib/validation-schema";
-
 import {
   deleteImages,
   generatePresignedUrls,
   StoragePrefix,
 } from "@ecommerce/storage-service";
-
 import productRepostiory from "../repository/product-repository";
-
 import {
   BadRequestError,
   sendCreated,
@@ -48,7 +45,6 @@ class ProductController {
       req.query
     );
     const products = await productRepostiory.findMany(filters);
-
     return sendSuccess(res, products);
   }
 
@@ -57,9 +53,7 @@ class ProductController {
       updateProductSchema,
       req.body
     );
-
     const products = await productRepostiory.update(req.params.id, data);
-
     return sendSuccess(
       res,
       products,
@@ -76,15 +70,15 @@ class ProductController {
       return sendSuccess(
         res,
         { failedImages: failed, deletedImagesCount: deleted.length },
-        `Product deleted, but ${failed.length} images failed to delete and require manual cleanup.`,
+        `Product deleted, but ${failed.length} images failed to delete.`,
         400
       );
     }
 
     return sendSuccess(
       res,
-      null,
-      `Product with ProductID:${req.params.id} and all ${deleted.length} associated images have been deleted successfully.`
+      null, // ✅ Pass null if no data is needed
+      `Product with ProductID:${req.params.id} deleted successfully.`
     );
   }
 
@@ -98,14 +92,12 @@ class ProductController {
 
     if (quantity < 0) {
       const product = await productRepostiory.findbyId(req.params.id);
-
       if (product.stockQuantity + quantity < 0) {
         throw new BadRequestError("Insufficient stock for this operation.");
       }
     }
 
     const product = await productRepostiory.updateStock(id, quantity);
-
     return sendSuccess(
       res,
       product,
@@ -130,7 +122,6 @@ class ProductController {
       id,
       imageCount
     );
-
     return sendSuccess(
       res,
       result,
@@ -144,20 +135,17 @@ class ProductController {
       req.body
     );
     const id = req.params.id;
-
     const product = await productRepostiory.addImage(id, images);
-
     return sendSuccess(res, product);
   }
+
   async reorderImages(req: Request, res: Response) {
     const { images } = validateAndThrow<AddImagesInput>(
       addImagesSchema,
       req.body
     );
     const { id } = req.params;
-
     const product = await productRepostiory.reorderImages(id, images);
-
     return sendSuccess(res, product);
   }
 }

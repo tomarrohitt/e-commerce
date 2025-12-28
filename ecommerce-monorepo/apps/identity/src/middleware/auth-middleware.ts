@@ -22,7 +22,7 @@ const redis = new RedisService({
 export class IdentityAuthMiddleware {
   private static async refreshSessionFromDb(
     token: string,
-    headers: IncomingHttpHeaders,
+    headers: IncomingHttpHeaders
   ): Promise<UserContext | null> {
     const session = await auth.api.getSession({
       headers: fromNodeHeaders(headers),
@@ -48,14 +48,14 @@ export class IdentityAuthMiddleware {
   }
 
   static async validateToken(
-    headers: IncomingHttpHeaders,
+    headers: IncomingHttpHeaders
   ): Promise<{ valid: boolean; data?: UserContext; error?: string }> {
     try {
       // 1. Extract Token
       let token = headers.authorization?.replace("Bearer ", "");
       if (!token && headers.cookie) {
         const match = headers.cookie.match(
-          /better-auth\.session_token=([^;]+)/,
+          /better-auth\.session_token=([^;]+)/
         );
         token = match ? match[1] : undefined;
       }
@@ -87,7 +87,7 @@ export class IdentityAuthMiddleware {
   static async authenticate(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
   ): Promise<void> {
     const validation = await IdentityAuthMiddleware.validateToken(req.headers);
 

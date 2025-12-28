@@ -5,6 +5,7 @@ import {
   ProductCreatedData,
   ProductDeletedData,
   LoggerFactory,
+  ProductUpdatedData,
 } from "@ecommerce/common";
 import { prisma } from "../config/prisma";
 
@@ -21,59 +22,48 @@ export class ProductConsumer {
         try {
           switch (event.eventType) {
             case ProductEventType.CREATED:
+              await this.handleProductCreated(event.data);
+              break;
             case ProductEventType.UPDATED:
             case ProductEventType.STOCK_CHANGED:
             case ProductEventType.PRICE_CHANGED:
-              await this.handleProductSync(event.data);
+              await this.handleProductUpdated(event.data);
               break;
 
             case ProductEventType.DELETED:
               await this.handleProductDelete(event.data);
               break;
 
-            case ProductEventType.STOCK_RESERVED:
-            case ProductEventType.STOCK_FAILED:
-              break;
-
             default:
-              console.warn(
-                `[Cart] Unknown event type ignored: ${event.eventType}`,
+              logger.warn(
+                `[Cart] Unknown event type ignored: ${event.eventType}`
               );
           }
         } catch (err) {
           logger.error(`[Cart] Error processing event ${event.eventId}:`, err);
           throw err;
         }
-      },
+      }
     );
   }
 
-  private async handleProductSync(data: ProductCreatedData) {
-    await prisma.productReplica.upsert({
+  private async handleProductCreated(data: ProductCreatedData) {
+    await prisma.productReplica.create({
+      data,
+      select: { id: true },
+    });
+  }
+
+  private async handleProductUpdated(data: ProductUpdatedData) {
+    await prisma.productReplica.updateMany({
       where: { id: data.id },
-      create: {
-        id: data.id,
-        name: data.name,
-        price: data.price,
-        stockQuantity: data.stockQuantity,
-        sku: data.sku,
-        thumbnail: data.images && data.images.length > 0 ? data.images[0] : "",
-        isActive: data.isActive,
-      },
-      update: {
-        name: data.name,
-        price: data.price,
-        sku: data.sku,
-        stockQuantity: data.stockQuantity,
-        thumbnail: data.images && data.images.length > 0 ? data.images[0] : "",
-        isActive: data.isActive,
-      },
+      data: data,
     });
   }
 
   private async handleProductDelete(data: ProductDeletedData) {
     try {
-      await prisma.productReplica.delete({
+      await prisma.productReplica.deleteMany({
         where: { id: data.id },
       });
     } catch (error) {

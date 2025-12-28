@@ -26,7 +26,7 @@ class AddressController {
 
     const address = await addressService.create(userId, data);
 
-    return sendCreated(res, address);
+    return sendCreated(res, { success: true, address });
   }
 
   async listAddresses(req: Request, res: Response) {

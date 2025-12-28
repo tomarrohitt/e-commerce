@@ -19,6 +19,11 @@ export const routeConfigs: RouteConfig[] = [
     rules: [{ method: "ALL", protected: false }],
   },
   {
+    path: "/api/auth/resend-verification-email",
+    target: env.IDENTITY_SERVICE_URL,
+    rules: [{ method: "POST", protected: false }],
+  },
+  {
     path: "/api/user",
     target: env.IDENTITY_SERVICE_URL,
     rules: [{ method: "ALL", protected: true }],
@@ -41,32 +46,41 @@ export const routeConfigs: RouteConfig[] = [
   {
     path: "/api/products",
     target: env.CATALOG_SERVICE_URL,
-    rules: [{ method: "GET", protected: false }],
+    rules: [
+      { method: "GET", protected: false },
+      { method: "POST", protected: true, adminOnly: true },
+      { method: "PATCH", protected: true, adminOnly: true },
+      { method: "DELETE", protected: true, adminOnly: true },
+    ],
   },
-
   {
     path: "/api/category",
     target: env.CATALOG_SERVICE_URL,
-    rules: [{ method: "GET", protected: false }],
+    rules: [
+      { method: "GET", protected: false },
+      { method: "POST", protected: true, adminOnly: true },
+      { method: "PATCH", protected: true, adminOnly: true },
+      { method: "DELETE", protected: true, adminOnly: true },
+    ],
   },
   {
-    path: "/api/admin/products",
+    path: "/api/reviews",
     target: env.CATALOG_SERVICE_URL,
-    rules: [{ method: "ALL", protected: true, adminOnly: true }],
+    rules: [
+      { method: "GET", protected: false },
+      { method: "POST", protected: true },
+      { method: "PATCH", protected: true },
+      { method: "DELETE", protected: true },
+    ],
   },
   {
-    path: "/api/admin/category",
+    path: "/api/reviews/status",
     target: env.CATALOG_SERVICE_URL,
-    rules: [{ method: "ALL", protected: true, adminOnly: true }],
+    rules: [{ method: "GET", protected: true }],
   },
   {
     path: "/api/cart",
     target: env.CART_SERVICE_URL,
-    rules: [{ method: "ALL", protected: true }],
-  },
-  {
-    path: "/api/orders",
-    target: env.ORDERS_SERVICE_URL,
     rules: [{ method: "ALL", protected: true }],
   },
   {

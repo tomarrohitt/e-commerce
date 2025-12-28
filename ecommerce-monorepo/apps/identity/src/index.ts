@@ -30,7 +30,19 @@ const outboxProcessor = new OutboxProcessor(prisma, eventBus, {
 });
 
 const app = express();
+app.use(express.json());
+
 const PORT = env.PORT || 4001;
+
+app.post("/api/auth/resend-verification-email", async (req, res) => {
+  await auth.api.sendVerificationEmail({
+    body: {
+      email: req.body.email,
+      callbackURL: "/verify-success",
+    },
+  });
+  res.status(200).json({ message: "Verification email sent" });
+});
 
 app.all("/api/auth/*", toNodeHandler(auth));
 

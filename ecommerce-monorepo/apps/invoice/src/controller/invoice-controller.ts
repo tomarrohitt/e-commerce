@@ -11,6 +11,9 @@ class InvoiceController {
       where: {
         orderId,
       },
+      select: {
+        pdfUrl: true,
+      },
     });
 
     if (!order) {
