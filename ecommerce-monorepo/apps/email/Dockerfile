@@ -19,31 +19,25 @@ COPY packages/tsconfig ./packages/tsconfig
 
 # Copy package manifests
 COPY packages/common/package.json packages/common/tsconfig.json ./packages/common/
-COPY packages/storage-service/package.json packages/storage-service/tsconfig.json ./packages/storage-service/
-COPY apps/identity/package.json apps/identity/tsconfig.json ./apps/identity/
+
+COPY apps/email/package.json apps/email/tsconfig.json ./apps/email/
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
 # Copy source code
 COPY packages/common/src ./packages/common/src
-COPY packages/storage-service/src ./packages/storage-service/src
-COPY apps/identity/src ./apps/identity/src
-COPY apps/identity/prisma ./apps/identity/prisma
-COPY apps/identity/prisma.config.ts ./apps/identity/prisma.config.ts 
+COPY apps/email/src ./apps/email/src
 
 # Build packages first
 RUN pnpm --filter @ecommerce/common build
-RUN pnpm --filter @ecommerce/storage-service build
 
 # Generate Prisma client
-WORKDIR /app/apps/identity
-ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public"
-RUN pnpm exec prisma generate --schema=./prisma/schema.prisma
+WORKDIR /app/apps/email
 
-# Build identity service
+# Build email service
 WORKDIR /app
-RUN pnpm --filter identity-service build
+RUN pnpm --filter email-service build
 
 # -----------------------------------------------------------------------------
 # STAGE 3: RUNNER
@@ -65,21 +59,14 @@ COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY --from=builder /app/packages/common/dist ./packages/common/dist
 COPY --from=builder /app/packages/common/package.json ./packages/common/package.json
 
-COPY --from=builder /app/packages/storage-service/dist ./packages/storage-service/dist
-COPY --from=builder /app/packages/storage-service/package.json ./packages/storage-service/package.json
-COPY --from=builder /app/packages/storage-service/node_modules ./packages/storage-service/node_modules
+# Copy email service with its node_modules
+COPY --from=builder /app/apps/email/node_modules ./apps/email/node_modules
+COPY --from=builder /app/apps/email/dist ./apps/email/dist
+COPY --from=builder /app/apps/email/package.json ./apps/email/package.json
 
-# Copy identity service with its node_modules
-COPY --from=builder /app/apps/identity/node_modules ./apps/identity/node_modules
-COPY --from=builder /app/apps/identity/dist ./apps/identity/dist
-COPY --from=builder /app/apps/identity/package.json ./apps/identity/package.json
-COPY --from=builder /app/apps/identity/prisma ./apps/identity/prisma
-COPY --from=builder /app/apps/identity/prisma.config.ts ./apps/identity/prisma.config.ts 
+# Set working directory to email app
+WORKDIR /app/apps/email
 
-
-# Set working directory to identity app
-WORKDIR /app/apps/identity
-
-EXPOSE 4001
+EXPOSE 5000
 
 CMD ["node", "dist/index.js"]

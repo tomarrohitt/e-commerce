@@ -61,7 +61,6 @@ export const emailEnv = {
 export const stripeEnv = {
   STRIPE_SECRET_KEY: z.string().min(3),
   STRIPE_WEBHOOK_SECRET: z.string().min(3),
-  STRIPE_PUBLISHABLE_KEY: z.string().min(3),
 };
 
 export const taxRateEnv = {

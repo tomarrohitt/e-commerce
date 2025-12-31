@@ -1,0 +1,62 @@
+# 1. The Disk Request
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  # storageClassName: standard-rwo
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+# 2. The Database Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  replicas: 1 # Databases usually run as singletons unless using StatefulSets
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16
+          env:
+            - name: POSTGRES_PASSWORD
+              value: "password"
+            - name: POSTGRES_USER
+              value: "postgres"
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: init-script
+              mountPath: /docker-entrypoint-initdb.d
+            - name: storage
+              mountPath: /var/lib/postgresql/data # 👈 Maps disk to DB data
+      volumes:
+        - name: init-script
+          configMap:
+            name: postgres-init-script
+        - name: storage
+          persistentVolumeClaim: # 👈 Connects to the PVC above
+            claimName: postgres-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+spec:
+  selector:
+    app: postgres
+  ports:
+    - port: 5432

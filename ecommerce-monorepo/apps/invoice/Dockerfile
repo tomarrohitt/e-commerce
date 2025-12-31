@@ -19,31 +19,30 @@ COPY packages/tsconfig ./packages/tsconfig
 
 # Copy package manifests
 COPY packages/common/package.json packages/common/tsconfig.json ./packages/common/
-COPY packages/storage-service/package.json packages/storage-service/tsconfig.json ./packages/storage-service/
-COPY apps/identity/package.json apps/identity/tsconfig.json ./apps/identity/
+
+COPY apps/invoice/package.json apps/invoice/tsconfig.json ./apps/invoice/
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
 # Copy source code
 COPY packages/common/src ./packages/common/src
-COPY packages/storage-service/src ./packages/storage-service/src
-COPY apps/identity/src ./apps/identity/src
-COPY apps/identity/prisma ./apps/identity/prisma
-COPY apps/identity/prisma.config.ts ./apps/identity/prisma.config.ts 
+COPY apps/invoice/src ./apps/invoice/src
+COPY apps/invoice/prisma ./apps/invoice/prisma
+COPY apps/invoice/prisma.config.ts ./apps/invoice/prisma.config.ts 
+
 
 # Build packages first
 RUN pnpm --filter @ecommerce/common build
-RUN pnpm --filter @ecommerce/storage-service build
 
 # Generate Prisma client
-WORKDIR /app/apps/identity
+WORKDIR /app/apps/invoice
 ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public"
 RUN pnpm exec prisma generate --schema=./prisma/schema.prisma
 
-# Build identity service
+# Build invoice service
 WORKDIR /app
-RUN pnpm --filter identity-service build
+RUN pnpm --filter invoice-service build
 
 # -----------------------------------------------------------------------------
 # STAGE 3: RUNNER
@@ -65,20 +64,16 @@ COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY --from=builder /app/packages/common/dist ./packages/common/dist
 COPY --from=builder /app/packages/common/package.json ./packages/common/package.json
 
-COPY --from=builder /app/packages/storage-service/dist ./packages/storage-service/dist
-COPY --from=builder /app/packages/storage-service/package.json ./packages/storage-service/package.json
-COPY --from=builder /app/packages/storage-service/node_modules ./packages/storage-service/node_modules
-
-# Copy identity service with its node_modules
-COPY --from=builder /app/apps/identity/node_modules ./apps/identity/node_modules
-COPY --from=builder /app/apps/identity/dist ./apps/identity/dist
-COPY --from=builder /app/apps/identity/package.json ./apps/identity/package.json
-COPY --from=builder /app/apps/identity/prisma ./apps/identity/prisma
-COPY --from=builder /app/apps/identity/prisma.config.ts ./apps/identity/prisma.config.ts 
+# Copy invoice service with its node_modules
+COPY --from=builder /app/apps/invoice/node_modules ./apps/invoice/node_modules
+COPY --from=builder /app/apps/invoice/dist ./apps/invoice/dist
+COPY --from=builder /app/apps/invoice/package.json ./apps/invoice/package.json
+COPY --from=builder /app/apps/invoice/prisma ./apps/invoice/prisma
+COPY --from=builder /app/apps/invoice/prisma.config.ts ./apps/invoice/prisma.config.ts 
 
 
-# Set working directory to identity app
-WORKDIR /app/apps/identity
+# Set working directory to invoice app
+WORKDIR /app/apps/invoice
 
 EXPOSE 4001
 

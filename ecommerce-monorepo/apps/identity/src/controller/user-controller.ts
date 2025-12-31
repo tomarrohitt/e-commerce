@@ -9,6 +9,7 @@ import {
 } from "@ecommerce/common";
 import { env } from "../config/env";
 import { dispatchUserEvent } from "../service/outbox-dispatcher";
+import { Prisma } from "@prisma/client";
 
 const logger = LoggerFactory.create("IdentityService");
 
@@ -23,16 +24,18 @@ class UserController {
     const { name } = req.body;
 
     try {
-      const updatedUser = await prisma.$transaction(async (tx) => {
-        const user = await tx.user.update({
-          where: { id: req.user?.id },
-          data: {
-            name,
-          },
-        });
+      const updatedUser = await prisma.$transaction(
+        async (tx: Prisma.TransactionClient) => {
+          const user = await tx.user.update({
+            where: { id: req.user?.id },
+            data: {
+              name,
+            },
+          });
 
-        return user;
-      });
+          return user;
+        }
+      );
 
       await redis.updateSessionData(req.user.sessionId, {
         id: updatedUser.id,

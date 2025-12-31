@@ -178,51 +178,58 @@ class AdminService {
   }
 
   async deleteAddress(addressId: string) {
-    async () => {
-      const address = await this.findAddressById(addressId);
-      return await prisma.$transaction(async (tx) => {
-        await tx.address.delete({
-          where: { id: addressId },
-        });
-
-        if (address.isDefault) {
-          const newDefault = await tx.address.findFirst({
-            where: { userId: address.userId },
-            orderBy: { createdAt: "desc" },
-          });
-
-          if (newDefault) {
-            await tx.address.update({
-              where: { id: newDefault.id },
-              data: { isDefault: true },
+    return await safeQuery(
+      async () => {
+        const address = await this.findAddressById(addressId);
+        return await prisma.$transaction(
+          async (tx: Prisma.TransactionClient) => {
+            await tx.address.delete({
+              where: { id: addressId },
             });
+
+            if (address.isDefault) {
+              const newDefault = await tx.address.findFirst({
+                where: { userId: address.userId },
+                orderBy: { createdAt: "desc" },
+              });
+
+              if (newDefault) {
+                await tx.address.update({
+                  where: { id: newDefault.id },
+                  data: { isDefault: true },
+                });
+              }
+            }
           }
-        }
-      });
-    };
+        );
+      },
+      { model: "Address", operation: "delete" }
+    );
   }
 
   async updateAddress(addressId: string, data: AdminUpdateAddressInput) {
     return await safeQuery(
       async () => {
         const address = await this.findAddressById(addressId);
-        return await prisma.$transaction(async (tx) => {
-          if (data.isDefault) {
-            await tx.address.updateMany({
-              where: {
-                userId: address.userId,
-                isDefault: true,
-                id: { not: addressId },
-              },
-              data: { isDefault: false },
+        return await prisma.$transaction(
+          async (tx: Prisma.TransactionClient) => {
+            if (data.isDefault) {
+              await tx.address.updateMany({
+                where: {
+                  userId: address.userId,
+                  isDefault: true,
+                  id: { not: addressId },
+                },
+                data: { isDefault: false },
+              });
+            }
+
+            return await tx.address.update({
+              where: { id: addressId },
+              data,
             });
           }
-
-          return await tx.address.update({
-            where: { id: addressId },
-            data,
-          });
-        });
+        );
       },
       { model: "Address", operation: "update" }
     );

@@ -1,10 +1,17 @@
-import { redis } from "@ecommerce/common";
+import { RedisService } from "@ecommerce/common";
 import { Prisma } from "@prisma/client";
+import { env } from "../config/env";
+
+const redis = new RedisService({
+  url: env.REDIS_URL,
+  maxRetries: 3,
+  retryDelay: 50,
+});
 
 export class UserEventLog {
   async queueUserCreated(
     tx: Prisma.TransactionClient,
-    user: { id: string; email: string; name: string },
+    user: { id: string; email: string; name: string }
   ) {
     await tx.outboxEvent.create({
       data: {
@@ -21,7 +28,7 @@ export class UserEventLog {
 
   async queueUserUpdated(
     tx: Prisma.TransactionClient,
-    user: { id: string; email: string; name: string },
+    user: { id: string; email: string; name: string }
   ) {
     await redis.delete(`user:${user.id}`);
 

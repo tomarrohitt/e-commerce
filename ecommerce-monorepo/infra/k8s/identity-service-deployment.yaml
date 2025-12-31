@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: identity-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: identity
+  template:
+    metadata:
+      labels:
+        app: identity
+    spec:
+      initContainers:
+        - name: prisma-db-push
+          image: ecommerce-identity:latest
+          imagePullPolicy: IfNotPresent
+
+          command: ["npx", "prisma", "db", "push"]
+          env:
+            - name: DATABASE_URL
+              value: "postgresql://postgres:password@postgres-service:5432/identity"
+      containers:
+        - name: identity
+          image: ecommerce-identity:latest
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 4001
+          env:
+            - name: PORT
+              value: "4001"
+            - name: NODE_ENV
+              value: "production"
+            - name: CLIENT_URL
+              value: "http://localhost:3000"
+
+            - name: BASE_URL
+              value: "http://api-gateway-service"
+            - name: BETTER_AUTH_URL
+              value: "http://api-gateway-service/api/v1/auth"
+
+            - name: DATABASE_URL
+              value: "postgresql://postgres:password@postgres-service:5432/identity"
+            - name: RABBITMQ_URL
+              value: "amqp://rabbitmq:password@rabbitmq-service:5672"
+            - name: REDIS_URL
+              value: "redis://redis-service:6379/0"
+
+            - name: AWS_REGION
+              value: "eu-north-1"
+            - name: AWS_BUCKET_NAME
+              value: "erce-amazon-s3"
+
+            - name: INTERNAL_SERVICE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: INTERNAL_SERVICE_SECRET
+            - name: BETTER_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: BETTER_AUTH_SECRET
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: AWS_SECRET_ACCESS_KEY
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: identity-service
+spec:
+  selector:
+    app: identity
+  ports:
+    - protocol: TCP
+      port: 4001
+      targetPort: 4001

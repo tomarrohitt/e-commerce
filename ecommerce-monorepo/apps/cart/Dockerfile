@@ -19,31 +19,30 @@ COPY packages/tsconfig ./packages/tsconfig
 
 # Copy package manifests
 COPY packages/common/package.json packages/common/tsconfig.json ./packages/common/
-COPY packages/storage-service/package.json packages/storage-service/tsconfig.json ./packages/storage-service/
-COPY apps/identity/package.json apps/identity/tsconfig.json ./apps/identity/
+
+COPY apps/cart/package.json apps/cart/tsconfig.json ./apps/cart/
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
 # Copy source code
 COPY packages/common/src ./packages/common/src
-COPY packages/storage-service/src ./packages/storage-service/src
-COPY apps/identity/src ./apps/identity/src
-COPY apps/identity/prisma ./apps/identity/prisma
-COPY apps/identity/prisma.config.ts ./apps/identity/prisma.config.ts 
+COPY apps/cart/src ./apps/cart/src
+COPY apps/cart/prisma ./apps/cart/prisma
+COPY apps/cart/prisma.config.ts ./apps/cart/prisma.config.ts 
+
 
 # Build packages first
 RUN pnpm --filter @ecommerce/common build
-RUN pnpm --filter @ecommerce/storage-service build
 
 # Generate Prisma client
-WORKDIR /app/apps/identity
+WORKDIR /app/apps/cart
 ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public"
 RUN pnpm exec prisma generate --schema=./prisma/schema.prisma
 
-# Build identity service
+# Build cart service
 WORKDIR /app
-RUN pnpm --filter identity-service build
+RUN pnpm --filter cart-service build
 
 # -----------------------------------------------------------------------------
 # STAGE 3: RUNNER
@@ -65,20 +64,16 @@ COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY --from=builder /app/packages/common/dist ./packages/common/dist
 COPY --from=builder /app/packages/common/package.json ./packages/common/package.json
 
-COPY --from=builder /app/packages/storage-service/dist ./packages/storage-service/dist
-COPY --from=builder /app/packages/storage-service/package.json ./packages/storage-service/package.json
-COPY --from=builder /app/packages/storage-service/node_modules ./packages/storage-service/node_modules
-
-# Copy identity service with its node_modules
-COPY --from=builder /app/apps/identity/node_modules ./apps/identity/node_modules
-COPY --from=builder /app/apps/identity/dist ./apps/identity/dist
-COPY --from=builder /app/apps/identity/package.json ./apps/identity/package.json
-COPY --from=builder /app/apps/identity/prisma ./apps/identity/prisma
-COPY --from=builder /app/apps/identity/prisma.config.ts ./apps/identity/prisma.config.ts 
+# Copy cart service with its node_modules
+COPY --from=builder /app/apps/cart/node_modules ./apps/cart/node_modules
+COPY --from=builder /app/apps/cart/dist ./apps/cart/dist
+COPY --from=builder /app/apps/cart/package.json ./apps/cart/package.json
+COPY --from=builder /app/apps/cart/prisma ./apps/cart/prisma
+COPY --from=builder /app/apps/cart/prisma.config.ts .apps/cart/prisma.config.ts 
 
 
-# Set working directory to identity app
-WORKDIR /app/apps/identity
+# Set working directory to cart app
+WORKDIR /app/apps/cart
 
 EXPOSE 4001
 

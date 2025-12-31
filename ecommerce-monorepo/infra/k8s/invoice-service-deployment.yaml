@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: invoice-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: invoice
+  template:
+    metadata:
+      labels:
+        app: invoice
+    spec:
+      initContainers:
+        - name: prisma-db-push
+          image: ecommerce-invoice:latest
+          imagePullPolicy: IfNotPresent
+
+          command: ["npx", "prisma", "db", "push"]
+          env:
+            - name: DATABASE_URL
+              value: "postgresql://postgres:password@postgres-service:5432/invoice"
+      containers:
+        - name: invoice
+          image: ecommerce-invoice:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 6000
+          env:
+            - name: PORT
+              value: "6000"
+            - name: NODE_ENV
+              value: "production"
+            - name: DATABASE_URL
+              value: "postgresql://postgres:password@postgres-service:5432/invoice"
+            - name: RABBITMQ_URL
+              value: "amqp://rabbitmq:password@rabbitmq-service:5672"
+
+            - name: AWS_REGION
+              value: "eu-north-1"
+            - name: AWS_BUCKET_NAME
+              value: "erce-amazon-s3"
+
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: AWS_SECRET_ACCESS_KEY
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: invoice-service
+spec:
+  selector:
+    app: invoice
+  ports:
+    - protocol: TCP
+      port: 6000
+      targetPort: 6000

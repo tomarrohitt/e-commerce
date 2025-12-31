@@ -6,6 +6,7 @@ import {
   sendSuccess,
   sendCreated,
   sendNoContent,
+  Address,
 } from "@ecommerce/common";
 import {
   CreateAddressInput,
@@ -14,7 +15,6 @@ import {
   updateAddressSchema,
 } from "../lib/address-validation-schema";
 import { addressService } from "../service/address-service";
-import { Address } from "@prisma/client";
 
 class AddressController {
   async createAddress(req: Request, res: Response) {

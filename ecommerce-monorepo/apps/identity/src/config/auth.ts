@@ -15,11 +15,13 @@ const auth = betterAuth({
     redirectTo: "/",
     requireEmailVerification: true,
     autoSignInAfterVerification: true,
-    sendResetPassword: async ({ user, url }) => {
+    sendResetPassword: async ({ user, token }) => {
+      const url = `${env.CLIENT_URL}/reset-password/${token}`;
       await dispatchUserEvent(UserEventType.FORGOT_PASSWORD, user, {
         link: url,
       });
     },
+    resetPasswordTokenExpiresIn: 1000 * 60 * 15,
   },
   baseURL: env.BASE_URL,
 

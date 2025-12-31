@@ -38,6 +38,7 @@ export * from "./utils/async-wrapper";
 
 // Types
 export * from "./types/user-types";
+export * from "./types/address-types";
 export * from "./types/prisma-types";
 export * from "./types/cart-types";
 export * from "./types/outbox-types";

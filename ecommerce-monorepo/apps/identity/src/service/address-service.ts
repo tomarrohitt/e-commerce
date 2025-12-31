@@ -1,9 +1,10 @@
 import { prisma } from "../config/prisma";
-import { safeQuery, NotFoundError } from "@ecommerce/common";
+import { safeQuery, NotFoundError, Address } from "@ecommerce/common";
 import {
   CreateAddressInput,
   UpdateAddressInput,
 } from "../lib/address-validation-schema";
+import { Prisma } from "@prisma/client";
 
 class AddressService {
   async create(userId: string, data: CreateAddressInput) {
@@ -17,29 +18,31 @@ class AddressService {
         }
 
         const shouldBeDefault = data.isDefault || existingCount === 0;
-        return await prisma.$transaction(async (tx) => {
-          if (shouldBeDefault && existingCount > 0) {
-            await tx.address.updateMany({
-              where: { userId, isDefault: true },
-              data: { isDefault: false },
+        return await prisma.$transaction(
+          async (tx: Prisma.TransactionClient) => {
+            if (shouldBeDefault && existingCount > 0) {
+              await tx.address.updateMany({
+                where: { userId, isDefault: true },
+                data: { isDefault: false },
+              });
+            }
+
+            return await tx.address.create({
+              data: {
+                ...data,
+                userId,
+                name: finalName,
+                isDefault: shouldBeDefault,
+              },
             });
           }
-
-          return await tx.address.create({
-            data: {
-              ...data,
-              userId,
-              name: finalName,
-              isDefault: shouldBeDefault,
-            },
-          });
-        });
+        );
       },
       { model: "Address", operation: "create" }
     );
   }
 
-  async findAll(userId: string) {
+  async findAll(userId: string): Promise<Address[]> {
     return await safeQuery(
       () =>
         prisma.address.findMany({
@@ -81,7 +84,7 @@ class AddressService {
     addressId: string,
     data: UpdateAddressInput & { isDefault?: boolean }
   ) {
-    return await safeQuery(
+    const address = await safeQuery(
       () =>
         prisma.address.update({
           where: { id: addressId, userId },
@@ -89,19 +92,33 @@ class AddressService {
         }),
       { model: "Address", operation: "update" }
     );
+    if (!address) {
+      throw new NotFoundError("Address not found");
+    }
+    return address;
   }
   async setToDefault(userId: string, addressId: string) {
-    (prisma.$transaction(async (tx) => {
-      await tx.address.updateMany({
-        where: { userId, isDefault: true, id: { not: addressId } },
-        data: { isDefault: false },
-      });
-      return await tx.address.update({
-        where: { id: addressId, userId },
-        data: { isDefault: true },
-      });
-    }),
-      { model: "Address", operation: "update" });
+    const address = await safeQuery(
+      async () => {
+        return await prisma.$transaction(
+          async (tx: Prisma.TransactionClient) => {
+            await tx.address.updateMany({
+              where: { userId, isDefault: true, id: { not: addressId } },
+              data: { isDefault: false },
+            });
+            return await tx.address.update({
+              where: { id: addressId, userId },
+              data: { isDefault: true },
+            });
+          }
+        );
+      },
+      { model: "Address", operation: "update" }
+    );
+    if (!address) {
+      throw new NotFoundError("Address not found");
+    }
+    return address;
   }
 
   async delete(userId: string, addressId: string) {
@@ -109,7 +126,11 @@ class AddressService {
       async () => {
         const address = await this.findOne(userId, addressId);
 
-        await prisma.$transaction(async (tx) => {
+        if (!address) {
+          throw new NotFoundError("Address not found");
+        }
+
+        await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
           await tx.address.delete({
             where: { id: addressId },
           });

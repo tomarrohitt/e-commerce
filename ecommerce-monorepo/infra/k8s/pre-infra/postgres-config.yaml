@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-script
+data:
+  db.sql: |
+    CREATE DATABASE identity;
+    CREATE DATABASE orders;
+    CREATE DATABASE catalog;
+    CREATE DATABASE payments;
+    CREATE DATABASE cart;
+    CREATE DATABASE invoice;

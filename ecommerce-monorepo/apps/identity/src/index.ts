@@ -9,7 +9,6 @@ import {
   currentUser,
   OutboxProcessor,
   EventBusService,
-  LoggerFactory,
 } from "@ecommerce/common";
 import { prisma } from "./config/prisma";
 import internalRouter from "./router/internal-router";
