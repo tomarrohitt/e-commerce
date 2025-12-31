@@ -26,18 +26,21 @@ export type CartItem = {
 
 export interface CartItemWithProduct extends CartItem {
   product: {
-    id: string;
+    productId: string;
     name: string;
     price: number;
-    images: string[];
+    thumbnail: string;
     stockQuantity: number;
+    sku: string;
   };
 }
 
 export interface Cart {
   items: CartItemWithProduct[];
   totalItems: number;
-  totalPrice: number;
+  subtotal: number;
+  tax: number;
+  totalAmount: number;
 }
 
 export type ValidateUser = {
