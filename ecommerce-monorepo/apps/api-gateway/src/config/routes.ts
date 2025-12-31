@@ -18,11 +18,6 @@ export const routeConfigs: RouteConfig[] = [
     target: env.IDENTITY_SERVICE_URL,
     rules: [{ method: "ALL", protected: false }],
   },
-  // {
-  //   path: "/api/auth/resend-verification-email",
-  //   target: env.IDENTITY_SERVICE_URL,
-  //   rules: [{ method: "POST", protected: false }],
-  // },
   {
     path: "/api/user",
     target: env.IDENTITY_SERVICE_URL,
