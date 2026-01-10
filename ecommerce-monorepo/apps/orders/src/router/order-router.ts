@@ -3,7 +3,6 @@ import { orderController } from "../controller/order-controller";
 
 const orderRouter = Router();
 
-// Order routes
 orderRouter.post("/", orderController.createOrder);
 orderRouter.get("/", orderController.getUserOrders);
 orderRouter.get("/summary", orderController.getOrderSummary);

@@ -11,9 +11,7 @@ import { prisma } from "./config/prisma";
 import { env } from "./config/env";
 
 import productRouter from "./router/product-router";
-import productAdminRouter from "./router/product-admin-router";
 import categoryRouter from "./router/category-router";
-import categoryAdminRouter from "./router/category-admin-router";
 import reviewRouter from "./router/review-router";
 
 import { OrderCreatedConsumer } from "./events/order-created-consumer";
@@ -45,9 +43,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(currentUser);
 
 app.use("/api/products", productRouter);
-app.use("/api/products", productAdminRouter);
 app.use("/api/category", categoryRouter);
-app.use("/api/category", categoryAdminRouter);
 
 app.use("/api/reviews", reviewRouter);
 

@@ -1,10 +1,10 @@
 import { useAuth } from "@/contexts/auth-context";
-import { orderService } from "@/lib/api";
 import { QUERY_KEYS, CACHE_TIMES } from "@/lib/query-config";
 import { useOptimizedQuery } from "./use-optimized-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { Order } from "@/types";
+import { getOrders, cancelOrderFunction } from "@/lib/api";
 
 export function useOrders() {
   const { isAuthenticated } = useAuth();
@@ -12,14 +12,14 @@ export function useOrders() {
 
   const { data, isLoading } = useOptimizedQuery({
     queryKey: QUERY_KEYS.orders({ limit: 10 }),
-    queryFn: () => orderService.getOrders({ limit: 10 }),
+    queryFn: () => getOrders({ limit: 10 }),
     cacheTime: CACHE_TIMES.orders, // ✅ 5 minutes instead of 0
     enabled: isAuthenticated,
   });
 
   // ✅ Optimistic update for cancel
   const { mutate: cancelOrder, isPending: isCancelling } = useMutation({
-    mutationFn: (orderId: string) => orderService.cancelOrder(orderId),
+    mutationFn: (orderId: string) => cancelOrderFunction(orderId),
     onMutate: async (orderId) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: QUERY_KEYS.orders() });
@@ -53,7 +53,7 @@ export function useOrders() {
 
   const downloadInvoice = async (orderId: string) => {
     try {
-      const url = await orderService.downloadInvoice(orderId);
+      const url = await downloadInvoice(orderId);
       window.open(url, "_blank");
     } catch (error: any) {
       toast.error(error.error || "Failed to download invoice");

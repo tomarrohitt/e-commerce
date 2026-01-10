@@ -1,5 +1,4 @@
-"use client";
-import { useState, FormEvent, useMemo } from "react";
+import { useState, FormEvent, useMemo, useEffect } from "react";
 import {
   PaymentElement,
   useStripe,
@@ -9,7 +8,7 @@ import { AlertCircle, CheckCircle, Lock, RefreshCw } from "lucide-react";
 
 interface CheckoutFormProps {
   orderId: string;
-  amount: number;
+  amount: string;
 }
 
 export default function CheckoutForm({ orderId, amount }: CheckoutFormProps) {
@@ -18,9 +17,23 @@ export default function CheckoutForm({ orderId, amount }: CheckoutFormProps) {
   const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isReady, setIsReady] = useState(false);
-  // ✅ Add state for load errors
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [retryCount, setRetryCount] = useState(0);
+
+  // Debug logging
+  useEffect(() => {
+    console.log("CheckoutForm mounted", {
+      stripe: !!stripe,
+      elements: !!elements,
+    });
+  }, []);
+
+  useEffect(() => {
+    console.log("Stripe initialized:", !!stripe);
+  }, [stripe]);
+
+  useEffect(() => {
+    console.log("Elements initialized:", !!elements);
+  }, [elements]);
 
   const paymentElementOptions = useMemo(
     () => ({
@@ -29,11 +42,9 @@ export default function CheckoutForm({ orderId, amount }: CheckoutFormProps) {
     [],
   );
 
-  // ✅ Handle reload
   const handleReload = () => {
     setLoadError(null);
     setMessage(null);
-    setRetryCount((prev) => prev + 1);
     window.location.reload();
   };
 
@@ -71,7 +82,7 @@ export default function CheckoutForm({ orderId, amount }: CheckoutFormProps) {
     }
   };
 
-  // ✅ Show error state if PaymentElement failed to load
+  // Show error state if PaymentElement failed to load
   if (loadError) {
     return (
       <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8">
@@ -122,9 +133,7 @@ export default function CheckoutForm({ orderId, amount }: CheckoutFormProps) {
       <div className="mb-6 pb-6 border-b border-gray-100">
         <div className="flex justify-between items-center mb-2">
           <span className="text-gray-600 font-medium">Total due</span>
-          <span className="text-2xl font-bold text-gray-900">
-            ${amount.toFixed(2)}
-          </span>
+          <span className="text-2xl font-bold text-gray-900">${amount}</span>
         </div>
         <div className="flex items-center gap-2 text-xs text-green-600 bg-green-50 px-3 py-1 rounded-full w-fit">
           <CheckCircle className="w-3 h-3" />
@@ -133,32 +142,41 @@ export default function CheckoutForm({ orderId, amount }: CheckoutFormProps) {
       </div>
 
       <div className="mb-6">
-        {/* ✅ Add loading state while PaymentElement initializes */}
+        {/* Show loading spinner while PaymentElement initializes */}
         {!isReady && (
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-spin h-8 w-8 border-3 border-purple-600 border-t-transparent rounded-full"></div>
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="animate-spin h-10 w-10 border-4 border-purple-600 border-t-transparent rounded-full mb-4"></div>
+            <p className="text-gray-600 text-sm">Loading payment form...</p>
+            <p className="text-gray-400 text-xs mt-2">
+              This may take a few seconds
+            </p>
           </div>
         )}
 
-        <PaymentElement
-          id="payment-element"
-          options={paymentElementOptions}
-          // ✅ Handle when element is ready
-          onReady={() => {
-            console.log("PaymentElement ready");
-            setIsReady(true);
-            setLoadError(null);
-          }}
-          // ✅ KEY FIX: Handle load errors
-          onLoadError={(error) => {
-            console.error("PaymentElement load error:", error);
-            setLoadError(
-              "Failed to load payment form. Please check your connection and try again.",
-            );
-            setIsReady(false);
-          }}
-          // ✅ Also handle change events for better UX
-        />
+        <div style={{ display: isReady ? "block" : "none" }}>
+          <PaymentElement
+            id="payment-element"
+            options={paymentElementOptions}
+            onReady={() => {
+              console.log("PaymentElement ready!");
+              setIsReady(true);
+              setLoadError(null);
+            }}
+            onLoadError={(error) => {
+              console.error("PaymentElement load error:", error);
+              setLoadError(
+                "Failed to load payment form. Please check your connection and try again.",
+              );
+              setIsReady(false);
+            }}
+            onChange={(event) => {
+              console.log("PaymentElement changed:", event);
+              if (event.complete) {
+                setMessage(null);
+              }
+            }}
+          />
+        </div>
       </div>
 
       {message && (
@@ -182,7 +200,7 @@ export default function CheckoutForm({ orderId, amount }: CheckoutFormProps) {
         ) : (
           <>
             <Lock className="w-4 h-4" />
-            <span>Pay ${amount.toFixed(2)}</span>
+            <span>Pay ${amount}</span>
           </>
         )}
       </button>
@@ -192,6 +210,16 @@ export default function CheckoutForm({ orderId, amount }: CheckoutFormProps) {
           Payments processed securely by Stripe
         </p>
       </div>
+
+      {/* Debug info - remove in production */}
+      {process.env.NODE_ENV === "development" && (
+        <div className="mt-4 p-3 bg-gray-100 rounded text-xs space-y-1">
+          <p>Debug Info:</p>
+          <p>Stripe: {stripe ? "✓" : "✗"}</p>
+          <p>Elements: {elements ? "✓" : "✗"}</p>
+          <p>Ready: {isReady ? "✓" : "✗"}</p>
+        </div>
+      )}
     </form>
   );
 }

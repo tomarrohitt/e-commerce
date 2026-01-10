@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { addressService, orderService } from "@/lib/api";
+import { addressService, createOrder } from "@/lib/api";
 import { useAuth } from "@/contexts/auth-context";
 import { useCart } from "@/contexts/cart-context";
 import toast from "react-hot-toast";
@@ -43,7 +43,7 @@ export function useCheckout() {
 
   // Place order mutation
   const { mutate: placeOrder, isPending: isSubmitting } = useMutation({
-    mutationFn: (orderData: any) => orderService.createOrder(orderData),
+    mutationFn: (orderData: any) => createOrder(orderData),
     onSuccess: (response) => {
       toast.success(`${response.message}!` || "Order created successfully!");
       router.push(`/orders/${response.data.orderId}`);

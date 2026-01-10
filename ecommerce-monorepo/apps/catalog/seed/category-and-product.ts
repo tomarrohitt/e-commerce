@@ -646,12 +646,6 @@ async function main() {
   // await clearRedisStock();
 
   console.log("Creating dummy users...");
-  const users = [
-    { id: "ASudAldnjtnoJUyGVUShEmc0inBDHXpa", name: "Lasate", image: null },
-  ];
-
-  await prisma.user.createMany({ data: users, skipDuplicates: true });
-  const validUserIds = users.map((u) => u.id);
 
   for (const category of categories) {
     const slug = generateSlug(category.name);
@@ -706,7 +700,7 @@ async function main() {
 
         await redis.set(
           `stock:${createdProduct.id}`,
-          createdProduct.stockQuantity
+          createdProduct.stockQuantity,
         );
       });
     }

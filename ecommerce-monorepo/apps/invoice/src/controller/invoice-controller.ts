@@ -1,4 +1,4 @@
-import { NotFoundError, safeQuery, sendError } from "@ecommerce/common";
+import { safeQuery, sendError } from "@ecommerce/common";
 import { Request, Response } from "express";
 import { prisma } from "../config/prisma";
 import { S3Service } from "../services/s3-service";
@@ -17,7 +17,7 @@ class InvoiceController {
             pdfUrl: true,
           },
         }),
-      { model: "Invoice", operation: "update" }
+      { model: "Invoice", operation: "update" },
     );
 
     if (!order) {

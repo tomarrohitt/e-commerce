@@ -3,7 +3,6 @@
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { orderService } from "@/lib/api";
 import { useState } from "react";
 import { Order, OrderStatusType } from "@/types";
 import Image from "next/image";
@@ -14,9 +13,10 @@ import {
   Clock,
   Ban,
 } from "lucide-react";
+import { getOrder } from "@/lib/api";
 
 const fetchOrderById = async (orderId: string): Promise<Order> => {
-  const response = await orderService.getOrder(orderId);
+  const response = await getOrder(orderId);
   return response.data;
 };
 
