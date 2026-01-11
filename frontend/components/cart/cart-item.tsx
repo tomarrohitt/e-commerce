@@ -1,34 +1,32 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/format";
 import { CartItemWithProduct } from "@/types";
+import { Loader2 } from "lucide-react";
+import { RemoveItemFromCartButton } from "./remove-item-from-cart-button";
+import { CartQuantity } from "./cart-quantity";
 
 type CartItemProps = {
   item: CartItemWithProduct;
   isUpdating: boolean;
-  onUpdateQuantity: (productId: string, quantity: number) => void;
-  onRemove: (productId: string) => void;
 };
 
-export function CartItem({
-  item,
-  isUpdating,
-  onUpdateQuantity,
-  onRemove,
-}: CartItemProps) {
+export function CartItem({ item, isUpdating }: CartItemProps) {
   const isOutOfStock = item.product.stockQuantity === 0;
   const exceedsStock = item.quantity > item.product.stockQuantity;
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-6 flex space-x-4">
-      <Link href={`/products/${item.productId}`} className="shrink-0">
-        <div className="w-24 h-24 bg-linear-to-br from-purple-400 to-indigo-600 rounded-lg overflow-hidden">
+    <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 p-6 flex space-x-4 border-2 border-transparent hover:border-purple-100">
+      <Link
+        href={`/products/${item.productId}`}
+        className="shrink-0 group relative"
+      >
+        <div className="w-24 h-24 bg-linear-to-br from-purple-400 to-indigo-600 rounded-lg overflow-hidden ring-2 ring-transparent group-hover:ring-purple-300 transition-all duration-200">
           {item.product.thumbnail ? (
             <img
               src={item.product.thumbnail}
               alt={item.product.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-white text-3xl">
@@ -36,72 +34,58 @@ export function CartItem({
             </div>
           )}
         </div>
+        {isUpdating && (
+          <div className="absolute inset-0 bg-white/80 rounded-lg flex items-center justify-center">
+            <Loader2 className="w-6 h-6 text-purple-600 animate-spin" />
+          </div>
+        )}
       </Link>
 
-      <div className="flex-1">
+      <div className="flex-1 flex flex-col">
         <Link
           href={`/products/${item.productId}`}
-          className="font-semibold text-lg text-gray-900 hover:text-purple-600 transition-colors block mb-2"
+          className="font-semibold text-lg text-gray-900 hover:text-purple-600 transition-colors mb-1 line-clamp-2"
         >
           {item.product.name}
         </Link>
 
-        <p className="text-2xl font-bold text-purple-600 mb-4">
+        <p className="text-2xl font-bold text-purple-600 mb-3">
           ${formatPrice(item.product.price)}
+          <span className="text-sm text-gray-500 font-normal ml-2">/ item</span>
         </p>
 
         {isOutOfStock ? (
-          <Badge variant="danger" className="mb-3">
-            Out of stock
+          <Badge
+            variant="danger"
+            className="mb-3 w-fit animate-in fade-in duration-300"
+          >
+            🚫 Out of stock
           </Badge>
         ) : exceedsStock ? (
-          <Badge variant="warning" className="mb-3">
-            Only {item.product.stockQuantity} left in stock
+          <Badge
+            variant="warning"
+            className="mb-3 w-fit animate-in fade-in duration-300"
+          >
+            ⚠️ Only {item.product.stockQuantity} left in stock
+          </Badge>
+        ) : item.product.stockQuantity <= 5 ? (
+          <Badge variant="warning" className="mb-3 w-fit">
+            ⏰ Only {item.product.stockQuantity} left!
           </Badge>
         ) : null}
 
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() =>
-                onUpdateQuantity(item.productId, item.quantity - 1)
-              }
-              disabled={isUpdating || item.quantity <= 1}
-              className="w-8 h-8 rounded-lg border-2 border-gray-300 hover:border-purple-600 hover:bg-purple-50 transition-colors flex items-center justify-center font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              −
-            </button>
-            <span className="w-12 text-center font-semibold">
-              {isUpdating ? "..." : item.quantity}
-            </span>
-            <button
-              onClick={() =>
-                onUpdateQuantity(item.productId, item.quantity + 1)
-              }
-              disabled={
-                isUpdating || item.quantity >= item.product.stockQuantity
-              }
-              className="w-8 h-8 rounded-lg border-2 border-gray-300 hover:border-purple-600 hover:bg-purple-50 transition-colors flex items-center justify-center font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              +
-            </button>
+        <div className="flex items-center justify-between mt-auto">
+          <div className="flex items-center space-x-3">
+            <CartQuantity item={item} />
+            <RemoveItemFromCartButton productId={item.productId} />
           </div>
 
-          <Button
-            variant="danger"
-            size="sm"
-            onClick={() => onRemove(item.productId)}
-            disabled={isUpdating}
-          >
-            Remove
-          </Button>
-        </div>
-
-        <div className="mt-4 text-right">
-          <p className="text-sm text-gray-600">Item Total</p>
-          <p className="text-xl font-bold text-gray-900">
-            ${formatPrice(item.product.price * item.quantity)}
-          </p>
+          <div className="text-right">
+            <p className="text-xs text-gray-500 mb-1">Item Total</p>
+            <p className="text-xl font-bold text-gray-900">
+              ${formatPrice(item.product.price * item.quantity)}
+            </p>
+          </div>
         </div>
       </div>
     </div>

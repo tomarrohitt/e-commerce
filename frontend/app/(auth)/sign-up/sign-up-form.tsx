@@ -3,27 +3,18 @@
 import { register } from "@/actions/auth";
 import { useActionState } from "react";
 
-export type RegisterState = {
-  success: boolean;
-  message: string;
-  errors?: {
-    name?: string[];
-    email?: string[];
-    password?: string[];
-  };
-  inputs?: {
-    name: string;
-    email: string;
-  };
-};
-
-const initialState: RegisterState = {
+const initialState = {
   success: false,
   message: "",
-  errors: {},
+  errors: {
+    name: "",
+    email: "",
+    password: "",
+  },
   inputs: {
     name: "",
     email: "",
+    password: "",
   },
 };
 
@@ -32,7 +23,6 @@ export const SignUpForm = () => {
 
   return (
     <form action={action} className="space-y-6">
-      {/* Global Error/Success Message */}
       {state.message && (
         <div
           className={`p-4 rounded-md text-sm ${
@@ -57,7 +47,6 @@ export const SignUpForm = () => {
           type="text"
           id="name"
           disabled={pending}
-          // Default to previous input if validation fails
           defaultValue={state.inputs?.name}
           className={`w-full px-4 py-3 rounded-lg border ${
             state.errors?.name
@@ -66,9 +55,8 @@ export const SignUpForm = () => {
           } focus:ring-2 focus:border-transparent transition-all duration-200`}
           placeholder="John Doe"
         />
-        {/* Helper to show the first error message */}
         {state.errors?.name && (
-          <p className="mt-1 text-sm text-red-600">{state.errors.name[0]}</p>
+          <p className="mt-1 text-sm text-red-600">{state.errors.name}</p>
         )}
       </div>
 
@@ -93,7 +81,7 @@ export const SignUpForm = () => {
           placeholder="you@example.com"
         />
         {state.errors?.email && (
-          <p className="mt-1 text-sm text-red-600">{state.errors.email[0]}</p>
+          <p className="mt-1 text-sm text-red-600">{state.errors.email}</p>
         )}
       </div>
 
@@ -117,9 +105,7 @@ export const SignUpForm = () => {
           placeholder="••••••••"
         />
         {state.errors?.password && (
-          <p className="mt-1 text-sm text-red-600">
-            {state.errors.password[0]}
-          </p>
+          <p className="mt-1 text-sm text-red-600">{state.errors.password}</p>
         )}
       </div>
 

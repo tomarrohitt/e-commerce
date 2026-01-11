@@ -14,7 +14,6 @@ export const authService = {
 
   async signOut() {
     const response = await api.post("/auth/sign-out", {});
-    console.log({ response });
     return response.data;
   },
 

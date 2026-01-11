@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Product, ProductListProduct } from "@/types";
+import type { ProductListProduct } from "@/types";
 import AddToCartButton from "./add-to-cart";
 
 interface ProductCardProps {

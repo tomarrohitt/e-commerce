@@ -1,9 +1,9 @@
 "use client";
 
-import { productService } from "@/lib/api";
 import { QUERY_KEYS, CACHE_TIMES } from "@/lib/query-config";
 import { useOptimizedQuery } from "./use-optimized-query";
 import { ListProductQuery } from "@/types";
+import { getProducts } from "@/lib/api";
 
 export function useProducts(filters: ListProductQuery) {
   const normalizedFilters = {
@@ -16,7 +16,7 @@ export function useProducts(filters: ListProductQuery) {
 
   const { data, isLoading, error } = useOptimizedQuery({
     queryKey: QUERY_KEYS.products(normalizedFilters),
-    queryFn: () => productService.getProducts(normalizedFilters),
+    queryFn: () => getProducts(normalizedFilters),
     cacheTime: CACHE_TIMES.products,
   });
 
@@ -28,7 +28,5 @@ export function useProducts(filters: ListProductQuery) {
       limit: 24,
       totalPages: 0,
     },
-    isLoading,
-    error,
   };
 }

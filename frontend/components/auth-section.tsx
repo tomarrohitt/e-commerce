@@ -1,0 +1,79 @@
+import Link from "next/link";
+import { getUserFromSession } from "@/lib/user-auth";
+import { UserDropdown } from "./user-dropdown";
+import { Loader2, ShoppingCart } from "lucide-react";
+import { CartCount } from "./cart-count";
+import { Suspense } from "react";
+
+export async function AuthSection() {
+  const user = await getUserFromSession();
+
+  if (!user) {
+    return <UnProtectedSection />;
+  }
+
+  return (
+    <>
+      <nav className="hidden md:flex items-center space-x-12 mr-60">
+        <Link
+          href="/"
+          className="text-gray-700 hover:text-purple-600 transition-all duration-200 font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-purple-600 after:transition-all after:duration-200 hover:after:w-full"
+        >
+          Home
+        </Link>
+        <Link
+          href="/dashboard"
+          className="text-gray-700 hover:text-purple-600 transition-all duration-200 font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-purple-600 after:transition-all after:duration-200 hover:after:w-full"
+        >
+          Dashboard
+        </Link>
+        <Link
+          href="/orders"
+          className="text-gray-700 hover:text-purple-600 transition-all duration-200 font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-purple-600 after:transition-all after:duration-200 hover:after:w-full"
+        >
+          Orders
+        </Link>
+      </nav>
+
+      <Link
+        href="/cart"
+        className="relative text-gray-700 hover:text-purple-600 transition-all duration-200 hover:scale-110 active:scale-95"
+        aria-label="Shopping cart"
+      >
+        <ShoppingCart className="w-6 h-6" />
+        <Suspense fallback={<CartCountFallback />}>
+          <CartCount />
+        </Suspense>
+      </Link>
+
+      <UserDropdown user={user} />
+    </>
+  );
+}
+
+const UnProtectedSection = () => {
+  return (
+    <div className="min-w-40 flex items-center justify-end space-x-8 mr-5">
+      <Link
+        href="/sign-in"
+        className="text-gray-700 hover:text-purple-600 transition-all duration-200 font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-purple-600 after:transition-all after:duration-200 hover:after:w-full"
+      >
+        Sign In
+      </Link>
+      <Link
+        href="/sign-up"
+        className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-lg transition-all duration-200 font-semibold shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
+      >
+        Sign Up
+      </Link>
+    </div>
+  );
+};
+
+function CartCountFallback() {
+  return (
+    <span className="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center">
+      <Loader2 className="w-3 h-3 text-purple-600 animate-spin" />
+    </span>
+  );
+}

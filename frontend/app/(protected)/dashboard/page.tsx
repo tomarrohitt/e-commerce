@@ -1,55 +1,31 @@
-// src/app/(protected)/dashboard/page.tsx
-"use client";
-
-import { useAuth } from "@/contexts/auth-context";
-import { useCart } from "@/contexts/cart-context";
-import { addressService, orderService } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 
-export default function DashboardPage() {
-  const { user, isAuthenticated } = useAuth();
-  const { cartCount } = useCart();
+import { getUserFromSession } from "@/lib/user-auth";
 
-  const { data: orderSummary, isLoading: isLoadingOrderSummary } = useQuery({
-    queryKey: ["order-summary"],
-    queryFn: () => orderService.getOrderSummary(),
-    enabled: isAuthenticated,
-    initialData: { totalOrders: 0 },
-    staleTime: 0,
-  });
-
-  const { data: addressCount, isLoading: isLoadingAddressCount } = useQuery({
-    queryKey: ["address-count"],
-    queryFn: () => addressService.getAddressCount(),
-    enabled: isAuthenticated,
-
-    initialData: { total: 0 },
-    staleTime: 0,
-  });
-
+export default async function DashboardPage() {
+  const user = await getUserFromSession();
   const stats = [
     {
       title: "Total Orders",
-      value: orderSummary.total,
+      value: 0,
       icon: "📦",
       href: "/orders",
     },
     {
       title: "Cart Items",
-      value: cartCount,
+      value: 0,
       icon: "🛒",
       href: "/cart",
     },
     {
       title: "Wishlist",
-      value: "0",
+      value: 0,
       icon: "❤️",
       href: "/wishlist",
     },
     {
       title: "Addresses",
-      value: addressCount.count,
+      value: 0,
       icon: "📍",
       href: "/addresses",
     },
@@ -57,7 +33,6 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      {/* Welcome Section */}
       <div className="bg-linear-to-r from-purple-600 to-indigo-700 rounded-2xl p-8 text-white mb-8">
         <h1 className="text-3xl font-bold mb-2">
           Welcome back, {user?.name}! 👋
@@ -67,7 +42,6 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {stats.map((stat) => (
           <Link
@@ -86,7 +60,6 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Quick Actions */}
       <div className="bg-white rounded-xl shadow-md p-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Quick Actions</h2>
 

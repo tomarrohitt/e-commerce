@@ -1,9 +1,7 @@
-// src/app/layout.tsx (UPDATE)
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import Providers from "@/components/provider";
-import Navbar from "@//components/navbar";
 import "./globals.css";
+import Navbar from "@/components/navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,10 +18,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Providers>
-          <Navbar />
-          {children}
-        </Providers>
+        <Navbar />
+        {children}
       </body>
     </html>
   );

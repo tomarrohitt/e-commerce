@@ -1,38 +1,17 @@
-import { api } from "./client";
+import { Cart } from "@/types";
+import api from "./server";
 
-export const cartService = {
-  async addToCart(productId: string, quantity: number) {
-    const response = await api.post("/cart", { productId, quantity });
-    return response.data;
-  },
+export async function getCart(): Promise<Cart> {
+  const response = await api.get("/cart");
+  return response.data.data;
+}
 
-  async getCart() {
-    const response = await api.get("/cart");
-    return response.data.data;
-  },
+export async function getCartCount() {
+  const response = await api.get("/cart/count");
+  return response.data;
+}
 
-  async updateCartItem(productId: string, quantity: number) {
-    const response = await api.patch(`/cart/${productId}`, { quantity });
-    return response.data;
-  },
-
-  async removeFromCart(productId: string) {
-    const response = await api.delete(`/cart/${productId}`);
-    return response.data;
-  },
-
-  async clearCart() {
-    const response = await api.delete("/cart");
-    return response.data;
-  },
-
-  async getCartCount() {
-    const response = await api.get("/cart/count");
-    return response.data;
-  },
-
-  async validateCart() {
-    const response = await api.get("/cart/validate");
-    return response.data;
-  },
-};
+export async function validateCart() {
+  const response = await api.get("/cart/validate");
+  return response.data;
+}

@@ -1,4 +1,4 @@
-import { api } from "./client";
+import api from "./server";
 import type { OrdersListResponse, PaginatedOrders } from "@/types";
 
 export async function createOrder(data: {

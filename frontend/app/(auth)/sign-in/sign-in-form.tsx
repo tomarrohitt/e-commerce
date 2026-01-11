@@ -1,36 +1,35 @@
 "use client";
 import { useActionState } from "react";
 import Link from "next/link";
-import { loginAction } from "@/actions/auth";
+import { login } from "@/actions/auth";
 
-export interface ProjectActionState {
-  success: boolean;
-  message: string;
-  payload?: {
-    email?: string;
-    password?: string;
-  };
-  errors?: {
-    email?: string;
-    password?: string;
-  };
-}
-const initialState: ProjectActionState = {
+const initialState = {
   success: false,
   message: "",
-  payload: {
+  errors: {
     email: "",
     password: "",
   },
-  errors: {
+  inputs: {
     email: "",
     password: "",
   },
 };
 export const SignInForm = () => {
-  const [state, action, pending] = useActionState(loginAction, initialState);
+  const [state, action, pending] = useActionState(login, initialState);
   return (
     <form action={action} className="space-y-6">
+      {state.message && (
+        <div
+          className={`p-4 rounded-md text-sm ${
+            state.success
+              ? "bg-green-50 text-green-700"
+              : "bg-red-50 text-red-700"
+          }`}
+        >
+          {state.message}
+        </div>
+      )}
       <div>
         <label
           htmlFor="email"
@@ -44,7 +43,7 @@ export const SignInForm = () => {
           type="email"
           autoComplete="email"
           disabled={pending}
-          defaultValue={state?.payload?.email as string}
+          defaultValue={state?.inputs?.email}
           className={`w-full px-4 py-3 rounded-lg border ${
             state.errors?.email
               ? "border-red-500 focus:ring-red-500"
@@ -81,7 +80,7 @@ export const SignInForm = () => {
               ? "border-red-500 focus:ring-red-500"
               : "border-gray-300 focus:ring-purple-500"
           } focus:ring-2 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
-          defaultValue={state.payload?.password}
+          defaultValue={state.inputs?.password}
           placeholder="•••••••••••••"
         />
         {state?.errors?.password && (

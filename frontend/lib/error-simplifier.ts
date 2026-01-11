@@ -3,18 +3,18 @@ type RawErrors = {
   properties?: Record<string, { errors: string[] }>;
 };
 
-type FlatErrors = Record<string, string>;
+export function simplifyZodErrors(
+  treeError: RawErrors
+): Record<string, string> {
+  const simplifiedErrors: Record<string, string> = {};
 
-export function simplifyErrors(errors: RawErrors): FlatErrors {
-  const result: FlatErrors = {};
-
-  if (errors.properties) {
-    for (const [field, fieldError] of Object.entries(errors.properties)) {
-      if (fieldError?.errors?.length) {
-        result[field] = fieldError.errors[0]; // Take the first error
+  if (treeError.properties) {
+    Object.entries(treeError.properties).forEach(([key, value]) => {
+      if (value?.errors && value.errors.length > 0) {
+        simplifiedErrors[key] = value.errors[0];
       }
-    }
+    });
   }
 
-  return result;
+  return simplifiedErrors;
 }

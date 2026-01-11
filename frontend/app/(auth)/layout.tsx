@@ -1,6 +1,4 @@
-// src/app/(auth)/layout.tsx
 import type { Metadata } from "next";
-import AuthWrapper from "./auth-wrapper";
 
 export const metadata: Metadata = {
   title: "Auth - E-commerce",
@@ -14,9 +12,7 @@ export default function AuthLayout({
 }) {
   return (
     <div className="min-h-lvh bg-linear-to-br from-purple-600 via-purple-700 to-indigo-800 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <AuthWrapper>{children}</AuthWrapper>
-      </div>
+      <div className="w-full max-w-md">{children}</div>
     </div>
   );
 }

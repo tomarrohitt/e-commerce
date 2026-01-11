@@ -1,48 +1,117 @@
 "use server";
-import { cookies } from "next/headers";
-import { loginSchema, LoginResponse } from "@/types";
-import { isAxiosError } from "axios";
-import api from "@/lib/api/client";
+
+import { signIn, signUp } from "@/lib/api/auth-server";
+import { simplifyZodErrors } from "@/lib/error-simplifier";
+import { LoginInput, loginSchema, registrationSchema } from "@/types";
+import { redirect } from "next/navigation";
 import z from "zod";
-import { ProjectActionState } from "@/app/(auth)/sign-in/sign-in-form";
-export async function loginAction(_: ProjectActionState, formData: FormData) {
-  const data = Object.fromEntries(formData);
+
+export async function login(_: any, formData: FormData) {
+  const data = Object.fromEntries(formData) as LoginInput;
   const result = loginSchema.safeParse(data);
+
   if (!result.success) {
-    const flattened = z.treeifyError(result.error);
+    const formattedErrors = z.treeifyError(result.error);
+
     return {
       success: false,
-      errors: {
-        email: flattened.properties?.email?.errors[0],
-        password: flattened.properties?.password?.errors[0],
+      message: "Validation failed",
+      errors: simplifyZodErrors(formattedErrors),
+      inputs: {
+        email: data.email,
+        password: "",
       },
-      payload: { email: data.email, password: "" },
     };
   }
+
   try {
-    const response = await api.post<LoginResponse>("/auth/sign-in/email", data);
-    const { token, user } = response.data;
-    if (token) {
-      const cookieStore = await cookies();
-      cookieStore.set("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 60 * 60 * 24 * 7,
-      });
-    }
-    return { success: true, user };
-  } catch (error: unknown) {
-    let message = "Invalid credentials";
-    if (isAxiosError(error) && error.response?.data?.message) {
-      message = error.response.data.message;
+    await signIn(result.data);
+  } catch (error: any) {
+    if (error instanceof Error) {
+      return {
+        success: false,
+        message: error.message,
+        errors: {
+          email: "",
+          password: "",
+        },
+        inputs: {
+          email: data.email,
+          password: "",
+        },
+      };
     }
     return {
       success: false,
-      message: message,
-      payload: { email: data.email, password: "" },
-      errors: undefined,
+      message: error.errors[0].message,
+      errors: {
+        email: "",
+        password: "",
+      },
+      inputs: {
+        email: data.email,
+        password: "",
+      },
     };
   }
+  redirect("/");
+}
+export async function register(_: any, formData: FormData) {
+  const data = Object.fromEntries(formData.entries()) as {
+    name: string;
+    email: string;
+    password: string;
+  };
+  const result = registrationSchema.safeParse(data);
+
+  if (!result.success) {
+    const formattedErrors = z.treeifyError(result.error);
+    return {
+      success: false,
+      message: "Validation failed",
+      errors: simplifyZodErrors(formattedErrors),
+      inputs: {
+        name: data.name,
+        email: data.email,
+        password: "",
+      },
+    };
+  }
+
+  try {
+    await signUp(result.data);
+  } catch (error: any) {
+    if (error instanceof Error) {
+      return {
+        success: false,
+        message: error.message,
+        errors: {
+          name: "",
+          email: "",
+          password: "",
+        },
+        inputs: {
+          name: data.name,
+          email: data.email,
+          password: "",
+        },
+      };
+    }
+    return {
+      success: false,
+      message: error.errors[0].message as string,
+      errors: {
+        name: "",
+        email: "",
+        password: "",
+      },
+      inputs: {
+        name: data.name,
+        email: data.email,
+        password: "",
+      },
+    };
+  }
+
+  redirect("/email-verification");
 }
