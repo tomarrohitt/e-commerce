@@ -3,13 +3,41 @@
 import { updateCartItem } from "@/actions/cart";
 import { CartItemWithProduct } from "@/types";
 import { Loader2, Minus, Plus } from "lucide-react";
-import { useTransition } from "react";
+import { useTransition, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export const CartQuantity = ({ item }: { item: CartItemWithProduct }) => {
-  const pending = false;
-  const handleQuantityChange = async (quantity: number) => {
+  const [pending, startTransition] = useTransition();
+  const [localQuantity, setLocalQuantity] = useState(item.quantity);
+  const router = useRouter();
+
+  // Sync local quantity with prop when it changes (after server update)
+  useEffect(() => {
+    setLocalQuantity(item.quantity);
+  }, [item.quantity]);
+
+  const handleQuantityChange = (delta: number) => {
     if (pending) return;
-    await updateCartItem(item.productId, item.quantity + quantity);
+    
+    const newQuantity = localQuantity + delta;
+    
+    // Validate bounds
+    if (newQuantity < 1) return;
+    if (newQuantity > item.product.stockQuantity) return;
+
+    // Optimistic update
+    setLocalQuantity(newQuantity);
+
+    startTransition(async () => {
+      try {
+        await updateCartItem(item.productId, newQuantity);
+        router.refresh();
+      } catch (error) {
+        // Revert on error
+        setLocalQuantity(item.quantity);
+        console.error("Error updating cart item:", error);
+      }
+    });
   };
 
   return (
@@ -17,7 +45,7 @@ export const CartQuantity = ({ item }: { item: CartItemWithProduct }) => {
       <button
         className="w-8 h-8 rounded-md border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-all flex items-center justify-center font-semibold disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-300 disabled:hover:bg-transparent group"
         onClick={() => handleQuantityChange(-1)}
-        disabled={pending || item.quantity === 1}
+        disabled={pending || localQuantity === 1}
       >
         <Minus className="w-4 h-4 text-gray-500 group-hover:text-blue-500" />
       </button>
@@ -25,11 +53,11 @@ export const CartQuantity = ({ item }: { item: CartItemWithProduct }) => {
         {pending ? (
           <Loader2 className="w-4 h-4 animate-spin mx-auto" />
         ) : (
-          item.quantity
+          localQuantity
         )}
       </span>
       <button
-        disabled={pending || item.quantity >= item.product.stockQuantity}
+        disabled={pending || localQuantity >= item.product.stockQuantity}
         className="w-8 h-8 rounded-md border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-all flex items-center justify-center font-semibold disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-300 disabled:hover:bg-transparent group"
         onClick={() => handleQuantityChange(1)}
       >
