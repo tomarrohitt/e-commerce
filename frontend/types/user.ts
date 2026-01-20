@@ -2,45 +2,71 @@ import { z } from "zod";
 
 export const registrationSchema = z.object({
   name: z
-    .string({ message: "Name is required" })
+    .string({ error: "Name is required" })
     .min(1, "Name is required")
-    .min(2, "Name must be at least 2 characters")
+    .min(2, "Must be at least 2 characters")
     .max(100, "Name cannot exceed 100 characters")
     .trim(),
   email: z
-    .string({ message: "Email is required" })
+    .string({ error: "Email is required" })
     .min(1, "Email is required")
     .trim()
     .toLowerCase()
     .refine((val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
-      message: "Please provide a valid email address",
+      error: "Must be a valid email address",
     }),
   password: z
-    .string({ message: "Password is required" })
+    .string({ error: "Password is required" })
     .min(1, "Password is required")
-    .min(8, "Password must be at least 8 characters")
-    .max(128, "Password cannot exceed 128 characters")
+    .min(8, "Must be at least 8 characters")
+    .max(128, "Must not exceed 128 characters")
     .regex(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-      "Password must contain uppercase, lowercase, number, and special character",
+      "Must contain uppercase, lowercase, number, and special character",
     ),
 });
 
 export const loginSchema = registrationSchema.omit({ name: true });
 
 export const createAddressSchema = z.object({
-  type: z.enum(["shipping", "billing"]).default("shipping"),
-  name: z.string().trim().max(50).optional().default("Home"),
+  name: z
+    .string()
+    .trim()
+    .min(2, " Must be at least 2 characters long.")
+    .max(50, " Must not be longer than 50 characters."),
+
   street: z
-    .string({ error: "Street is required" })
-    .min(3, "Street address is too short")
-    .max(255),
-  city: z.string({ error: "City is required" }).min(2).max(100),
-  state: z.string({ error: "State is required" }).min(2).max(100),
-  zipCode: z.string({ error: "Zip Code is required" }).min(3).max(20),
-  country: z.string({ error: "Country is required" }).min(2).max(100),
-  phoneNumber: z.string().min(8).max(20).optional(),
+    .string()
+    .min(3, "Must be at least 3 characters long.")
+    .max(255, "Must not be longer than 255 characters."),
+
+  city: z
+    .string()
+    .min(2, "Must be at least 2 characters long.")
+    .max(100, "Must not be longer than 100 characters."),
+
+  state: z
+    .string()
+    .min(2, "Must be at least 2 characters long.")
+    .max(100, "Must not be longer than 100 characters."),
+
+  zipCode: z
+    .string()
+    .min(3, "Must be at least 3 characters long.")
+    .max(20, "Must not be longer than 20 characters."),
+
+  country: z
+    .string()
+    .min(2, "Must be at least 2 characters long.")
+    .max(100, "Must not be longer than 100 characters."),
+
+  phoneNumber: z
+    .string()
+    .min(8, "Must be at least 8 digits long.")
+    .max(13, "Must not be longer than 13 digits."),
 });
+
+export const updateAddressSchema = createAddressSchema.partial();
 
 export enum Role {
   ADMIN = "admin",
@@ -79,6 +105,7 @@ export type Address = CreateAddressInput & {
 };
 
 export type CreateAddressInput = z.infer<typeof createAddressSchema>;
+export type UpdateAddressInput = z.infer<typeof updateAddressSchema>;
 
 export type RegistrationInput = z.infer<typeof registrationSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;

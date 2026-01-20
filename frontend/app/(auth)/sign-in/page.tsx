@@ -6,7 +6,7 @@ export default function SignInPage() {
     <div className="bg-white rounded-2xl shadow-2xl p-8">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-        <p className="text-gray-600">Sign in to your account to continue</p>
+        <p className="text-gray-500">Sign in to your account to continue</p>
       </div>
 
       <SignInForm />
@@ -25,7 +25,7 @@ export default function SignInPage() {
       <div className="text-center">
         <Link
           href="/sign-up"
-          className="text-purple-600 hover:text-purple-700 font-semibold transition-colors duration-200"
+          className="text-blue-500 hover:text-blue-700 font-semibold transition-colors duration-200"
         >
           Create an account
         </Link>

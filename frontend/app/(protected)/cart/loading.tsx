@@ -3,7 +3,7 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 export default function Loading() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="bg-linear-to-r from-purple-50 via-indigo-50 to-purple-50 rounded-2xl p-8 mb-8 border-2 border-purple-100 shadow-sm h-35 animate-pulse opacity-40"></div>
+      <div className="bg-linear-to-r from-blue-50 via-indigo-50 to-blue-50 rounded-2xl p-8 mb-8 border-2 border-blue-100 shadow-sm h-35 animate-pulse opacity-40"></div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-4">
@@ -41,7 +41,7 @@ export default function Loading() {
 
         <div className="lg:col-span-1">
           <Card className="sticky top-24 shadow-lg border-2 border-gray-100">
-            <CardHeader className="bg-linear-to-r from-purple-50 to-indigo-50 h-18">
+            <CardHeader className="bg-linear-to-r from-blue-50 to-indigo-50 h-18">
               {""}
             </CardHeader>
             <CardContent className="pt-6">

@@ -6,10 +6,10 @@ export async function getCart(): Promise<Cart> {
   return response.data.data;
 }
 
-export async function getCartCount() {
+export const getCartCount = async () => {
   const response = await api.get("/cart/count");
   return response.data;
-}
+};
 
 export async function validateCart() {
   const response = await api.get("/cart/validate");

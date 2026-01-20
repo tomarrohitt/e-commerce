@@ -28,6 +28,8 @@ export async function getProducts(params?: {
 }
 
 export async function getProduct(id: string): Promise<Product> {
+  cacheTag(`products-${id}`);
+
   const response = await baseApi.get(`/products/${id}`);
   return response.data.data;
 }

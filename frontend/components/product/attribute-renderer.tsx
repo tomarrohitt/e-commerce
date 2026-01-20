@@ -67,7 +67,7 @@ export function AttributeRenderer({
               {value.map((item, index) => (
                 <span
                   key={index}
-                  className="px-2.5 py-0.5 rounded-md bg-purple-50 text-purple-700 text-sm font-medium border border-purple-100"
+                  className="px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-700 text-sm font-medium border border-blue-100"
                 >
                   {item}
                 </span>
@@ -83,7 +83,7 @@ export function AttributeRenderer({
             href={String(value)}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center space-x-1 text-purple-600 hover:text-purple-800 hover:underline transition-colors"
+            className="flex items-center space-x-1 text-blue-500 hover:text-blue-800 hover:underline transition-colors"
           >
             <span>View Link</span>
             <ExternalLink className="w-3.5 h-3.5" />

@@ -9,20 +9,16 @@ import { clearCart } from "@/actions/cart";
 export const ClearCartButton = () => {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const handleClearCart = () => {
-    startTransition(async () => {
-      await clearCart();
-      router.refresh();
-    });
+  const handleClearCart = async () => {
+    await clearCart();
   };
   return (
     <Button
-      variant="danger"
-      className="group shadow-md hover:shadow-lg transition-all flex items-center"
+      className="group shadow-md transition-all flex items-center text-white bg-red-500 hover:bg-red-600"
       disabled={pending}
       onClick={handleClearCart}
     >
-      <Trash2 className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform opacity-" />
+      <Trash2 className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
       Clear Cart
     </Button>
   );

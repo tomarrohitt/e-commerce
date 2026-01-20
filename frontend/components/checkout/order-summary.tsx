@@ -1,96 +1,83 @@
-import { Card, CardContent, CardHeader } from "../ui/card";
-import { Button } from "../ui/button";
+import type React from "react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { ShoppingBag, Truck, ShieldCheck } from "lucide-react";
+import type { Cart, CartItemWithProduct } from "@/types";
 
-export type CartItem = {
-  productId: string;
-  quantity: number;
-  addedAt: Date;
-};
-
-export interface CartItemWithProduct extends CartItem {
-  product: {
-    productId: string;
-    name: string;
-    price: number;
-    thumbnail: string;
-    stockQuantity: number;
-    sku: string;
-  };
-}
-
-export interface Cart {
-  items: CartItemWithProduct[];
-  totalItems: number;
-  subtotal: number;
-  tax: number;
-  totalAmount: number;
-}
 interface OrderSummaryProps {
   cart: Cart;
-  onCheckout: () => void;
-  isSubmitting: boolean;
-  canCheckout: boolean;
+  children: React.ReactNode;
 }
-
-export function OrderSummary({
-  cart,
-  onCheckout,
-  isSubmitting,
-  canCheckout,
-}: OrderSummaryProps) {
+export function OrderSummary({ children, cart }: OrderSummaryProps) {
   return (
-    <Card className="sticky top-6">
-      <CardHeader>
-        <h2 className="text-xl font-bold text-gray-900">Order Summary</h2>
+    <Card className="border-0 shadow-sm overflow-hidden sticky top-24">
+      <CardHeader className="border-b bg-muted/30 py-5">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+            <ShoppingBag className="w-4 h-4 text-primary-foreground" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">
+              Order Summary
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {cart.totalItems} items
+            </p>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-3 mb-6 max-h-64 overflow-y-auto">
+      <CardContent className="p-5">
+        <div className="space-y-4 max-h-72 overflow-y-auto pr-1 mb-5">
           {cart.items.map((item) => (
             <OrderItem key={item.productId} item={item} />
           ))}
         </div>
+        <Separator className="my-5" />
         <PriceBreakdown cart={cart} />
-        <Button
-          onClick={onCheckout}
-          disabled={!canCheckout || isSubmitting}
-          className="w-full mb-3"
-          isLoading={isSubmitting}
-        >
-          {isSubmitting ? "Processing..." : "Place Order"}
-        </Button>
-
-        <p className="text-xs text-gray-500 text-center">
-          By placing your order, you agree to our Terms of Service and Privacy
-          Policy
-        </p>
+        {children}
+        <div className="mt-4 space-y-2">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <ShieldCheck className="w-4 h-4" />
+            <span>Secure checkout powered by Stripe</span>
+          </div>
+          <p className="text-xs text-muted-foreground text-center">
+            By placing your order, you agree to our Terms of Service and Privacy
+            Policy
+          </p>
+        </div>
       </CardContent>
     </Card>
   );
 }
 
-function OrderItem({ item }: { item: any }) {
+function OrderItem({ item }: { item: CartItemWithProduct }) {
   return (
-    <div className="flex space-x-3">
-      <div className="w-16 h-16 bg-linear-to-br from-purple-400 to-indigo-600 rounded-lg overflow-hidden shrink-0">
+    <div className="flex gap-4 group">
+      <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-muted ring-1 ring-border">
         {item.product.thumbnail ? (
           <img
-            src={item.product.thumbnail}
+            src={item.product.thumbnail || "/placeholder.svg"}
             alt={item.product.name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform group-hover:scale-105"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-white text-xl">
-            📦
+          <div className="w-full h-full flex items-center justify-center bg-muted">
+            <ShoppingBag className="w-6 h-6 text-muted-foreground" />
           </div>
         )}
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold text-sm text-gray-900 truncate">
-          {item.product.name}
-        </p>
-        <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
-        <p className="text-sm font-semibold text-purple-600">
-          ${(item.product.price * item.quantity).toFixed(2)}
+      <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+        <div>
+          <p className="font-medium text-foreground truncate">
+            {item.product.name}
+          </p>
+          <Badge variant="secondary" className="mt-1 text-xs">
+            Qty: {item.quantity}
+          </Badge>
+        </div>
+        <p className="text-sm font-semibold text-foreground">
+          ${item.product.price * item.quantity}
         </p>
       </div>
     </div>
@@ -99,26 +86,33 @@ function OrderItem({ item }: { item: any }) {
 
 function PriceBreakdown({ cart }: { cart: Cart }) {
   return (
-    <div className="space-y-3 mb-6">
-      <div className="flex justify-between text-gray-600">
-        <span>Subtotal</span>
-        <span>${cart.subtotal}</span>
+    <div className="space-y-3 mb-5">
+      <div className="flex justify-between text-sm">
+        <span className="text-muted-foreground">Subtotal</span>
+        <span className="font-medium text-foreground">${cart.subtotal}</span>
       </div>
-      <div className="flex justify-between text-gray-600">
-        <span>Shipping</span>
-        <span className="text-green-600">FREE</span>
+      <div className="flex justify-between text-sm">
+        <span className="text-muted-foreground flex items-center gap-1.5">
+          <Truck className="w-4 h-4" />
+          Shipping
+        </span>
+        <Badge
+          variant="secondary"
+          className="bg-primary/10 text-primary border-0 font-medium"
+        >
+          FREE
+        </Badge>
       </div>
-      <div className="flex justify-between text-gray-600">
-        <span>Tax (18%)</span>
-        <span>${cart.tax}</span>
+      <div className="flex justify-between text-sm">
+        <span className="text-muted-foreground">Tax (18%)</span>
+        <span className="font-medium text-foreground">${cart.tax}</span>
       </div>
-      <div className="border-t pt-3">
-        <div className="flex justify-between">
-          <span className="text-lg font-bold text-gray-900">Total</span>
-          <span className="text-2xl font-bold text-purple-600">
-            ${cart.totalAmount}
-          </span>
-        </div>
+      <Separator />
+      <div className="flex justify-between items-baseline pt-1">
+        <span className="text-base font-semibold text-foreground">Total</span>
+        <span className="text-2xl font-bold text-foreground">
+          ${cart.totalAmount.toFixed(2)}
+        </span>
       </div>
     </div>
   );

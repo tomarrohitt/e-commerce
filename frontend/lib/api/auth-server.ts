@@ -9,6 +9,7 @@ export async function signUp(data: RegistrationInput): Promise<User> {
 
 export async function signIn(data: LoginInput): Promise<User> {
   const response = await api.post<LoginResponse>("/auth/sign-in/email", data);
+
   const rawSetCookie =
     (response.headers as any).get("set-cookie") ||
     response.headers["set-cookie"];
@@ -17,6 +18,7 @@ export async function signIn(data: LoginInput): Promise<User> {
     : typeof rawSetCookie === "string"
       ? rawSetCookie.split(/,(?=\s*[^;]+=[^;]+)/)
       : [];
+
   const cookieStore = await cookies();
   cookieHeader.forEach((cookieString: string) => {
     const [nameValue] = cookieString.split(";");
@@ -24,14 +26,16 @@ export async function signIn(data: LoginInput): Promise<User> {
     const value = rest.join("=");
 
     if (name && value) {
+      const cleanValue = decodeURIComponent(value);
+
       cookieStore.set({
         name: name.trim(),
-        value: value,
+        value: cleanValue,
         httpOnly: true,
         path: "/",
-        secure: process.env.NODE_ENV === "production",
+        secure: true,
         sameSite: "lax",
-        maxAge: 60 * 60 * 24 * 7,
+        maxAge: 60 * 60 * 24,
       });
     }
   });
@@ -73,4 +77,41 @@ export async function resetPassword(data: {
 }) {
   const response = await api.post("/auth/reset-password", data);
   return response.data;
+}
+
+export async function refreshSession() {
+  const response = await api.get("/auth/get-session", {
+    headers: {
+      "x-skip-cache": "true",
+    },
+  });
+
+  const rawSetCookie = response.headers["set-cookie"];
+
+  if (rawSetCookie) {
+    const cookieStore = await cookies();
+    const cookieHeaders = Array.isArray(rawSetCookie)
+      ? rawSetCookie
+      : [rawSetCookie];
+
+    cookieHeaders.forEach((cookieString) => {
+      const [nameValue] = cookieString.split(";");
+      const [name, ...rest] = nameValue.split("=");
+      const value = rest.join("=");
+
+      if (name && value) {
+        const cleanValue = decodeURIComponent(value);
+
+        cookieStore.set({
+          name: name.trim(),
+          value: cleanValue,
+          httpOnly: true,
+          path: "/",
+          secure: true,
+          sameSite: "lax",
+          maxAge: 60 * 60 * 24 * 7,
+        });
+      }
+    });
+  }
 }

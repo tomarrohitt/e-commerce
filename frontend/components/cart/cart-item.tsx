@@ -16,12 +16,12 @@ export function CartItem({ item, isUpdating }: CartItemProps) {
   const exceedsStock = item.quantity > item.product.stockQuantity;
 
   return (
-    <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 p-6 flex space-x-4 border-2 border-transparent hover:border-purple-100">
+    <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 p-6 flex space-x-4 border-2 border-transparent hover:border-blue-100">
       <Link
         href={`/products/${item.productId}`}
         className="shrink-0 group relative"
       >
-        <div className="w-24 h-24 bg-linear-to-br from-purple-400 to-indigo-600 rounded-lg overflow-hidden ring-2 ring-transparent group-hover:ring-purple-300 transition-all duration-200">
+        <div className="w-24 h-24 bg-linear-to-br from-blue-400 to-indigo-500 rounded-lg overflow-hidden ring-2 ring-transparent group-hover:ring-blue-300 transition-all duration-200">
           {item.product.thumbnail ? (
             <img
               src={item.product.thumbnail}
@@ -36,7 +36,7 @@ export function CartItem({ item, isUpdating }: CartItemProps) {
         </div>
         {isUpdating && (
           <div className="absolute inset-0 bg-white/80 rounded-lg flex items-center justify-center">
-            <Loader2 className="w-6 h-6 text-purple-600 animate-spin" />
+            <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
           </div>
         )}
       </Link>
@@ -44,32 +44,32 @@ export function CartItem({ item, isUpdating }: CartItemProps) {
       <div className="flex-1 flex flex-col">
         <Link
           href={`/products/${item.productId}`}
-          className="font-semibold text-lg text-gray-900 hover:text-purple-600 transition-colors mb-1 line-clamp-2"
+          className="font-semibold text-lg text-gray-900 hover:text-blue-500 transition-colors mb-1 line-clamp-2"
         >
           {item.product.name}
         </Link>
 
-        <p className="text-2xl font-bold text-purple-600 mb-3">
+        <p className="text-2xl font-bold text-blue-500 mb-3">
           ${formatPrice(item.product.price)}
           <span className="text-sm text-gray-500 font-normal ml-2">/ item</span>
         </p>
 
         {isOutOfStock ? (
           <Badge
-            variant="danger"
+            variant="destructive"
             className="mb-3 w-fit animate-in fade-in duration-300"
           >
             🚫 Out of stock
           </Badge>
         ) : exceedsStock ? (
           <Badge
-            variant="warning"
+            variant="secondary"
             className="mb-3 w-fit animate-in fade-in duration-300"
           >
             ⚠️ Only {item.product.stockQuantity} left in stock
           </Badge>
         ) : item.product.stockQuantity <= 5 ? (
-          <Badge variant="warning" className="mb-3 w-fit">
+          <Badge variant="secondary" className="mb-3 w-fit">
             ⏰ Only {item.product.stockQuantity} left!
           </Badge>
         ) : null}

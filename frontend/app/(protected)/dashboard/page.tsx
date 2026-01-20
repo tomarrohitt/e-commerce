@@ -1,19 +1,26 @@
 import Link from "next/link";
 
 import { getUserFromSession } from "@/lib/user-auth";
+import { getAddressCount, getCartCount, getTotalOrdersCount } from "@/lib/api";
 
 export default async function DashboardPage() {
-  const user = await getUserFromSession();
+  const [user, cartCount, addressCount, ordersCount] = await Promise.all([
+    getUserFromSession(),
+    getCartCount(),
+    getAddressCount(),
+    getTotalOrdersCount(),
+  ]);
+
   const stats = [
     {
       title: "Total Orders",
-      value: 0,
+      value: ordersCount.total,
       icon: "📦",
       href: "/orders",
     },
     {
       title: "Cart Items",
-      value: 0,
+      value: cartCount.data.count,
       icon: "🛒",
       href: "/cart",
     },
@@ -25,7 +32,7 @@ export default async function DashboardPage() {
     },
     {
       title: "Addresses",
-      value: 0,
+      value: addressCount.count,
       icon: "📍",
       href: "/addresses",
     },
@@ -33,11 +40,11 @@ export default async function DashboardPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="bg-linear-to-r from-purple-600 to-indigo-700 rounded-2xl p-8 text-white mb-8">
+      <div className="bg-linear-to-r from-blue-500 to-indigo-700 rounded-2xl p-8 text-white mb-8">
         <h1 className="text-3xl font-bold mb-2">
           Welcome back, {user?.name}! 👋
         </h1>
-        <p className="text-purple-100">
+        <p className="text-blue-100">
           Here's what's happening with your account
         </p>
       </div>
@@ -51,11 +58,11 @@ export default async function DashboardPage() {
           >
             <div className="flex items-center justify-between mb-4">
               <span className="text-3xl">{stat.icon}</span>
-              <span className="text-3xl font-bold text-purple-600">
+              <span className="text-3xl font-bold text-blue-500">
                 {stat.value}
               </span>
             </div>
-            <h3 className="text-gray-600 font-medium">{stat.title}</h3>
+            <h3 className="text-gray-500 font-medium">{stat.title}</h3>
           </Link>
         ))}
       </div>
@@ -66,34 +73,34 @@ export default async function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link
             href="/products"
-            className="flex items-center space-x-3 p-4 rounded-lg border-2 border-gray-200 hover:border-purple-600 hover:bg-purple-50 transition-all"
+            className="flex items-center space-x-3 p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all"
           >
             <span className="text-2xl">🛍️</span>
             <div>
               <p className="font-semibold text-gray-900">Browse Products</p>
-              <p className="text-sm text-gray-600">Discover new items</p>
+              <p className="text-sm text-gray-500">Discover new items</p>
             </div>
           </Link>
 
           <Link
             href="/orders"
-            className="flex items-center space-x-3 p-4 rounded-lg border-2 border-gray-200 hover:border-purple-600 hover:bg-purple-50 transition-all"
+            className="flex items-center space-x-3 p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all"
           >
             <span className="text-2xl">📦</span>
             <div>
               <p className="font-semibold text-gray-900">View Orders</p>
-              <p className="text-sm text-gray-600">Track your purchases</p>
+              <p className="text-sm text-gray-500">Track your purchases</p>
             </div>
           </Link>
 
           <Link
             href="/profile"
-            className="flex items-center space-x-3 p-4 rounded-lg border-2 border-gray-200 hover:border-purple-600 hover:bg-purple-50 transition-all"
+            className="flex items-center space-x-3 p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all"
           >
             <span className="text-2xl">⚙️</span>
             <div>
               <p className="font-semibold text-gray-900">Settings</p>
-              <p className="text-sm text-gray-600">Manage your account</p>
+              <p className="text-sm text-gray-500">Manage your account</p>
             </div>
           </Link>
         </div>
@@ -107,29 +114,29 @@ export default async function DashboardPage() {
 
         <div className="space-y-4">
           <div className="flex justify-between items-center py-3 border-b border-gray-200">
-            <span className="text-gray-600">Email</span>
+            <span className="text-gray-500">Email</span>
             <span className="font-medium text-gray-900">{user?.email}</span>
           </div>
 
           <div className="flex justify-between items-center py-3 border-b border-gray-200">
-            <span className="text-gray-600">Name</span>
+            <span className="text-gray-500">Name</span>
             <span className="font-medium text-gray-900">{user?.name}</span>
           </div>
 
           <div className="flex justify-between items-center py-3 border-b border-gray-200">
-            <span className="text-gray-600">Role</span>
-            <span className="inline-block px-3 py-1 bg-purple-100 text-purple-600 rounded-full text-sm font-medium">
+            <span className="text-gray-500">Role</span>
+            <span className="inline-block px-3 py-1 bg-blue-100 text-blue-500 rounded-full text-sm font-medium">
               {user?.role}
             </span>
           </div>
 
           <div className="flex justify-between items-center py-3 border-b border-gray-200">
-            <span className="text-gray-600">Email Verified</span>
+            <span className="text-gray-500">Email Verified</span>
             <span
               className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
                 user?.emailVerified
-                  ? "bg-green-100 text-green-600"
-                  : "bg-yellow-100 text-yellow-600"
+                  ? "bg-green-100 text-green-500"
+                  : "bg-yellow-100 text-yellow-500"
               }`}
             >
               {user?.emailVerified ? "Verified ✓" : "Not Verified"}
@@ -137,7 +144,7 @@ export default async function DashboardPage() {
           </div>
 
           <div className="flex justify-between items-center py-3">
-            <span className="text-gray-600">Member Since</span>
+            <span className="text-gray-500">Member Since</span>
             <span className="font-medium text-gray-900">
               {user?.createdAt
                 ? new Date(user.createdAt).toLocaleDateString("en-US", {

@@ -8,7 +8,7 @@ export default function SignUpPage() {
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
           Create Account
         </h1>
-        <p className="text-gray-600">Join us and start shopping today</p>
+        <p className="text-gray-500">Join us and start shopping today</p>
       </div>
 
       <SignUpForm />
@@ -27,7 +27,7 @@ export default function SignUpPage() {
       <div className="text-center">
         <Link
           href="/sign-in"
-          className="text-purple-600 hover:text-purple-700 font-semibold transition-colors duration-200"
+          className="text-blue-500 hover:text-blue-700 font-semibold transition-colors duration-200"
         >
           Sign in instead
         </Link>

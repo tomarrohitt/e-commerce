@@ -47,12 +47,12 @@ export const SignInForm = () => {
           className={`w-full px-4 py-3 rounded-lg border ${
             state.errors?.email
               ? "border-red-500 focus:ring-red-500"
-              : "border-gray-300 focus:ring-purple-500"
+              : "border-gray-300 focus:ring-blue-500"
           } focus:ring-2 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
           placeholder="you@example.com"
         />
         {state.errors?.email && (
-          <p className="mt-1 text-sm text-red-600">{state.errors.email}</p>
+          <p className="mt-1 text-sm text-red-500">{state.errors.email}</p>
         )}
       </div>
       <div>
@@ -65,7 +65,7 @@ export const SignInForm = () => {
           </label>
           <Link
             href="/forgot-password"
-            className="text-sm text-purple-600 hover:text-purple-700 transition-colors duration-200"
+            className="text-sm text-blue-500 hover:text-blue-700 transition-colors duration-200"
           >
             Forgot password?
           </Link>
@@ -78,19 +78,19 @@ export const SignInForm = () => {
           className={`w-full px-4 py-3 rounded-lg border ${
             state?.errors?.password
               ? "border-red-500 focus:ring-red-500"
-              : "border-gray-300 focus:ring-purple-500"
+              : "border-gray-300 focus:ring-blue-500"
           } focus:ring-2 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
           defaultValue={state.inputs?.password}
           placeholder="•••••••••••••"
         />
         {state?.errors?.password && (
-          <p className="mt-1 text-sm text-red-600">{state.errors.password} </p>
+          <p className="mt-1 text-sm text-red-500">{state.errors.password} </p>
         )}
       </div>
       <button
         type="submit"
         disabled={pending}
-        className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center"
+        className="w-full bg-blue-500 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center"
       >
         {pending ? (
           <>

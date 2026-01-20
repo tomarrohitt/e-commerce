@@ -31,7 +31,7 @@ export function ProductQuantitySelector({
         <button
           onClick={onDecrement}
           disabled={quantity <= 1}
-          className="w-10 h-10 rounded-lg border-2 border-gray-300 hover:border-purple-600 hover:bg-purple-50 transition-colors flex items-center justify-center font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-10 h-10 rounded-lg border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-colors flex items-center justify-center font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
         >
           −
         </button>
@@ -41,12 +41,12 @@ export function ProductQuantitySelector({
           max={maxQuantity}
           value={quantity}
           onChange={handleInputChange}
-          className="w-20 h-10 text-center border-2 border-gray-300 rounded-lg font-semibold focus:border-purple-600 focus:outline-none"
+          className="w-20 h-10 text-center border-2 border-gray-300 rounded-lg font-semibold focus:border-blue-500 focus:outline-none"
         />
         <button
           onClick={onIncrement}
           disabled={quantity >= maxQuantity}
-          className="w-10 h-10 rounded-lg border-2 border-gray-300 hover:border-purple-600 hover:bg-purple-50 transition-colors flex items-center justify-center font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-10 h-10 rounded-lg border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-colors flex items-center justify-center font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
         >
           +
         </button>

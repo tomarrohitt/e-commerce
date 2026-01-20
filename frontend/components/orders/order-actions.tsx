@@ -1,21 +1,18 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { OrderCancelButton } from "./order-cancel-button";
+import { InvoiceDownloadButton } from "./invoice-download-button";
 
 interface OrderActionsProps {
   orderId: string;
   status: string;
   invoiceUrl: string | null;
-  onCancel: () => void;
-  onDownloadInvoice: () => void;
-  isCancelling: boolean;
 }
 
 export function OrderActions({
   orderId,
   status,
-  onCancel,
-  onDownloadInvoice,
-  isCancelling,
+
   invoiceUrl,
 }: OrderActionsProps) {
   const canCancel = ![
@@ -29,17 +26,14 @@ export function OrderActions({
   return (
     <div className="flex flex-wrap gap-3 mt-6">
       <Link href={`/orders/${orderId}`}>
-        <Button variant="primary">View Details</Button>
+        <Button variant="default">View Details</Button>
       </Link>
-      {canCancel && (
-        <Button variant="danger" onClick={onCancel} disabled={isCancelling}>
-          {isCancelling ? "Cancelling..." : "Cancel Order"}
-        </Button>
-      )}
+      {canCancel && <OrderCancelButton orderId={orderId} />}
       {invoiceUrl && (
-        <Button variant="secondary" onClick={onDownloadInvoice}>
-          Download Invoice
-        </Button>
+        <InvoiceDownloadButton
+          orderId={orderId}
+          className="gap-2 border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 transition-all duration-200 shadow-sm"
+        />
       )}
     </div>
   );

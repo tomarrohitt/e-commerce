@@ -1,51 +1,91 @@
+"use client";
+
+import { MapPin, Plus, Check, Phone, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Address } from "@/types";
+import { Badge } from "@/components/ui/badge";
+import type { Address } from "@/types";
+import { useCheckout } from "../context/checkout-context";
+import AddAddressForm from "../add-address-form";
+import { Modal } from "../modal";
 
 interface ShippingSectionProps {
   addresses: Address[];
-  selectedAddressId: string;
-  onSelectAddress: (id: string) => void;
-  onAddNewAddress: () => void;
 }
 
-export function ShippingSection({
-  addresses,
-  selectedAddressId,
-  onSelectAddress,
-  onAddNewAddress,
-}: ShippingSectionProps) {
+export function ShippingSection({ addresses }: ShippingSectionProps) {
+  const { selectedAddressId, setSelectedAddressId } = useCheckout();
+
+  const handleSelect = (id: string) => {
+    setSelectedAddressId(id);
+  };
+
   if (addresses.length === 0) {
     return (
-      <Card>
-        <CardContent className="text-center py-8">
-          <p className="text-gray-600 mb-4">
-            You don't have any saved addresses
+      <Card className="border-0 shadow-sm">
+        <CardContent className="flex flex-col items-center justify-center py-12">
+          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+            <MapPin className="w-8 h-8 text-muted-foreground" />
+          </div>
+          <p className="text-muted-foreground mb-6 text-center">
+            You don&apos;t have any saved addresses yet
           </p>
-          <Button onClick={onAddNewAddress}>Add Address</Button>
+
+          <Modal
+            title="Add Shipping Address"
+            description="Fill in the details to save a new delivery address."
+            button={
+              <Button className="inline-flex items-center gap-2 px-5 py-2.5">
+                <Plus className="w-5 h-5" />
+                Add New Address
+              </Button>
+            }
+          >
+            <AddAddressForm />
+          </Modal>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border-0 shadow-sm overflow-hidden">
+      <CardHeader className="border-b bg-muted/30 py-5">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-900">Shipping Address</h2>
-          <Button variant="ghost" size="sm" onClick={onAddNewAddress}>
-            + Add New
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+              1
+            </div>
+            <h2 className="text-lg font-semibold text-foreground">
+              Shipping Address
+            </h2>
+          </div>
+          <Modal
+            title="Add Shipping Address"
+            description="Fill in the details to save a new delivery address."
+            button={
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5 bg-transparent"
+              >
+                <Plus className="w-4 h-4" />
+                Add New
+              </Button>
+            }
+          >
+            <AddAddressForm />
+          </Modal>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-5">
         <div className="space-y-3">
           {addresses.map((address) => (
             <AddressCard
               key={address.id}
               address={address}
-              isSelected={selectedAddressId === address.id}
-              onSelect={() => onSelectAddress(address.id)}
+              handleSelect={handleSelect}
+              isSelected={address.id === selectedAddressId}
             />
           ))}
         </div>
@@ -56,45 +96,58 @@ export function ShippingSection({
 
 function AddressCard({
   address,
+  handleSelect,
   isSelected,
-  onSelect,
 }: {
   address: Address;
+  handleSelect: (addressId: string) => void;
   isSelected: boolean;
-  onSelect: () => void;
 }) {
   return (
     <div
-      onClick={onSelect}
-      className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+      onClick={() => handleSelect(address.id)}
+      className={`relative p-5 rounded-xl cursor-pointer transition-all duration-200 ${
         isSelected
-          ? "border-purple-600 bg-purple-50"
-          : "border-gray-200 hover:border-purple-300"
+          ? "bg-primary/5 ring-2 ring-primary shadow-sm"
+          : "bg-muted/30 hover:bg-muted/50 ring-1 ring-transparent"
       }`}
     >
-      <div className="flex items-start justify-between">
-        <div className="flex items-start space-x-3">
-          <input
-            type="radio"
-            checked={isSelected}
-            onChange={onSelect}
-            className="mt-1"
-          />
-          <div>
-            <p className="font-semibold text-gray-900">
-              {address.type === "shipping" ? "📦" : "💳"} {address.street}
+      <div className="flex items-start gap-4">
+        <div
+          className={`shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+            isSelected
+              ? "border-primary bg-primary"
+              : "border-muted-foreground/30"
+          }`}
+        >
+          {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-2">
+            <User className="w-4 h-4 text-muted-foreground" />
+            <span className="font-semibold text-foreground">
+              {address.name}
+            </span>
+            {address.isDefault && (
+              <Badge variant="secondary" className="text-xs ml-auto">
+                Default
+              </Badge>
+            )}
+          </div>
+          <div className="space-y-1 text-sm text-muted-foreground">
+            <p className="flex items-start gap-2">
+              <MapPin className="w-4 h-4 mt-0.5 shrink-0" />
+              <span>
+                {address.street}, {address.city}, {address.state}{" "}
+                {address.zipCode}, {address.country}
+              </span>
             </p>
-            <p className="text-gray-600 text-sm">
-              {address.city}, {address.state} {address.zipCode}
+            <p className="flex items-center gap-2">
+              <Phone className="w-4 h-4 shrink-0" />
+              <span>{address.phoneNumber}</span>
             </p>
-            <p className="text-gray-600 text-sm">{address.country}</p>
           </div>
         </div>
-        {address.isDefault && (
-          <span className="inline-block mt-1 px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded">
-            Default
-          </span>
-        )}
       </div>
     </div>
   );

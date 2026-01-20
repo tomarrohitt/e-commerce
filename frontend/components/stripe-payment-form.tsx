@@ -8,7 +8,6 @@ import {
   useElements,
 } from "@stripe/react-stripe-js";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
 
 interface StripePaymentFormProps {
   orderId: string;
@@ -45,11 +44,9 @@ export default function StripePaymentForm({
 
       if (error) {
         setErrorMessage(error.message || "Payment failed");
-        toast.error(error.message || "Payment failed");
       }
     } catch (error: any) {
       setErrorMessage("An unexpected error occurred");
-      toast.error("An unexpected error occurred");
     } finally {
       setLoading(false);
     }
@@ -70,10 +67,10 @@ export default function StripePaymentForm({
       )}
 
       {/* Amount Display */}
-      <div className="bg-purple-50 p-4 rounded-lg">
+      <div className="bg-blue-50 p-4 rounded-lg">
         <div className="flex justify-between items-center">
           <span className="text-gray-700 font-semibold">Amount to Pay:</span>
-          <span className="text-2xl font-bold text-purple-600">
+          <span className="text-2xl font-bold text-blue-500">
             ${amount.toFixed(2)}
           </span>
         </div>
@@ -83,7 +80,7 @@ export default function StripePaymentForm({
       <button
         type="submit"
         disabled={!stripe || loading}
-        className="w-full bg-purple-600 hover:bg-purple-700 text-white py-4 px-6 rounded-lg font-bold text-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+        className="w-full bg-blue-500 hover:bg-blue-700 text-white py-4 px-6 rounded-lg font-bold text-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
       >
         {loading ? (
           <>

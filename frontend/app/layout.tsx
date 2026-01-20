@@ -1,25 +1,27 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Raleway } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
+import { cn } from "@/lib/utils";
+import Footer from "@/components/footer";
 
-const inter = Inter({ subsets: ["latin"] });
+const raleway = Raleway({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: "E-commerce Store",
   description: "Modern e-commerce platform",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="en" className={raleway.variable}>
+      <body className={cn("min-h-screen flex flex-col", raleway.className)}>
         <Navbar />
-        {children}
+        <main className="flex-1">{children}</main>
       </body>
     </html>
   );

@@ -20,7 +20,7 @@ export function ProductSearchBar({ value, onChange, onSubmit }: Props) {
           placeholder="Search for products..."
           className="flex-1 px-6 py-4 rounded-lg focus:ring-4"
         />
-        <button className="bg-white px-8 py-4 rounded-lg font-semibold text-purple-600 ring-0 focus:ring-0">
+        <button className="bg-white px-8 py-4 rounded-lg font-semibold text-blue-500 ring-0 focus:ring-0">
           Search
         </button>
       </div>

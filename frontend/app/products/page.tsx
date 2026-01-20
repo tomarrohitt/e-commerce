@@ -18,10 +18,10 @@ export default async function ProductsPage(props: Props) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <section className="bg-linear-to-r from-purple-600 to-indigo-700 text-white py-16">
+      <section className="bg-linear-to-r from-blue-500 to-indigo-700 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl font-bold mb-4">Shop Our Products</h1>
-          <p className="text-xl text-purple-100">
+          <p className="text-xl text-blue-100">
             {searchParams.category
               ? `Viewing ${searchParams.category.replace("-", " ")}`
               : `Discover amazing deals on ${products.pagination.total} products`}

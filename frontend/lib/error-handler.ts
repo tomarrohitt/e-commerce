@@ -1,7 +1,6 @@
 // ============================================
 // lib/utils/error-handler.ts
 // ============================================
-import toast from "react-hot-toast";
 import type { ApiError } from "@/types";
 
 export function handleApiError(
@@ -11,13 +10,9 @@ export function handleApiError(
   const apiError = error as ApiError;
 
   if (apiError.details && Array.isArray(apiError.details)) {
-    apiError.details.forEach((detail) => {
-      toast.error(detail.message);
-    });
+    apiError.details.forEach((detail) => {});
   } else if (apiError.error) {
-    toast.error(apiError.error);
   } else {
-    toast.error(defaultMessage);
   }
 }
 

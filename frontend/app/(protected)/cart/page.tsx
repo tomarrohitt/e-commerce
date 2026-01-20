@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { formatPrice } from "@/lib/format";
 import { getCart } from "@/lib/api";
-import { ShoppingBag, ArrowRight, Package, Trash2 } from "lucide-react";
+import { ShoppingBag, ArrowRight, Package, ShoppingCart } from "lucide-react";
 import { ClearCartButton } from "@/components/cart/clear-cart-button";
+import { cookies } from "next/headers";
 
 export default async function CartPage() {
+  await cookies();
   const cart = await getCart();
 
   if (!cart.items || cart.items.length === 0) {
@@ -24,20 +26,20 @@ export default async function CartPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="bg-linear-to-r from-purple-50 via-indigo-50 to-purple-50 rounded-2xl p-8 mb-8 border-2 border-purple-100 shadow-sm h-35">
+      <div className="bg-linear-to-r from-blue-50 via-indigo-50 to-blue-50 rounded-2xl p-8 mb-8 border-2 border-blue-100 shadow-sm h-35">
         <div className="flex justify-between items-start">
           <div className="flex items-start gap-4">
-            <div className="w-16 h-16 bg-linear-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform">
+            <div className="w-16 h-16 bg-linear-to-br from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform">
               <ShoppingBag className="w-8 h-8 text-white" />
             </div>
             <div>
               <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
                 Shopping Cart
-                <span className="text-sm font-normal px-3 py-1 bg-purple-600 text-white rounded-full shadow-sm">
+                <span className="text-sm font-normal px-3 py-1 bg-blue-500 text-white rounded-full shadow-sm">
                   {cart.totalItems}
                 </span>
               </h1>
-              <p className="text-gray-600 flex items-center gap-2">
+              <p className="text-gray-500 flex items-center gap-2">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                 {cart.totalItems} {cart.totalItems === 1 ? "item" : "items"}{" "}
                 ready for checkout
@@ -56,16 +58,16 @@ export default async function CartPage() {
         </div>
 
         <div className="lg:col-span-1">
-          <Card className="sticky top-24 shadow-lg border-2 border-gray-100">
-            <CardHeader className="bg-linear-to-r from-purple-50 to-indigo-50  h-18">
+          <Card className="sticky top-0 shadow-lg border-2 border-gray-100  pt-0">
+            <CardHeader className="bg-linear-to-r from-blue-50 to-indigo-50  h-18 pt-6">
               <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                <Package className="w-5 h-5 text-purple-600" />
+                <Package className="w-5 h-5 text-blue-500" />
                 Order Summary
               </h2>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="space-y-3 mb-6">
-                <div className="flex justify-between text-gray-600">
+                <div className="flex justify-between text-gray-500">
                   <span>
                     Subtotal ({cart.totalItems}{" "}
                     {cart.totalItems === 1 ? "item" : "items"})
@@ -74,13 +76,13 @@ export default async function CartPage() {
                     ${formatPrice(cart.subtotal)}
                   </span>
                 </div>
-                <div className="flex justify-between text-gray-600">
+                <div className="flex justify-between text-gray-500">
                   <span>Shipping</span>
-                  <span className="text-green-600 font-semibold flex items-center gap-1">
+                  <span className="text-green-500 font-semibold flex items-center gap-1">
                     <span className="text-lg">✓</span> FREE
                   </span>
                 </div>
-                <div className="flex justify-between text-gray-600">
+                <div className="flex justify-between text-gray-500">
                   <span>Tax</span>
                   <span className="font-semibold">
                     ${formatPrice(cart.tax)}
@@ -91,7 +93,7 @@ export default async function CartPage() {
                     <span className="text-lg font-bold text-gray-900">
                       Total
                     </span>
-                    <span className="text-2xl font-bold text-purple-600">
+                    <span className="text-2xl font-bold text-blue-500">
                       ${formatPrice(cart.totalAmount)}
                     </span>
                   </div>
@@ -110,18 +112,20 @@ export default async function CartPage() {
                 </div>
               )}
 
-              <Button
+              <Link
+                href={`/checkout`}
                 className="w-full mb-3 group shadow-md hover:shadow-lg transition-all flex items-center justify-center"
-                disabled={hasIssues}
               >
-                <span>Proceed to Checkout</span>
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
+                <Button className="w-full">
+                  <span>Proceed to Checkout</span>
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
 
               <Link href="/products">
                 <Button
                   variant="ghost"
-                  className="w-full hover:bg-purple-50 transition-colors flex items-center justify-center"
+                  className="w-full hover:bg-blue-50 transition-colors flex items-center justify-center"
                 >
                   <ShoppingBag className="w-4 h-4 mr-2" />
                   Continue Shopping
@@ -129,8 +133,8 @@ export default async function CartPage() {
               </Link>
 
               <div className="mt-6 pt-6 border-t border-gray-200">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <span className="text-green-600">🔒</span>
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <span className="text-green-500">🔒</span>
                   <span>Secure checkout guaranteed</span>
                 </div>
               </div>
@@ -142,27 +146,40 @@ export default async function CartPage() {
   );
 }
 
-function EmptyCartState() {
+export function EmptyCartState() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <Card className="p-12 text-center shadow-lg">
-        <div className="text-6xl mb-4 animate-in zoom-in-50 duration-500">
-          🛒
+    <div className="flex-1 bg-muted/30 flex flex-col pt-30 items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
+      <div className="text-center max-w-lg w-full mb-12">
+        <div className="relative mb-8">
+          <div className="w-32 h-32 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
+            <ShoppingCart
+              className="w-16 h-16 text-primary"
+              strokeWidth={1.5}
+            />
+          </div>
+          <div className="absolute top-0 left-1/2 -translate-x-16 -translate-y-2 w-4 h-4 bg-primary/20 rounded-full animate-pulse" />
+          <div className="absolute bottom-4 right-1/2 translate-x-20 w-3 h-3 bg-primary/30 rounded-full animate-pulse delay-150" />
+          <div className="absolute top-8 right-1/2 translate-x-24 w-2 h-2 bg-primary/40 rounded-full animate-pulse delay-300" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+
+        <h1 className="text-3xl font-bold text-foreground mb-3 text-balance">
           Your Cart is Empty
-        </h2>
-        <p className="text-gray-600 mb-6">
-          Looks like you haven't added anything to your cart yet
+        </h1>
+        <p className="text-muted-foreground text-lg mb-8 text-pretty">
+          Looks like you haven't found anything you love yet. Let's change that!
         </p>
-        <Link href="/products" className="flex justify-center">
-          <Button className="group shadow-md hover:shadow-lg transition-all flex items-center ">
-            <ShoppingBag className="w-4 h-4 mr-2" />
+
+        <Link href="/products">
+          <Button
+            size="lg"
+            className="group shadow-md hover:shadow-lg transition-all"
+          >
+            <ShoppingBag className="w-5 h-5 mr-2" />
             Start Shopping
-            <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
           </Button>
         </Link>
-      </Card>
+      </div>
     </div>
   );
 }

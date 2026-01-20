@@ -1,434 +1,392 @@
-"use client";
-
-import { use, useState } from "react";
 import Link from "next/link";
 import {
   Star,
-  Heart,
-  ShoppingCart,
-  Check,
   Truck,
   Shield,
   RefreshCw,
-  AlertCircle,
+  Check,
+  ChevronLeft,
 } from "lucide-react";
-import { useProduct } from "@/hooks/use-product";
-import { DynamicAttributesSection } from "@/components/product/dynamic-attribute-section";
-import { getCategorySchema } from "@/lib/category-schema";
-import { useQuery } from "@tanstack/react-query";
-import { productService } from "@/lib/api";
-import { Review } from "@/types";
+import { ProductImageGallery } from "./product-image-gallery";
+import { AddToCartSection } from "./add-to-cart-section";
+import { WishlistButton } from "./wishlist-button";
+import { AttributeRenderer } from "./attribute-rendered";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { getProduct } from "@/lib/api/product-cached";
+import { notFound } from "next/navigation";
 
-interface ProductDetailViewProps {
-  params: Promise<{ id: string }>;
-}
+export default async function ProductDetailPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const { id } = await params;
 
-export default function ProductDetailView({ params }: ProductDetailViewProps) {
-  const { id } = use(params);
-  const { data: product, isLoading, error } = useProduct(id);
+  const product = await getProduct(id);
 
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState<
-    "description" | "specifications" | "reviews"
-  >("description");
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  if (!product) {
+    return notFound();
+  }
 
-  // 2. Loading & Error States
-  if (isLoading) return <ProductSkeleton />;
-  if (error || !product) return <ProductNotFound />;
-  const categorySchema =
-    product.category?.attributeSchema ||
-    (product.category ? getCategorySchema(product.category.slug) : []);
+  const reviews = [
+    {
+      id: "1",
+      rating: 5,
+      comment: "Perfect fit for my windshield! Keeps the car cool on hot days.",
+      user: { name: "David Miller" },
+      createdAt: "2026-01-15T10:30:00.000Z",
+    },
+    {
+      id: "2",
+      rating: 4,
+      comment: "Good quality material, easy to install and remove.",
+      user: { name: "Lisa Anderson" },
+      createdAt: "2026-01-14T14:20:00.000Z",
+    },
+    {
+      id: "3",
+      rating: 4,
+      comment: "Works great! Slight wrinkles but doesn't affect performance.",
+      user: { name: "James Wilson" },
+      createdAt: "2026-01-12T09:15:00.000Z",
+    },
+  ];
 
-  // Check if we actually have data to show
+  const discountPercentage = 25;
+  const originalPrice = Number(product.price) * (1 + discountPercentage / 100);
   const hasAttributes =
     product.attributes && Object.keys(product.attributes).length > 0;
 
-  const maxQuantity = Math.min(10, product.stockQuantity);
-  const discountPercentage = 25;
-  const originalPrice = Number(product.price) * (1 + discountPercentage / 100);
-
   return (
-    <div className="min-h-screen bg-gray-50 animate-in fade-in duration-500">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-          <div className="space-y-4">
-            <div
-              className="aspect-square bg-white rounded-2xl overflow-hidden shadow-sm border border-gr
-ay-200 relative group"
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50">
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center gap-2 text-sm">
+            <Link
+              href="/"
+              className="text-gray-500 hover:text-blue-600 transition-colors"
             >
-              <img
-                src={product.thumbnail || "/placeholder.png"}
-                alt={product.name}
-                className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform du
-ration-500"
-              />
-            </div>
-            {product?.images?.length > 1 && (
-              <div className="grid grid-cols-5 gap-3">
-                {product.images.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImage(index)}
-                    className={`aspect-square rounded-lg overflow-hidden border-2 transition-all bg-white
- ${
-   selectedImage === index
-     ? "border-purple-600 shadow-md ring-2 ring-purple-100"
-     : "border-gray-200 hover:border-purple-300"
- }`}
-                  >
-                    <img
-                      src={image}
-                      alt=""
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="space-y-6 mt-4 lg:mt-0">
+              Home
+            </Link>
+            <span className="text-gray-400">/</span>
+            <Link
+              href="/products"
+              className="text-gray-500 hover:text-blue-600 transition-colors"
+            >
+              Products
+            </Link>
             {product.category && (
-              <Link
-                href={`/products?category=${product.category.slug}`}
-                className="inline-block bg-purple-100 text-purple-700 px-4 py-1.5 rounded-full text-sm fo
-nt-semibold hover:bg-purple-200 transition-colors"
-              >
-                {product.category.name}
-              </Link>
+              <>
+                <span className="text-gray-400">/</span>
+                <Link
+                  href={`/products?category=${product.category.slug}`}
+                  className="text-gray-500 hover:text-blue-600 transition-colors"
+                >
+                  {product.category.name}
+                </Link>
+              </>
             )}
-
-            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
+            <span className="text-gray-400">/</span>
+            <span className="text-gray-900 font-medium truncate">
               {product.name}
-            </h1>
+            </span>
+          </div>
+        </div>
+      </div>
 
-            {/* Rating Section */}
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-1">
-                <StarRating rating={product.rating || 0} />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Link
+          href="/products"
+          className="inline-flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors mb-6 group"
+        >
+          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          Back to Products
+        </Link>
+
+        <div className="grid lg:grid-cols-2 gap-8 mb-12">
+          {/* Image Gallery - Client Component */}
+          <ProductImageGallery
+            images={product.images}
+            productName={product.name}
+          />
+
+          {/* Product Info */}
+          <div className="sticky top-8 h-fit space-y-8">
+            {/* Header Section */}
+            <div className="space-y-4">
+              {product.category && (
+                <Badge variant="secondary" className="text-xs mb-2">
+                  {product.category.name}
+                </Badge>
+              )}
+
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
+                {product.name}
+              </h1>
+
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1">
+                  <StarRating rating={product.rating} />
+                  <span className="font-semibold text-gray-900 ml-1">
+                    {product.rating}
+                  </span>
+                </div>
+                <Separator orientation="vertical" className="h-5" />
+                <span className="text-sm text-gray-500 hover:text-gray-900 cursor-pointer transition-colors">
+                  {product.reviewCount} reviews
+                </span>
               </div>
-              <span className="text-lg font-semibold text-gray-900">
-                {product.rating}
-              </span>
-              <span className="text-gray-500">
-                ({product.reviewCount} reviews)
-              </span>
             </div>
 
-            {/* Price Section */}
-            <div className="flex items-baseline space-x-4">
-              <span className="text-4xl font-bold text-purple-600">
-                ${Number(product.price).toFixed(2)}
-              </span>
-              <span className="text-lg text-gray-500 line-through">
-                ${originalPrice.toFixed(2)}
-              </span>
-              <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
-                {discountPercentage}% OFF
-              </span>
-            </div>
+            {/* Price & Stock Section */}
+            <div className="space-y-4">
+              <div className="flex items-end gap-3">
+                <span className="text-4xl font-bold text-gray-900">
+                  ${Number(product.price).toFixed(2)}
+                </span>
+                <span className="text-lg text-gray-400 line-through mb-1">
+                  ${originalPrice.toFixed(2)}
+                </span>
+                <Badge variant="destructive" className="mb-2">
+                  {discountPercentage}% OFF
+                </Badge>
+              </div>
 
-            {/* Stock Section */}
-            <div className="flex items-center space-x-2">
               {product.stockQuantity > 0 ? (
-                <>
-                  <Check className="w-5 h-5 text-green-600" />
-                  <span className="text-green-600 font-semibold">
+                <div className="flex items-center gap-2 text-green-600 bg-green-50 w-fit px-3 py-1 rounded-full text-sm">
+                  <Check className="w-4 h-4" />
+                  <span className="font-medium">
                     In Stock ({product.stockQuantity} available)
                   </span>
-                </>
+                </div>
               ) : (
-                <span className="flex items-center text-red-600 font-semibold">
-                  <AlertCircle className="w-5 h-5 mr-2" /> Out of Stock
-                </span>
+                <Badge variant="destructive">Out of Stock</Badge>
               )}
             </div>
 
-            {/* Action Buttons */}
-            <div className="pt-6 border-t border-gray-100 space-y-6">
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center border-2 border-gray-200 rounded-lg">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-12 h-12 flex items-center justify-center hover:bg-gray-50"
-                  >
-                    -
-                  </button>
-                  <span className="w-12 text-center font-semibold">
-                    {quantity}
-                  </span>
-                  <button
-                    onClick={() =>
-                      setQuantity(Math.min(maxQuantity, quantity + 1))
-                    }
-                    className="w-12 h-12 flex items-center justify-center hover:bg-gray-50"
-                  >
-                    +
-                  </button>
-                </div>
-                <button
-                  disabled={product.stockQuantity === 0}
-                  className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-4 rounded-xl font-bol
-d shadow-lg shadow-purple-200 transition-all flex items-center justify-center gap-2 disabled:opacity-50 d
-isabled:cursor-not-allowed"
-                >
-                  <ShoppingCart className="w-5 h-5" />
-                  Add to Cart
-                </button>
-                <button
-                  onClick={() => setIsWishlisted(!isWishlisted)}
-                  className={`p-4 rounded-xl border-2 transition-all ${
-                    isWishlisted
-                      ? "border-red-200 bg-red-50 text-red-600"
-                      : "border-gray-200 hover:border-purple-300 text-gray-400"
-                  }`}
-                >
-                  <Heart
-                    className={`w-6 h-6 ${isWishlisted ? "fill-current" : ""}`}
+            {/* Short Description (Removed the Card wrapper for a cleaner look) */}
+            <p className="text-gray-600 leading-relaxed text-lg">
+              {product.description}
+            </p>
+
+            {/* Actions */}
+            <div className="space-y-6">
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <AddToCartSection
+                    productId={product.id}
+                    maxQuantity={product.stockQuantity}
                   />
-                </button>
+                </div>
+                <WishlistButton productId={product.id} />
               </div>
-            </div>
 
-            {/* Trust Badges */}
-            <div className="grid grid-cols-3 gap-4 pt-6">
-              <TrustBadge
-                icon={Truck}
-                label="Free Shipping"
-                color="text-purple-600"
-                bg="bg-purple-50"
-              />
-              <TrustBadge
-                icon={Shield}
-                label="Secure Payment"
-                color="text-green-600"
-                bg="bg-green-50"
-              />
-              <TrustBadge
-                icon={RefreshCw}
-                label="30-Day Returns"
-                color="text-blue-600"
-                bg="bg-blue-50"
-              />
+              {/* Trust Badges - Made slightly more subtle */}
+              <div className="grid grid-cols-3 gap-3 pt-6 border-t">
+                <TrustBadge
+                  icon={Truck}
+                  label="Free Shipping"
+                  color="text-gray-600"
+                  bg="bg-gray-50"
+                />
+                <TrustBadge
+                  icon={RefreshCw}
+                  label="Easy Returns"
+                  color="text-gray-600"
+                  bg="bg-gray-50"
+                />
+                <TrustBadge
+                  icon={Shield}
+                  label="Secure Payment"
+                  color="text-gray-600"
+                  bg="bg-gray-50"
+                />
+              </div>
             </div>
           </div>
         </div>
 
-        {/* --- TABS SECTION --- */}
-        <div className="mt-16">
-          <div className="border-b border-gray-200">
-            <nav className="flex space-x-8">
-              <TabButton
-                id="description"
-                label="Description"
-                active={activeTab}
-                onClick={setActiveTab}
-              />
+        {/* Tabs Section */}
+        <Card>
+          <CardContent className="p-6 sm:p-8">
+            {/* Description Section */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                Description
+              </h2>
+              <p className="text-gray-600 leading-relaxed">
+                {product.description}
+              </p>
+            </div>
 
-              {/* ✅ UPDATED: Use hasAttributes check */}
-              {hasAttributes && (
-                <TabButton
-                  id="specifications"
-                  label="Specifications"
-                  active={activeTab}
-                  onClick={setActiveTab}
-                />
-              )}
+            <Separator className="my-8" />
 
-              <TabButton
-                id="reviews"
-                label={`Reviews (${product.reviewCount})`}
-                active={activeTab}
-                onClick={setActiveTab}
-              />
-            </nav>
-          </div>
+            {/* Specifications Section */}
+            {hasAttributes && (
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                  Specifications
+                </h2>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="space-y-1">
+                      <div className="flex justify-between py-3 border-b border-gray-100">
+                        <span className="font-semibold text-gray-900">SKU</span>
+                        <span className="text-gray-700">{product.sku}</span>
+                      </div>
 
-          <div className="py-8">
-            {activeTab === "description" && (
-              <div className="max-w-4xl space-y-8 animate-in fade-in slide-in-from-bottom-4">
-                <div className="prose prose-purple max-w-none text-gray-700 leading-relaxed">
-                  <p>{product.description}</p>
-                </div>
+                      {product.category?.attributeSchema?.map((schema) => {
+                        const value = (
+                          product.attributes as Record<string, any>
+                        )[schema.key];
+                        if (value === undefined || value === null) return null;
+
+                        return (
+                          <AttributeRenderer
+                            key={schema.key}
+                            attribute={schema}
+                            value={value}
+                          />
+                        );
+                      })}
+
+                      <div className="flex justify-between py-3">
+                        <span className="font-semibold text-gray-900">
+                          Last Updated
+                        </span>
+                        <span className="text-gray-700">
+                          {new Date(product.updatedAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             )}
 
-            {activeTab === "specifications" && hasAttributes && (
-              <div className="max-w-3xl animate-in fade-in slide-in-from-bottom-4">
-                <DynamicAttributesSection
-                  attributes={product.attributes}
-                  schema={categorySchema}
-                />
+            <Separator className="my-8" />
 
-                <div
-                  className="mt-6 p-4 bg-gray-50 rounded-lg text-sm text-gray-500 flex justify-between
-"
-                >
-                  <span>SKU: {product.sku}</span>
-                  <span>
-                    Last Updated:{" "}
-                    {new Date(product.updatedAt).toLocaleDateString()}
+            {/* Reviews Section */}
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Customer Reviews ({product.rating})
+                </h2>
+                <div className="flex items-center gap-2">
+                  <StarRating rating={product.rating} />
+                  <span className="font-semibold text-gray-900">
+                    {product.rating}
                   </span>
                 </div>
               </div>
-            )}
 
-            {activeTab === "reviews" && (
-              <ReviewsSection productId={product.id} />
-            )}
-          </div>
-        </div>
+              {reviews.length > 0 ? (
+                <div className="space-y-4">
+                  {reviews.map((review) => (
+                    <Card key={review.id}>
+                      <CardContent className="pt-6">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-start gap-3">
+                            <Avatar>
+                              <AvatarFallback className="bg-blue-100 text-blue-700 font-semibold">
+                                {review.user?.name?.charAt(0) || "A"}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-semibold text-gray-900 mb-1">
+                                {review.user?.name || "Anonymous"}
+                              </p>
+                              <div className="flex items-center gap-2">
+                                <StarRating
+                                  rating={review.rating}
+                                  size="small"
+                                />
+                                <Separator
+                                  orientation="vertical"
+                                  className="h-4"
+                                />
+                                <span className="text-sm text-gray-500">
+                                  {new Date(
+                                    review.createdAt,
+                                  ).toLocaleDateString()}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        {review.comment && (
+                          <p className="text-gray-700 leading-relaxed ml-12">
+                            {review.comment}
+                          </p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <p className="text-gray-500">
+                      No reviews yet. Be the first to review!
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
 }
 
-function StarRating({ rating }: { rating: number }) {
+function StarRating({
+  rating,
+  size = "normal",
+}: {
+  rating: number;
+  size?: "small" | "normal";
+}) {
+  const sizeClass = size === "small" ? "w-4 h-4" : "w-5 h-5";
+
   return (
-    <>
+    <div className="flex items-center gap-0.5">
       {[...Array(5)].map((_, i) => (
         <Star
           key={i}
-          className={`w-5 h-5 ${i < Math.floor(rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
+          className={`${sizeClass} ${
+            i < Math.floor(rating)
+              ? "fill-yellow-400 text-yellow-400"
+              : i < rating
+                ? "fill-yellow-200 text-yellow-400"
+                : "fill-gray-200 text-gray-200"
+          }`}
         />
       ))}
-    </>
+    </div>
   );
 }
 
-function TrustBadge({ icon: Icon, label, color, bg }: any) {
+function TrustBadge({
+  icon: Icon,
+  label,
+  color,
+  bg,
+}: {
+  icon: React.ElementType;
+  label: string;
+  color: string;
+  bg: string;
+}) {
   return (
     <div
-      className="flex flex-col items-center text-center space-y-2 p-3 rounded-lg hover:bg-gray-50 tran
-sition-colors"
+      className={`${bg} rounded-xl p-4 text-center transition-transform hover:scale-105`}
     >
-      <div
-        className={`w-10 h-10 ${bg} rounded-full flex items-center justify-center`}
-      >
-        <Icon className={`w-5 h-5 ${color}`} />
-      </div>
-      <span className="text-xs font-semibold text-gray-700">{label}</span>
-    </div>
-  );
-}
-
-function TabButton({ id, label, active, onClick }: any) {
-  return (
-    <button
-      onClick={() => onClick(id)}
-      className={`py-4 px-1 border-b-2 font-semibold text-sm transition-colors ${
-        active === id
-          ? "border-purple-600 text-purple-600"
-          : "border-transparent text-gray-500 hover:text-gray-700"
-      }`}
-    >
-      {label}
-    </button>
-  );
-}
-
-function ReviewsSection({ productId }: { productId: string }) {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["reviews", productId],
-    queryFn: () => productService.getReviews(productId),
-    staleTime: 1000 * 60 * 5,
-  });
-
-  const { reviews, pagination } = data || {
-    reviews: [],
-  };
-
-  if (isLoading) {
-    return (
-      <div className="max-w-4xl space-y-4 animate-pulse">
-        {[1, 2].map((i) => (
-          <div key={i} className="h-32 bg-gray-100 rounded-xl" />
-        ))}
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="text-red-500 text-center py-10">
-        Failed to load reviews. Please try again.
-      </div>
-    );
-  }
-
-  if (!reviews || reviews.length === 0) {
-    return (
-      <div
-        className="text-gray-500 text-center py-10 bg-gray-50 rounded-xl border border-dashed border-g
-ray-200"
-      >
-        No reviews yet. Be the first to review!
-      </div>
-    );
-  }
-
-  return (
-    <div className="max-w-4xl space-y-6 animate-in fade-in slide-in-from-bottom-2">
-      {reviews.map((review: Review) => (
-        <div
-          key={review.id}
-          className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 transition-shadow hover:sha
-dow-md"
-        >
-          <div className="flex justify-between items-start">
-            <div>
-              <h4 className="font-bold text-gray-900">
-                {review.user?.name || "Anonymous"}
-              </h4>
-              <div className="flex mt-1">
-                <StarRating rating={review.rating} />
-              </div>
-            </div>
-            <span className="text-sm text-gray-400">
-              {new Date(review.createdAt).toLocaleDateString()}
-            </span>
-          </div>
-          {review.comment && (
-            <p className="mt-4 text-gray-700 leading-relaxed">
-              {review.comment}
-            </p>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function ProductSkeleton() {
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-8 animate-pulse">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        <div className="aspect-square bg-gray-200 rounded-2xl" />
-        <div className="space-y-6">
-          <div className="h-8 bg-gray-200 w-3/4 rounded" />
-          <div className="h-4 bg-gray-200 w-1/4 rounded" />
-          <div className="h-12 bg-gray-200 w-1/3 rounded" />
-          <div className="h-64 bg-gray-200 rounded" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ProductNotFound() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900">Product Not Found</h2>
-        <Link
-          href="/products"
-          className="text-purple-600 hover:underline mt-4 block"
-        >
-          Back to Products
-        </Link>
-      </div>
+      <Icon className={`w-6 h-6 ${color} mx-auto mb-2`} />
+      <p className={`text-xs font-semibold ${color}`}>{label}</p>
     </div>
   );
 }

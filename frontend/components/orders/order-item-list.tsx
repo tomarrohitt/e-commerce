@@ -1,23 +1,11 @@
-import { useState } from "react";
 import Link from "next/link";
-import { MessageSquare, CheckCircle2 } from "lucide-react";
-import { ReviewModal } from "../review-modal";
 import { OrderItem, OrderStatusType } from "@/types";
 
 interface OrderItemsListProps {
   orderItems: OrderItem[];
-  status: string;
 }
 
-export function OrderItemsList({ orderItems, status }: OrderItemsListProps) {
-  const [reviewingProduct, setReviewingProduct] = useState<{
-    id: string;
-    name: string;
-    thumbnail?: string;
-  } | null>(null);
-
-  const canReview = status === OrderStatusType.DELIVERED;
-
+export function OrderItemsList({ orderItems }: OrderItemsListProps) {
   return (
     <>
       <div className="space-y-3 mb-4">
@@ -28,7 +16,7 @@ export function OrderItemsList({ orderItems, status }: OrderItemsListProps) {
           >
             <Link
               href={`/products/${item.productId}`}
-              className="w-16 h-16 bg-linear-to-br from-purple-400 to-indigo-600 rounded-lg flex items-center justify-center shrink-0"
+              className="w-16 h-16 bg-linear-to-br from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center shrink-0"
             >
               {item.thumbnail ? (
                 <img
@@ -44,11 +32,11 @@ export function OrderItemsList({ orderItems, status }: OrderItemsListProps) {
             <div className="flex-1 min-w-0">
               <Link
                 href={`/products/${item.productId}`}
-                className="font-semibold text-gray-900 hover:text-purple-600 transition-colors line-clamp-1"
+                className="font-semibold text-gray-900 hover:text-blue-500 transition-colors line-clamp-1"
               >
                 {item.name}
               </Link>
-              <p className="text-sm text-gray-600 mt-0.5">
+              <p className="text-sm text-gray-500 mt-0.5">
                 Quantity: {item.quantity} × ${item.price}
               </p>
             </div>
@@ -58,37 +46,9 @@ export function OrderItemsList({ orderItems, status }: OrderItemsListProps) {
                 ${(item.quantity * Number(item.price)).toFixed(2)}
               </p>
             </div>
-
-            {canReview && (
-              <div className="shrink-0 w-[140px] flex justify-end">
-                <button
-                  onClick={() =>
-                    setReviewingProduct({
-                      id: item.productId,
-                      name: item.name,
-                      thumbnail: item.thumbnail || undefined,
-                    })
-                  }
-                  className="flex items-center gap-1.5 text-purple-600 text-sm font-medium bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg transition-colors"
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  Review
-                </button>
-              </div>
-            )}
           </div>
         ))}
       </div>
-
-      {reviewingProduct && (
-        <ReviewModal
-          isOpen={!!reviewingProduct}
-          onClose={() => setReviewingProduct(null)}
-          productId={reviewingProduct.id}
-          productName={reviewingProduct.name}
-          productThumbnail={reviewingProduct.thumbnail}
-        />
-      )}
     </>
   );
 }

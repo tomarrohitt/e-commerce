@@ -1,17 +1,13 @@
 import api from "./server";
-import type { OrdersListResponse, PaginatedOrders } from "@/types";
+import type {
+  OrderExtended,
+  OrdersListResponse,
+  PaginatedOrders,
+} from "@/types";
 
-export async function createOrder(data: {
-  shippingAddressId: string;
-  paymentMethod?: "stripe" | "cod";
-}) {
-  const response = await api.post("/orders", data);
-  return response.data;
-}
-
-export async function getOrder(id: string) {
+export async function getOrder(id: string): Promise<OrderExtended> {
   const response = await api.get(`/orders/${id}`);
-  return response.data;
+  return response.data.data;
 }
 
 export async function getOrders(params?: {
@@ -24,7 +20,7 @@ export async function getOrders(params?: {
   return response.data.data;
 }
 
-export async function cancelOrderFunction(id: string) {
+export async function cancelOrder(id: string) {
   const response = await api.post(`/orders/${id}/cancel`);
   return response.data;
 }
@@ -44,6 +40,18 @@ export async function updateOrderStatus(id: string, status: string) {
   return response.data;
 }
 
+export async function getTotalOrdersSpend(): Promise<{ total: number }> {
+  const response = await api.get("/orders/total");
+  return response.data.data;
+}
+export async function getTotalOrdersCount(): Promise<{
+  total: number;
+  pending: number;
+  completed: number;
+}> {
+  const response = await api.get("/orders/summary");
+  return response.data.data;
+}
 export async function refundOrder(id: string, amount?: number) {
   const response = await api.post(`/orders/${id}/refund`, { amount });
   return response.data;

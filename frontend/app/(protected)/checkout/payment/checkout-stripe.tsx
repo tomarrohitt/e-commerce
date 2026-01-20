@@ -16,21 +16,15 @@ export const CheckoutStripe = ({
   amount: string;
   clientSecret: string;
 }) => {
-  // Debug logging
   useEffect(() => {
-    console.log("CheckoutStripe mounted with:", {
-      orderId,
-      amount,
-      clientSecret: clientSecret
-        ? `${clientSecret.substring(0, 20)}...`
-        : "missing",
-      stripeKey: stripeKey ? `${stripeKey.substring(0, 20)}...` : "missing",
-    });
+    // Validate client secret format
+    if (clientSecret) {
+      const isValid =
+        clientSecret.startsWith("pi_") || clientSecret.startsWith("seti_");
+    }
   }, [orderId, amount, clientSecret]);
 
   const stripePromise = useMemo(() => {
-    console.log("Creating Stripe promise...");
-
     if (!stripeKey) {
       console.error("❌ STRIPE KEY IS MISSING!");
       console.error(
@@ -44,42 +38,93 @@ export const CheckoutStripe = ({
       console.error("Key should start with 'pk_test_' or 'pk_live_'");
       return null;
     }
-
-    console.log("✓ Stripe key found, loading Stripe...");
     return loadStripe(stripeKey);
   }, []);
 
-  // Check for missing Stripe key
   if (!stripeKey) {
     console.error("Rendering error: No Stripe key");
     return (
-      <div>
-        Stripe is not configured. Please add NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-        to your environment variables.
+      <div className="bg-white rounded-2xl shadow-lg p-6">
+        <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+          <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center shrink-0">
+            <span className="text-red-600">⚠️</span>
+          </div>
+          <div>
+            <h3 className="font-semibold text-red-900 mb-1">
+              Configuration Error
+            </h3>
+            <p className="text-sm text-red-700">
+              Stripe is not configured. Please add
+              NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY to your environment variables.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
 
-  // Check for invalid Stripe key format
   if (!stripeKey.startsWith("pk_")) {
     console.error("Rendering error: Invalid Stripe key format");
     return (
-      <div>
-        Invalid Stripe configuration. The publishable key should start with
-        'pk_test_' or 'pk_live_'.
+      <div className="bg-white rounded-2xl shadow-lg p-6">
+        <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+          <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center shrink-0">
+            <span className="text-red-600">⚠️</span>
+          </div>
+          <div>
+            <h3 className="font-semibold text-red-900 mb-1">
+              Configuration Error
+            </h3>
+            <p className="text-sm text-red-700">
+              Invalid Stripe configuration. The publishable key should start
+              with 'pk_test_' or 'pk_live_'.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!stripePromise) {
     console.error("Rendering error: No Stripe promise");
-    return <div>Failed to initialize Stripe. Please contact support.</div>;
+    return (
+      <div className="bg-white rounded-2xl shadow-lg p-6">
+        <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+          <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center shrink-0">
+            <span className="text-red-600">❌</span>
+          </div>
+          <div>
+            <h3 className="font-semibold text-red-900 mb-1">
+              Initialization Failed
+            </h3>
+            <p className="text-sm text-red-700">
+              Failed to initialize Stripe. Please contact support.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
-  // Validate client secret
   if (!clientSecret || typeof clientSecret !== "string") {
     console.error("Invalid client secret:", clientSecret);
-    return <div>Invalid payment session. Please try again.</div>;
+    return (
+      <div className="bg-white rounded-2xl shadow-lg p-6">
+        <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+          <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center shrink-0">
+            <span className="text-red-600">⚠️</span>
+          </div>
+          <div>
+            <h3 className="font-semibold text-red-900 mb-1">
+              Payment Session Error
+            </h3>
+            <p className="text-sm text-red-700">
+              Invalid payment session. Please try again.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const options = useMemo(
@@ -88,60 +133,36 @@ export const CheckoutStripe = ({
       appearance: {
         theme: "stripe" as const,
         variables: {
-          colorPrimary: "#9333ea",
+          colorPrimary: "#2563eb",
+          colorBackground: "#ffffff",
+          colorText: "#1f2937",
+          colorDanger: "#ef4444",
+          fontFamily: "system-ui, sans-serif",
+          spacingUnit: "4px",
+          borderRadius: "12px",
         },
       },
     }),
     [clientSecret],
   );
 
-  console.log("Rendering Elements component with options:", {
-    hasClientSecret: !!clientSecret,
-    hasStripePromise: !!stripePromise,
-  });
-
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
-      <div className="border-b pb-4 mb-6">
-        <h1 className="text-2xl font-bold mb-2">Secure Payment</h1>
-        <p className="text-gray-600 text-sm">
-          Order #{orderId.slice(-6).toUpperCase()}
-        </p>
-      </div>
-
+    <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
       <Elements stripe={stripePromise} options={options}>
-        <div className="space-y-6">
-          <div className="flex items-center gap-3 p-4 border rounded-lg bg-purple-50 border-purple-200">
-            <div className="shrink-0">
-              <svg
-                className="w-6 h-6 text-purple-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                />
-              </svg>
-            </div>
-            <span className="font-medium text-gray-900">Pay with Stripe</span>
-          </div>
-
-          <CheckoutForm orderId={orderId} amount={amount} />
-        </div>
+        <CheckoutForm orderId={orderId} amount={amount} />
       </Elements>
 
-      {/* Debug info - remove in production */}
       {process.env.NODE_ENV === "development" && (
-        <div className="mt-6 p-3 bg-gray-100 rounded text-xs space-y-1">
-          <p className="font-semibold">Debug Info:</p>
-          <p>Stripe Key: {stripeKey ? "✓ Present" : "✗ Missing"}</p>
-          <p>Client Secret: {clientSecret ? "✓ Present" : "✗ Missing"}</p>
-          <p>Order ID: {orderId}</p>
-          <p>Amount: ${amount}</p>
+        <div className="mt-6 p-4 bg-gray-50 rounded-xl text-xs space-y-1 font-mono">
+          <p className="font-semibold text-gray-700">Debug Info:</p>
+          <p className="text-gray-600">
+            Stripe Key: {stripeKey ? "✓ Present" : "✗ Missing"}
+          </p>
+          <p className="text-gray-600">
+            Client Secret: {clientSecret ? "✓ Present" : "✗ Missing"}
+          </p>
+          <p className="text-gray-600">Order ID: {orderId}</p>
+          <p className="text-gray-600">Amount: ${amount}</p>
         </div>
       )}
     </div>

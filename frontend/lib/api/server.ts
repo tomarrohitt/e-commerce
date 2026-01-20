@@ -3,8 +3,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-// 1. Create the Axios Instance
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -12,13 +10,9 @@ const api = axios.create({
   },
 });
 
-// 2. Request Interceptor: Attach Cookies
 api.interceptors.request.use(
   async (config) => {
-    // We must await cookies() in Server Components
     const cookieStore = await cookies();
-
-    // Convert cookie store to a header string (e.g., "token=abc; session=xyz")
     const cookieHeader = cookieStore.toString();
 
     if (cookieHeader) {
@@ -34,7 +28,7 @@ export async function serverApi<T = any>(
 ): Promise<T> {
   try {
     const response = await fn(api);
-    return response as T; // Axios usually returns { data: ... }, adjust based on your needs
+    return response as T;
   } catch (error: any) {
     if (axios.isAxiosError(error)) {
       if (error.response?.status === 401) {

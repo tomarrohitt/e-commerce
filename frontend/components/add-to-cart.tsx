@@ -1,73 +1,74 @@
 "use client";
-import { useTransition, useState } from "react";
+import { useTransition, useState, useEffect } from "react";
 import { ShoppingCart, Check, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { addToCart } from "@/actions/cart";
+import { cn } from "@/lib/utils";
 
 interface AddToCartButtonProps {
   productId: string;
   isOutOfStock: boolean;
+  className: string;
+  quantity?: number;
 }
 
 export default function AddToCartButton({
   productId,
   isOutOfStock,
+  className,
+  quantity,
 }: AddToCartButtonProps) {
   const [pending, startTransition] = useTransition();
   const [added, setAdded] = useState(false);
-  const [error, setError] = useState(false);
-
-  const router = useRouter();
 
   async function handleAddToCart() {
     if (added) return;
 
-    setError(false);
     startTransition(async () => {
       try {
-        await addToCart(productId, 1);
-        router.refresh();
+        await addToCart(productId, quantity || 1);
         setAdded(true);
-        setTimeout(() => {
-          setAdded(false);
-        }, 2000);
-      } catch (err) {
-        setError(true);
-        setTimeout(() => {
-          setError(false);
-        }, 3000);
-      }
+      } catch (err) {}
     });
   }
+
+  useEffect(() => {
+    if (!pending) {
+      setTimeout(() => {
+        setAdded(false);
+      }, 2000);
+    }
+  }, [pending]);
 
   const getButtonContent = () => {
     if (pending) {
       return (
-        <>
+        <div className="flex items-center justify-center gap-x-5">
           <Loader2 className="w-5 h-5 animate-spin" />
           <span>Adding...</span>
-        </>
+        </div>
       );
     }
 
     if (added) {
       return (
-        <>
+        <div className="flex items-center justify-center gap-x-5">
           <Check className="w-5 h-5" />
           <span>Added to Cart!</span>
-        </>
+        </div>
       );
     }
 
     if (isOutOfStock) {
-      return <span>Out of Stock</span>;
+      <div className="flex items-center justify-center gap-x-5">
+        return <span>Out of Stock</span>;
+      </div>;
     }
 
     return (
-      <>
+      <div className="flex items-center justify-center gap-x-5">
         <ShoppingCart className="w-5 h-5" />
         <span>Add to Cart</span>
-      </>
+      </div>
     );
   };
 
@@ -76,31 +77,22 @@ export default function AddToCartButton({
       return "bg-gray-300 text-gray-500 cursor-not-allowed";
     }
 
-    if (error) {
-      return "bg-red-600 text-white hover:bg-red-700";
+    if (pending) {
+      return "bg-blue-500 text-white cursor-wait";
     }
-
     if (added) {
-      return "bg-green-600 text-white";
+      return "bg-green-500 text-white";
     }
 
-    return "bg-purple-600 text-white hover:bg-purple-700 active:scale-95";
+    return "bg-blue-500 text-white hover:bg-blue-700 active:scale-95";
   };
-
   return (
     <button
       disabled={isOutOfStock || pending || added}
-      className={`
-        mt-4 w-full py-2.5 px-4 rounded-lg font-semibold
-        transition-all duration-200 ease-in-out
-        flex items-center justify-center gap-2
-        transform hover:scale-[1.02]
-        disabled:transform-none disabled:hover:scale-100
-        ${getButtonStyles()}
-      `}
+      className={cn(getButtonStyles(), className)}
       onClick={handleAddToCart}
     >
-      {error ? "Failed - Try Again" : getButtonContent()}
+      {getButtonContent()}
     </button>
   );
 }

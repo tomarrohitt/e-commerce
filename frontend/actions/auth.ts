@@ -1,8 +1,10 @@
 "use server";
 
+import api from "@/lib/api";
 import { signIn, signUp } from "@/lib/api/auth-server";
 import { simplifyZodErrors } from "@/lib/error-simplifier";
 import { LoginInput, loginSchema, registrationSchema } from "@/types";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import z from "zod";
 
@@ -114,4 +116,25 @@ export async function register(_: any, formData: FormData) {
   }
 
   redirect("/email-verification");
+}
+
+export async function logout() {
+  try {
+    await api.post(
+      "/auth/sign-out",
+      {},
+      {
+        headers: {
+          Origin: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+        },
+      },
+    );
+  } catch (error) {
+    console.log(JSON.stringify(error));
+  }
+  const cookieStore = await cookies();
+  cookieStore.getAll().forEach((cookie) => {
+    cookieStore.delete(cookie.name);
+  });
+  redirect("/sign-in");
 }

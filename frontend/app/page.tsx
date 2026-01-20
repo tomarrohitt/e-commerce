@@ -14,7 +14,7 @@ export default function HomePage() {
             </h2>
             <Link
               href="/products"
-              className="text-purple-600 hover:text-purple-700 font-semibold"
+              className="text-blue-500 hover:text-blue-700 font-semibold"
             >
               View All →
             </Link>

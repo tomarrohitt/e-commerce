@@ -9,7 +9,7 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="flex items-center space-x-2">
             <span className="text-2xl">🛒</span>
-            <span className="text-xl font-bold text-purple-600">E-Store</span>
+            <span className="text-xl font-bold text-blue-500">E-Store</span>
           </Link>
 
           <div className="hidden md:flex items-center space-x-4">

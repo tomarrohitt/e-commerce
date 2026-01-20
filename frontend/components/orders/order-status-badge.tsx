@@ -1,12 +1,12 @@
 import { Badge } from "@/components/ui/badge";
 
 const STATUS_VARIANTS = {
-  PENDING: "warning",
+  PENDING: "default",
   PROCESSING: "default",
   SHIPPED: "default",
   DELIVERED: "success",
   PAID: "success",
-  CANCELLED: "danger",
+  CANCELLED: "destructive",
   REFUNDED: "default",
 } as const;
 

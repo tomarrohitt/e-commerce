@@ -12,7 +12,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <div className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 h-full flex flex-col">
       <Link href={`/products/${product.id}`} className="block">
-        <div className="relative h-48 bg-linear-to-br from-purple-400 to-indigo-600 overflow-hidden">
+        <div className="relative h-48 bg-linear-to-br from-blue-400 to-indigo-500 overflow-hidden">
           {product.thumbnail ? (
             <img
               src={product.thumbnail}
@@ -32,7 +32,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           )}
 
           {product.category && (
-            <span className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-purple-600">
+            <span className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-blue-500">
               {product.category.name}
             </span>
           )}
@@ -41,13 +41,13 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       <div className="p-4 flex flex-col grow">
         <Link href={`/products/${product.id}`}>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 hover:text-purple-600 transition-colors">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 hover:text-blue-500 transition-colors">
             {product.name}
           </h3>
         </Link>
 
         <div className="flex items-center justify-between mb-4">
-          <span className="text-xl font-bold text-purple-600">
+          <span className="text-xl font-bold text-blue-500">
             ${product.price}
           </span>
 
@@ -61,7 +61,16 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
 
         <div className="mt-auto">
-          <AddToCartButton productId={product.id} isOutOfStock={isOutOfStock} />
+          <AddToCartButton
+            productId={product.id}
+            isOutOfStock={isOutOfStock}
+            className="
+          mt-4 w-full py-2.5 px-4 rounded-lg font-semibold
+          transition-all duration-200 ease-in-out
+          flex items-center justify-center gap-2
+          transform hover:scale-[1.02]
+          disabled:transform-none disabled:hover:scale-100"
+          />
         </div>
       </div>
     </div>

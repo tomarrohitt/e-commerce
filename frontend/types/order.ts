@@ -2,48 +2,39 @@ import { Pagination } from "./common";
 import { Address } from "./user";
 
 export interface OrderItem {
-  id: string;
-  orderId: string;
   productId: string;
   name: string;
-  sku: string;
   price: string;
   thumbnail: string;
   quantity: number;
 }
 
-export interface Order {
+export type Order = {
   id: string;
+  totalAmount: string;
+  status: string;
+  currency: string;
+  invoiceUrl: string | null;
+  createdAt: string;
+  items: OrderItem[];
+  shippingAddress: Address;
+};
+
+export interface OrderExtended extends Order {
   userId: string;
   userEmail: string;
   userName: string;
 
   subtotal: string;
   tax: string;
-  totalAmount: string;
-  currency: string;
 
   paid: boolean;
   refunded: boolean;
 
-  status:
-    | "AWAITING_PAYMENT"
-    | "PAID"
-    | "CANCELLED"
-    | "SHIPPED"
-    | "DELIVERED"
-    | "REFUNDED";
   paymentId: string | null;
   paymentClientSecret: string | null;
-  invoiceUrl: string | null;
+  billingAddress: Address;
 
-  // Relations
-  items: OrderItem[];
-  shippingAddress: Address;
-  billingAddress?: Address;
-
-  // Timestamps
-  createdAt: string;
   updatedAt: string;
 }
 
@@ -78,21 +69,16 @@ export enum OrderStatusType {
   REFUNDED = "REFUNDED",
 }
 
-export interface OrderItemsListProps {
-  orderItems: Array<{
-    productId: string;
-    name: string;
-    thumbnail: string;
-    quantity: number;
-    price: string;
-  }>;
-  status: string;
-}
-
 export type ListOrderInput = Partial<{
   page: number;
   limit: number;
   sortBy: "totalAmount" | "createdAt";
   sortOrder: "asc" | "desc";
-  status?: "PAID" | "FAILED" | "CANCELLED" | "DELIVERED" | "REFUNDED";
+  status?:
+    | "PAID"
+    | "FAILED"
+    | "CANCELLED"
+    | "DELIVERED"
+    | "REFUNDED"
+    | "AWAITING_PAYMENT";
 }>;

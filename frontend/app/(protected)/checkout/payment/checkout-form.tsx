@@ -4,7 +4,7 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
-import { AlertCircle, CheckCircle, Lock, RefreshCw } from "lucide-react";
+import { AlertCircle, Lock, RefreshCw, ShieldCheck } from "lucide-react";
 
 interface CheckoutFormProps {
   orderId: string;
@@ -18,22 +18,6 @@ export default function CheckoutForm({ orderId, amount }: CheckoutFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-
-  // Debug logging
-  useEffect(() => {
-    console.log("CheckoutForm mounted", {
-      stripe: !!stripe,
-      elements: !!elements,
-    });
-  }, []);
-
-  useEffect(() => {
-    console.log("Stripe initialized:", !!stripe);
-  }, [stripe]);
-
-  useEffect(() => {
-    console.log("Elements initialized:", !!elements);
-  }, [elements]);
 
   const paymentElementOptions = useMemo(
     () => ({
@@ -63,7 +47,7 @@ export default function CheckoutForm({ orderId, amount }: CheckoutFormProps) {
       const { error } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/orders/${orderId}?payment_status=success`,
+          return_url: `${window.location.origin}/orders/${orderId}/success`,
         },
       });
 
@@ -82,12 +66,11 @@ export default function CheckoutForm({ orderId, amount }: CheckoutFormProps) {
     }
   };
 
-  // Show error state if PaymentElement failed to load
   if (loadError) {
     return (
-      <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8">
-        <div className="flex items-start gap-3 mb-6 p-4 bg-red-50 border border-red-100 rounded-lg">
-          <AlertCircle className="w-6 h-6 text-red-600 mt-0.5 shrink-0" />
+      <div>
+        <div className="flex items-start gap-3 mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+          <AlertCircle className="w-6 h-6 text-red-500 mt-0.5 shrink-0" />
           <div>
             <h3 className="font-semibold text-red-900 mb-1">
               Payment Form Failed to Load
@@ -103,21 +86,33 @@ export default function CheckoutForm({ orderId, amount }: CheckoutFormProps) {
           </div>
         </div>
 
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-          <h4 className="font-medium text-gray-900 mb-2">
+        <div className="mt-6 p-4 bg-gray-50 rounded-xl">
+          <h4 className="font-medium text-gray-900 mb-3">
             Troubleshooting Steps:
           </h4>
-          <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
-            <li>Check your internet connection</li>
-            <li>Disable any ad blockers or VPN</li>
-            <li>Try a different browser or incognito mode</li>
-            <li>Contact support if the issue persists</li>
+          <ul className="text-sm text-gray-600 space-y-2">
+            <li className="flex items-start gap-2">
+              <span className="text-blue-600 mt-0.5">•</span>
+              <span>Check your internet connection</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-blue-600 mt-0.5">•</span>
+              <span>Disable any ad blockers or VPN</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-blue-600 mt-0.5">•</span>
+              <span>Try a different browser or incognito mode</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-blue-600 mt-0.5">•</span>
+              <span>Contact support if the issue persists</span>
+            </li>
           </ul>
         </div>
 
         <button
           onClick={() => (window.location.href = "/checkout")}
-          className="w-full mt-6 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition-all"
+          className="w-full mt-6 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-4 px-6 rounded-xl transition-all"
         >
           Return to Checkout
         </button>
@@ -126,28 +121,34 @@ export default function CheckoutForm({ orderId, amount }: CheckoutFormProps) {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white rounded-xl shadow-lg p-6 sm:p-8"
-    >
+    <form onSubmit={handleSubmit}>
       <div className="mb-6 pb-6 border-b border-gray-100">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-gray-600 font-medium">Total due</span>
-          <span className="text-2xl font-bold text-gray-900">${amount}</span>
+        <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 px-4 py-2 rounded-xl w-fit mb-4">
+          <ShieldCheck className="w-4 h-4" />
+          <span className="font-medium">Secure SSL Connection</span>
         </div>
-        <div className="flex items-center gap-2 text-xs text-green-600 bg-green-50 px-3 py-1 rounded-full w-fit">
-          <CheckCircle className="w-3 h-3" />
-          <span>Secure SSL Connection</span>
+        <div className="flex justify-between items-baseline">
+          <span className="text-gray-600 font-medium">Amount to pay</span>
+          <div className="text-right">
+            <div className="text-3xl font-bold text-gray-900">${amount}</div>
+            <div className="text-sm text-gray-500">USD</div>
+          </div>
         </div>
       </div>
 
       <div className="mb-6">
-        {/* Show loading spinner while PaymentElement initializes */}
         {!isReady && (
-          <div className="flex flex-col items-center justify-center py-12">
-            <div className="animate-spin h-10 w-10 border-4 border-purple-600 border-t-transparent rounded-full mb-4"></div>
-            <p className="text-gray-600 text-sm">Loading payment form...</p>
-            <p className="text-gray-400 text-xs mt-2">
+          <div className="flex flex-col items-center justify-center py-16">
+            <div className="relative">
+              <div className="animate-spin h-12 w-12 border-4 border-blue-200 border-t-blue-600 rounded-full"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Lock className="w-5 h-5 text-blue-600" />
+              </div>
+            </div>
+            <p className="text-gray-600 text-sm mt-4 font-medium">
+              Loading secure payment form...
+            </p>
+            <p className="text-gray-400 text-xs mt-1">
               This may take a few seconds
             </p>
           </div>
@@ -158,19 +159,27 @@ export default function CheckoutForm({ orderId, amount }: CheckoutFormProps) {
             id="payment-element"
             options={paymentElementOptions}
             onReady={() => {
-              console.log("PaymentElement ready!");
               setIsReady(true);
               setLoadError(null);
             }}
-            onLoadError={(error) => {
+            onLoadError={(error: any) => {
               console.error("PaymentElement load error:", error);
-              setLoadError(
-                "Failed to load payment form. Please check your connection and try again.",
-              );
+              console.error("Error details:", JSON.stringify(error, null, 2));
+              console.error("Error type:", error?.type);
+              console.error("Error message:", error?.message);
+
+              let errorMessage = "Failed to load payment form. ";
+
+              if (error?.message) {
+                errorMessage += error.message;
+              } else {
+                errorMessage += "Please check your connection and try again.";
+              }
+
+              setLoadError(errorMessage);
               setIsReady(false);
             }}
             onChange={(event) => {
-              console.log("PaymentElement changed:", event);
               if (event.complete) {
                 setMessage(null);
               }
@@ -180,9 +189,9 @@ export default function CheckoutForm({ orderId, amount }: CheckoutFormProps) {
       </div>
 
       {message && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-lg flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 shrink-0" />
-          <div className="text-sm text-red-700">{message}</div>
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 shrink-0" />
+          <div className="text-sm text-red-700 flex-1">{message}</div>
         </div>
       )}
 
@@ -190,34 +199,39 @@ export default function CheckoutForm({ orderId, amount }: CheckoutFormProps) {
         disabled={!isReady || isLoading || !stripe || !elements}
         id="submit"
         type="submit"
-        className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:shadow-none flex items-center justify-center gap-2 text-lg"
       >
         {isLoading ? (
           <>
-            <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            <span>Processing...</span>
+            <div className="h-5 w-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+            <span>Processing payment...</span>
           </>
         ) : (
           <>
-            <Lock className="w-4 h-4" />
-            <span>Pay ${amount}</span>
+            <Lock className="w-5 h-5" />
+            <span>Pay ${amount} securely</span>
           </>
         )}
       </button>
 
-      <div className="mt-6 text-center">
-        <p className="text-xs text-gray-400 flex items-center justify-center gap-1">
-          Payments processed securely by Stripe
-        </p>
+      <div className="mt-6 flex items-center justify-center gap-6 text-xs text-gray-400">
+        <div className="flex items-center gap-1">
+          <ShieldCheck className="w-3 h-3" />
+          <span>256-bit encryption</span>
+        </div>
+        <div className="w-1 h-1 bg-gray-300 rounded-full" />
+        <div className="flex items-center gap-1">
+          <Lock className="w-3 h-3" />
+          <span>PCI DSS compliant</span>
+        </div>
       </div>
 
-      {/* Debug info - remove in production */}
       {process.env.NODE_ENV === "development" && (
-        <div className="mt-4 p-3 bg-gray-100 rounded text-xs space-y-1">
-          <p>Debug Info:</p>
-          <p>Stripe: {stripe ? "✓" : "✗"}</p>
-          <p>Elements: {elements ? "✓" : "✗"}</p>
-          <p>Ready: {isReady ? "✓" : "✗"}</p>
+        <div className="mt-6 p-4 bg-gray-50 rounded-xl text-xs space-y-1 font-mono">
+          <p className="font-semibold text-gray-700">Debug Info:</p>
+          <p className="text-gray-600">Stripe: {stripe ? "✓" : "✗"}</p>
+          <p className="text-gray-600">Elements: {elements ? "✓" : "✗"}</p>
+          <p className="text-gray-600">Ready: {isReady ? "✓" : "✗"}</p>
         </div>
       )}
     </form>

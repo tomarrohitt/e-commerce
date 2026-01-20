@@ -15,7 +15,7 @@ export function ProductImageGallery({
 
   return (
     <div>
-      <div className="aspect-square bg-linear-to-br from-purple-400 to-indigo-600 rounded-2xl overflow-hidden mb-4">
+      <div className="aspect-square bg-linear-to-br from-blue-400 to-indigo-500 rounded-2xl overflow-hidden mb-4">
         {mainImage ? (
           <img
             src={mainImage}
@@ -37,8 +37,8 @@ export function ProductImageGallery({
               onClick={() => onSelectImage(index)}
               className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
                 selectedImage === index
-                  ? "border-purple-600 scale-105"
-                  : "border-gray-200 hover:border-purple-400"
+                  ? "border-blue-500 scale-105"
+                  : "border-gray-200 hover:border-blue-400"
               }`}
             >
               <img

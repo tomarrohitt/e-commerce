@@ -17,19 +17,19 @@ export async function AuthSection() {
       <nav className="hidden md:flex items-center space-x-12 mr-60">
         <Link
           href="/"
-          className="text-gray-700 hover:text-purple-600 transition-all duration-200 font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-purple-600 after:transition-all after:duration-200 hover:after:w-full"
+          className="text-gray-700 hover:text-blue-500 transition-all duration-200 font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-blue-500 after:transition-all after:duration-200 hover:after:w-full"
         >
           Home
         </Link>
         <Link
           href="/dashboard"
-          className="text-gray-700 hover:text-purple-600 transition-all duration-200 font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-purple-600 after:transition-all after:duration-200 hover:after:w-full"
+          className="text-gray-700 hover:text-blue-500 transition-all duration-200 font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-blue-500 after:transition-all after:duration-200 hover:after:w-full"
         >
           Dashboard
         </Link>
         <Link
           href="/orders"
-          className="text-gray-700 hover:text-purple-600 transition-all duration-200 font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-purple-600 after:transition-all after:duration-200 hover:after:w-full"
+          className="text-gray-700 hover:text-blue-500 transition-all duration-200 font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-blue-500 after:transition-all after:duration-200 hover:after:w-full"
         >
           Orders
         </Link>
@@ -37,7 +37,7 @@ export async function AuthSection() {
 
       <Link
         href="/cart"
-        className="relative text-gray-700 hover:text-purple-600 transition-all duration-200 hover:scale-110 active:scale-95"
+        className="relative text-gray-700 hover:text-blue-500 transition-all duration-200 hover:scale-110 active:scale-95"
         aria-label="Shopping cart"
       >
         <ShoppingCart className="w-6 h-6" />
@@ -56,13 +56,13 @@ const UnProtectedSection = () => {
     <div className="min-w-40 flex items-center justify-end space-x-8 mr-5">
       <Link
         href="/sign-in"
-        className="text-gray-700 hover:text-purple-600 transition-all duration-200 font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-purple-600 after:transition-all after:duration-200 hover:after:w-full"
+        className="text-gray-700 hover:text-blue-500 transition-all duration-200 font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-blue-500 after:transition-all after:duration-200 hover:after:w-full"
       >
         Sign In
       </Link>
       <Link
         href="/sign-up"
-        className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-lg transition-all duration-200 font-semibold shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
+        className="bg-blue-500 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg transition-all duration-200 font-semibold shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
       >
         Sign Up
       </Link>
@@ -73,7 +73,7 @@ const UnProtectedSection = () => {
 function CartCountFallback() {
   return (
     <span className="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center">
-      <Loader2 className="w-3 h-3 text-purple-600 animate-spin" />
+      <Loader2 className="w-3 h-3 text-blue-500 animate-spin" />
     </span>
   );
 }

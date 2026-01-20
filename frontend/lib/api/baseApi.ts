@@ -7,8 +7,6 @@ export const baseApi = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  // Default: Don't send cookies.
-  // You can override this in individual requests if needed.
   withCredentials: false,
 });
 
