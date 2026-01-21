@@ -3,7 +3,7 @@ import { CartItem } from "@/components/cart/cart-item";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { formatPrice } from "@/lib/format";
-import { getCart } from "@/lib/api";
+import { getCart } from "@/lib/api/cart";
 import { ShoppingBag, ArrowRight, Package, ShoppingCart } from "lucide-react";
 import { ClearCartButton } from "@/components/cart/clear-cart-button";
 import { cookies } from "next/headers";
@@ -146,7 +146,7 @@ export default async function CartPage() {
   );
 }
 
-export function EmptyCartState() {
+function EmptyCartState() {
   return (
     <div className="flex-1 bg-muted/30 flex flex-col pt-30 items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
       <div className="text-center max-w-lg w-full mb-12">
@@ -166,7 +166,8 @@ export function EmptyCartState() {
           Your Cart is Empty
         </h1>
         <p className="text-muted-foreground text-lg mb-8 text-pretty">
-          Looks like you haven't found anything you love yet. Let's change that!
+          Looks like you haven&apos;t found anything you love yet. Let&apos;s
+          change that!
         </p>
 
         <Link href="/products">

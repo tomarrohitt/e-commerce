@@ -1,26 +1,43 @@
+"use server";
 import { User } from "@/types";
 import { cookies } from "next/headers";
 
 export async function getUserFromSession(): Promise<User | null> {
   const cookieStore = await cookies();
-  const session = cookieStore.get("better-auth.session_data");
+  const sessionData = cookieStore.get("better-auth.session_data");
+  const sessionToken = cookieStore.get("better-auth.session_token");
 
-  if (!session) return null;
+  if (!sessionData || !sessionToken) {
+    if (sessionData || sessionToken) {
+      cookieStore.delete("better-auth.session_data");
+      cookieStore.delete("better-auth.session_token");
+    }
+    return null;
+  }
 
   try {
-    const jsonString = Buffer.from(session.value, "base64").toString("utf-8");
+    const jsonString = Buffer.from(sessionData.value, "base64").toString(
+      "utf-8",
+    );
     const data = JSON.parse(jsonString);
+
+    const expiresAt = new Date(data.session.expiresAt);
+    if (new Date() > expiresAt) {
+      throw new Error("Session expired");
+    }
+
     return data.session.user;
   } catch (error) {
-    console.error("Failed to parse session data", error);
+    cookieStore.delete("better-auth.session_data");
+    cookieStore.delete("better-auth.session_token");
     return null;
   }
 }
+
 export async function getTokenFromSession(): Promise<string | null> {
   const cookieStore = await cookies();
-  const session = cookieStore.get("better-auth.session_token");
+  const token = cookieStore.get("better-auth.session_token");
+  if (!token) return null;
 
-  if (!session) return null;
-
-  return session.value;
+  return token.value;
 }

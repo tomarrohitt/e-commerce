@@ -25,7 +25,7 @@ export function UserDropdown({ user }: UserDropdownProps) {
           />
         ) : (
           <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-            user?.name?.charAt(0).toUpperCase() || "U"
+            {user?.name?.charAt(0).toUpperCase() || "U"}
           </div>
         )}
         <span className="text-sm font-medium">{user?.name}</span>

@@ -4,13 +4,16 @@ import { Trash2 } from "lucide-react";
 import { useTransition } from "react";
 import { Button } from "../ui/button";
 import { cancelOrder } from "@/actions/order";
+import { useRouter } from "next/navigation";
 
 export const OrderCancelButton = ({ orderId }: { orderId: string }) => {
   const [pending, startTransition] = useTransition();
+  const router = useRouter();
 
   const handleCancelOrder = async () => {
     startTransition(async () => {
       await cancelOrder(orderId);
+      router.refresh();
     });
   };
 

@@ -1,5 +1,3 @@
-"use cache";
-
 import {
   PaginatedProducts,
   Product,
@@ -9,7 +7,7 @@ import {
   ReviewsResponse,
 } from "@/types";
 import { baseApi } from "./baseApi";
-import { cacheTag } from "next/cache";
+import { buildQuery } from "../build-query";
 
 export async function getProducts(params?: {
   page?: number;
@@ -20,45 +18,50 @@ export async function getProducts(params?: {
   maxPrice?: number;
   inStock?: boolean;
 }): Promise<PaginatedProducts> {
-  cacheTag("products");
-  const response = await baseApi.get<ProductsListResponse>("/products", {
-    params,
+  const q = buildQuery(params);
+  const res = await baseApi<ProductsListResponse>(`/products${q}`, {
+    cache: "force-cache",
+    next: {
+      tags: ["products"],
+    },
   });
-  return response.data.data;
+
+  return res.data;
 }
 
 export async function getProduct(id: string): Promise<Product> {
-  cacheTag(`products-${id}`);
-
-  const response = await baseApi.get(`/products/${id}`);
-  return response.data.data;
+  const res = await baseApi<{ data: Product }>(`/products/${id}`, {
+    cache: "force-cache",
+    next: {
+      tags: [`product-${id}`],
+    },
+  });
+  return res.data;
 }
 
 export async function getCategories() {
-  cacheTag("categories");
-  const response = await baseApi.get("/category");
-  return response.data.data;
+  const res = await baseApi<{ data: any[] }>("/category");
+  return res.data;
 }
 
 export async function getCategory(id: string) {
-  const response = await baseApi.get(`/category/${id}`);
-  return response.data;
+  const res = await baseApi(`/category/${id}`);
+  return res;
 }
 
 export async function getCategoryBySlug(slug: string) {
-  const response = await baseApi.get(`/category/slug/${slug}`);
-  return response.data;
+  const res = await baseApi(`/category/slug/${slug}`);
+  return res;
 }
 
 export async function getReviews(productId: string): Promise<ReviewsData> {
-  const response = await baseApi.get<ReviewsResponse>(
-    `/reviews?productId=${productId}`,
+  const res = await baseApi<ReviewsResponse>(
+    `/reviews${buildQuery({ productId })}`,
   );
-  return response.data.data;
+  return res.data;
 }
+
 export async function getReviewByProductId(productId: string) {
-  const response = await baseApi.get<ReviewResponse>(
-    `/reviews/status/${productId}`,
-  );
-  return response.data.data;
+  const res = await baseApi<ReviewResponse>(`/reviews/status/${productId}`);
+  return res.data;
 }

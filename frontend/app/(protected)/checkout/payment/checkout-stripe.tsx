@@ -16,8 +16,26 @@ export const CheckoutStripe = ({
   amount: string;
   clientSecret: string;
 }) => {
+  const options = useMemo(
+    () => ({
+      clientSecret,
+      appearance: {
+        theme: "stripe" as const,
+        variables: {
+          colorPrimary: "#2563eb",
+          colorBackground: "#ffffff",
+          colorText: "#1f2937",
+          colorDanger: "#ef4444",
+          fontFamily: "system-ui, sans-serif",
+          spacingUnit: "4px",
+          borderRadius: "12px",
+        },
+      },
+    }),
+    [clientSecret],
+  );
+
   useEffect(() => {
-    // Validate client secret format
     if (clientSecret) {
       const isValid =
         clientSecret.startsWith("pi_") || clientSecret.startsWith("seti_");
@@ -77,7 +95,7 @@ export const CheckoutStripe = ({
             </h3>
             <p className="text-sm text-red-700">
               Invalid Stripe configuration. The publishable key should start
-              with 'pk_test_' or 'pk_live_'.
+              with &apos;pk_test_&apos; or &apos;pk_live_&apos;.
             </p>
           </div>
         </div>
@@ -126,25 +144,6 @@ export const CheckoutStripe = ({
       </div>
     );
   }
-
-  const options = useMemo(
-    () => ({
-      clientSecret,
-      appearance: {
-        theme: "stripe" as const,
-        variables: {
-          colorPrimary: "#2563eb",
-          colorBackground: "#ffffff",
-          colorText: "#1f2937",
-          colorDanger: "#ef4444",
-          fontFamily: "system-ui, sans-serif",
-          spacingUnit: "4px",
-          borderRadius: "12px",
-        },
-      },
-    }),
-    [clientSecret],
-  );
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">

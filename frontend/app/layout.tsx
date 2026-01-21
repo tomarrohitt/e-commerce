@@ -3,7 +3,6 @@ import { Raleway } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
 import { cn } from "@/lib/utils";
-import Footer from "@/components/footer";
 
 const raleway = Raleway({ subsets: ["latin"], variable: "--font-sans" });
 

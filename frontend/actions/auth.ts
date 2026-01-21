@@ -1,6 +1,6 @@
 "use server";
 
-import api from "@/lib/api";
+import { api } from "@/lib/api/server";
 import { signIn, signUp } from "@/lib/api/auth-server";
 import { simplifyZodErrors } from "@/lib/error-simplifier";
 import { LoginInput, loginSchema, registrationSchema } from "@/types";
@@ -8,9 +8,11 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import z from "zod";
 
-export async function login(_: any, formData: FormData) {
+export async function login(redirectTo: string, _: any, formData: FormData) {
   const data = Object.fromEntries(formData) as LoginInput;
   const result = loginSchema.safeParse(data);
+
+  console.log({ data: result.data, redirectTo });
 
   if (!result.success) {
     const formattedErrors = z.treeifyError(result.error);
@@ -45,7 +47,7 @@ export async function login(_: any, formData: FormData) {
     }
     return {
       success: false,
-      message: error.errors[0].message,
+      message: "",
       errors: {
         email: "",
         password: "",
@@ -56,7 +58,7 @@ export async function login(_: any, formData: FormData) {
       },
     };
   }
-  redirect("/");
+  redirect(redirectTo);
 }
 export async function register(_: any, formData: FormData) {
   const data = Object.fromEntries(formData.entries()) as {
@@ -120,18 +122,14 @@ export async function register(_: any, formData: FormData) {
 
 export async function logout() {
   try {
-    await api.post(
-      "/auth/sign-out",
-      {},
-      {
-        headers: {
-          Origin: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-        },
+    await api("/auth/sign-out", {
+      method: "POST",
+      body: {},
+      headers: {
+        Origin: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
       },
-    );
-  } catch (error) {
-    console.log(JSON.stringify(error));
-  }
+    });
+  } catch (error) {}
   const cookieStore = await cookies();
   cookieStore.getAll().forEach((cookie) => {
     cookieStore.delete(cookie.name);

@@ -1,17 +1,37 @@
 import { Cart } from "@/types";
-import api from "./server";
+import { cache } from "react";
+import { api } from "./server";
 
 export async function getCart(): Promise<Cart> {
-  const response = await api.get("/cart");
-  return response.data.data;
+  const res = await api("/cart");
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw err;
+  }
+
+  const json = await res.json();
+  return json.data;
 }
 
-export const getCartCount = async () => {
-  const response = await api.get("/cart/count");
-  return response.data;
-};
+export const getCartCount = cache(async () => {
+  const res = await api("/cart/count");
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw err;
+  }
+
+  return await res.json();
+});
 
 export async function validateCart() {
-  const response = await api.get("/cart/validate");
-  return response.data;
+  const res = await api("/cart/validate");
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw err;
+  }
+
+  return await res.json();
 }

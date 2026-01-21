@@ -1,23 +1,37 @@
 import { LoginInput, LoginResponse, RegistrationInput, User } from "@/types";
-import api from ".";
 import { cookies } from "next/headers";
+import { api } from "./server";
 
 export async function signUp(data: RegistrationInput): Promise<User> {
-  const response = await api.post("/auth/sign-up/email", data);
-  return response.data;
+  const res = await api("/auth/sign-up/email", {
+    method: "POST",
+    body: data,
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw err;
+  }
+
+  const json = await res.json();
+  return json;
 }
 
 export async function signIn(data: LoginInput): Promise<User> {
-  const response = await api.post<LoginResponse>("/auth/sign-in/email", data);
+  const res = await api("/auth/sign-in/email", {
+    method: "POST",
+    body: data,
+  });
 
-  const rawSetCookie =
-    (response.headers as any).get("set-cookie") ||
-    response.headers["set-cookie"];
-  const cookieHeader = Array.isArray(rawSetCookie)
-    ? rawSetCookie
-    : typeof rawSetCookie === "string"
-      ? rawSetCookie.split(/,(?=\s*[^;]+=[^;]+)/)
-      : [];
+  if (!res.ok) {
+    const err = await res.json();
+    throw err;
+  }
+
+  const rawSetCookie = res.headers.get("set-cookie") || "";
+  const cookieHeader = rawSetCookie
+    ? rawSetCookie.split(/,(?=\s*[^;]+=[^;]+)/)
+    : [];
 
   const cookieStore = await cookies();
   cookieHeader.forEach((cookieString: string) => {
@@ -40,78 +54,113 @@ export async function signIn(data: LoginInput): Promise<User> {
     }
   });
 
-  return response.data.user;
+  const json = (await res.json()) as LoginResponse;
+  return json.user;
 }
 
 export async function signOut() {
-  const response = await api.post("/auth/sign-out", {});
-  return response.data;
+  const res = await api("/auth/sign-out", {
+    method: "POST",
+    body: {},
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw err;
+  }
+
+  return await res.json();
 }
 
 export async function getSession(): Promise<{ user: User } | null> {
   try {
-    const response = await api.get("/auth/get-session");
-    return response.data;
-  } catch (error) {
+    const res = await api("/auth/get-session");
+
+    if (!res.ok) return null;
+
+    return await res.json();
+  } catch {
     return null;
   }
 }
 
 export async function resendVerificationEmail(email: string) {
-  const response = await api.post("/auth/resend-verification-email", {
-    email,
+  const res = await api("/auth/resend-verification-email", {
+    method: "POST",
+    body: { email },
   });
-  return response.data;
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw err;
+  }
+
+  return await res.json();
 }
 
 export async function forgotPassword(email: string) {
-  const response = await api.post("/auth/request-password-reset", {
-    email,
+  const res = await api("/auth/request-password-reset", {
+    method: "POST",
+    body: { email },
   });
-  return response.data;
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw err;
+  }
+
+  return await res.json();
 }
 
 export async function resetPassword(data: {
   token: string;
   newPassword: string;
 }) {
-  const response = await api.post("/auth/reset-password", data);
-  return response.data;
+  const res = await api("/auth/reset-password", {
+    method: "POST",
+    body: data,
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw err;
+  }
+
+  return await res.json();
 }
 
 export async function refreshSession() {
-  const response = await api.get("/auth/get-session", {
+  const res = await api("/auth/get-session", {
     headers: {
       "x-skip-cache": "true",
     },
   });
 
-  const rawSetCookie = response.headers["set-cookie"];
+  if (!res.ok) return;
 
-  if (rawSetCookie) {
-    const cookieStore = await cookies();
-    const cookieHeaders = Array.isArray(rawSetCookie)
-      ? rawSetCookie
-      : [rawSetCookie];
+  const rawSetCookie = res.headers.get("set-cookie");
+  if (!rawSetCookie) return;
 
-    cookieHeaders.forEach((cookieString) => {
-      const [nameValue] = cookieString.split(";");
-      const [name, ...rest] = nameValue.split("=");
-      const value = rest.join("=");
+  const cookieStore = await cookies();
+  const cookieHeaders = rawSetCookie.split(/,(?=\s*[^;]+=[^;]+)/);
 
-      if (name && value) {
-        const cleanValue = decodeURIComponent(value);
+  cookieHeaders.forEach((cookieString) => {
+    const [nameValue] = cookieString.split(";");
+    const [name, ...rest] = nameValue.split("=");
+    const value = rest.join("=");
 
-        cookieStore.set({
-          name: name.trim(),
-          value: cleanValue,
-          httpOnly: true,
-          path: "/",
-          secure: true,
-          sameSite: "lax",
-          maxAge: 60 * 60 * 24 * 7,
-        });
-      }
-    });
-  }
+    if (name && value) {
+      const cleanValue = decodeURIComponent(value);
+
+      cookieStore.set({
+        name: name.trim(),
+        value: cleanValue,
+        httpOnly: true,
+        path: "/",
+        secure: true,
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24 * 7,
+      });
+    }
+  });
 }

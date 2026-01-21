@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ProductListProduct } from "@/types";
 import AddToCartButton from "./add-to-cart";
+import Image from "next/image";
 
 interface ProductCardProps {
   product: ProductListProduct;
@@ -14,10 +15,11 @@ export default function ProductCard({ product }: ProductCardProps) {
       <Link href={`/products/${product.id}`} className="block">
         <div className="relative h-48 bg-linear-to-br from-blue-400 to-indigo-500 overflow-hidden">
           {product.thumbnail ? (
-            <img
+            <Image
               src={product.thumbnail}
               alt={product.name}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">

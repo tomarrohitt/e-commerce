@@ -1,46 +1,75 @@
 import { LoginInput, LoginResponse, RegistrationInput, User } from "@/types";
-import api from ".";
+import { api } from "./server";
 
 export const authService = {
   async signUp(data: RegistrationInput): Promise<User> {
-    const response = await api.post("/auth/sign-up/email", data);
-    return response.data;
+    const res = await api("/auth/sign-up/email", {
+      method: "POST",
+      body: data,
+    });
+
+    if (!res.ok) throw await res.json();
+    return await res.json();
   },
 
   async signIn(data: LoginInput): Promise<User> {
-    const response = await api.post<LoginResponse>("/auth/sign-in/email", data);
-    return response.data.user;
+    const res = await api("/auth/sign-in/email", {
+      method: "POST",
+      body: data,
+    });
+
+    if (!res.ok) throw await res.json();
+    const json = (await res.json()) as LoginResponse;
+    return json.user;
   },
 
   async signOut() {
-    const response = await api.post("/auth/sign-out", {});
-    return response.data;
+    const res = await api("/auth/sign-out", {
+      method: "POST",
+      body: {},
+    });
+
+    if (!res.ok) throw await res.json();
+    return await res.json();
   },
 
   async getSession(): Promise<{ user: User } | null> {
     try {
-      const response = await api.get("/auth/get-session");
-      return response.data;
-    } catch (error) {
+      const res = await api("/auth/get-session");
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
       return null;
     }
   },
 
   async resendVerificationEmail(email: string) {
-    const response = await api.post("/auth/resend-verification-email", {
-      email,
+    const res = await api("/auth/resend-verification-email", {
+      method: "POST",
+      body: { email },
     });
-    return response.data;
+
+    if (!res.ok) throw await res.json();
+    return await res.json();
   },
 
   async forgotPassword(email: string) {
-    const response = await api.post("/auth/request-password-reset", {
-      email,
+    const res = await api("/auth/request-password-reset", {
+      method: "POST",
+      body: { email },
     });
-    return response.data;
+
+    if (!res.ok) throw await res.json();
+    return await res.json();
   },
-  resetPassword: async (data: { token: string; newPassword: string }) => {
-    const response = await api.post("/auth/reset-password", data);
-    return response.data;
+
+  async resetPassword(data: { token: string; newPassword: string }) {
+    const res = await api("/auth/reset-password", {
+      method: "POST",
+      body: data,
+    });
+
+    if (!res.ok) throw await res.json();
+    return await res.json();
   },
 };

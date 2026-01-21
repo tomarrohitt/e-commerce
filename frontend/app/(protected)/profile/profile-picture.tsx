@@ -6,6 +6,7 @@ import { ImageCropModal } from "./image-crop-modal";
 import { imageUpload } from "@/actions/user";
 import { getImageUrl } from "@/lib/get-image-url";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const getInitials = (name: string) => {
   return name
@@ -14,14 +15,6 @@ const getInitials = (name: string) => {
     .join("")
     .toUpperCase()
     .slice(0, 2);
-};
-
-const updateSessionCookie = (sessionData: any) => {
-  const cookieValue = encodeURIComponent(JSON.stringify(sessionData));
-  const maxAge = 60 * 60 * 24 * 7;
-  const isProduction = window.location.protocol === "https:";
-
-  document.cookie = `better-auth.session_data=${cookieValue}; path=/; max-age=${maxAge}; samesite=lax${isProduction ? "; secure" : ""}`;
 };
 
 export const ProfilePicture = ({ user }: { user: User }) => {
@@ -56,6 +49,9 @@ export const ProfilePicture = ({ user }: { user: User }) => {
     startTransition(async () => {
       try {
         await imageUpload(compressedBlob);
+        setTimeout(() => {
+          router.refresh();
+        }, 100);
       } catch (error) {
         console.error("Upload failed", error);
         setOptimisticImage(null);
@@ -71,12 +67,13 @@ export const ProfilePicture = ({ user }: { user: User }) => {
       <div className="relative">
         <div className="w-32 h-32 rounded-full overflow-hidden bg-linear-to-br from-blue-400 to-indigo-500 flex items-center justify-center shadow-xl">
           {displayUrl ? (
-            <img
+            <Image
               src={displayUrl}
               alt={user.name}
-              className="w-full h-full object-cover"
-              // Add key to force re-render if URL changes
+              fill
               key={displayUrl}
+              className="rounded-full"
+              sizes="128px"
             />
           ) : (
             <span className="text-white text-4xl font-bold">

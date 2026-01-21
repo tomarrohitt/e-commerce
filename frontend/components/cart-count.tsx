@@ -1,4 +1,4 @@
-import { getCartCount } from "@/lib/api";
+import { getCartCount } from "@/lib/api/cart";
 
 export async function CartCount() {
   const { data } = await getCartCount();

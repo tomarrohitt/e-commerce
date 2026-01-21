@@ -39,7 +39,7 @@ export default async function ProductsPage(props: Props) {
   );
 }
 
-export function ProductsPageSkeleton() {
+function ProductsPageSkeleton() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
       <div className="flex flex-col space-y-8">

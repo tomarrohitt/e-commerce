@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { OrderItem, OrderStatusType } from "@/types";
+import Image from "next/image";
 
 interface OrderItemsListProps {
   orderItems: OrderItem[];
@@ -16,13 +17,14 @@ export function OrderItemsList({ orderItems }: OrderItemsListProps) {
           >
             <Link
               href={`/products/${item.productId}`}
-              className="w-16 h-16 bg-linear-to-br from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center shrink-0"
+              className="relative w-16 h-16 bg-linear-to-br from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center shrink-0"
             >
               {item.thumbnail ? (
-                <img
+                <Image
                   src={item.thumbnail}
                   alt={item.name}
-                  className="w-full h-full object-cover rounded-lg"
+                  className="object-cover rounded-lg"
+                  fill
                 />
               ) : (
                 <span className="text-white text-2xl">📦</span>

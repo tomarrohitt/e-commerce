@@ -1,4 +1,5 @@
-import api from "./server";
+import { buildQuery } from "../build-query";
+import { api } from "./server";
 import type {
   OrderExtended,
   OrdersListResponse,
@@ -6,8 +7,10 @@ import type {
 } from "@/types";
 
 export async function getOrder(id: string): Promise<OrderExtended> {
-  const response = await api.get(`/orders/${id}`);
-  return response.data.data;
+  const res = await api(`/orders/${id}`);
+  if (!res.ok) throw await res.json();
+  const json = await res.json();
+  return json.data;
 }
 
 export async function getOrders(params?: {
@@ -15,46 +18,67 @@ export async function getOrders(params?: {
   limit?: number;
   status?: string;
 }): Promise<PaginatedOrders> {
-  const response = await api.get<OrdersListResponse>("/orders", { params });
-
-  return response.data.data;
+  const q = buildQuery(params);
+  const res = await api(`/orders${q}`);
+  if (!res.ok) throw await res.json();
+  const json = (await res.json()) as OrdersListResponse;
+  return json.data;
 }
 
 export async function cancelOrder(id: string) {
-  const response = await api.post(`/orders/${id}/cancel`);
-  return response.data;
+  const res = await api(`/orders/${id}/cancel`, { method: "POST" });
+  if (!res.ok) throw await res.json();
+  return await res.json();
 }
 
 export async function getOrderSummary() {
-  const response = await api.get("/orders/summary");
-  return response.data.data;
+  const res = await api("/orders/summary");
+  if (!res.ok) throw await res.json();
+  const json = await res.json();
+  return json.data;
 }
 
 export async function downloadInvoice(orderId: string): Promise<string> {
-  const response = await api.get(`/invoice/download/${orderId}`);
-  return response.data.url;
+  const res = await api(`/invoice/download/${orderId}`);
+  if (!res.ok) throw await res.json();
+  const json = await res.json();
+  return json.url;
 }
 
 export async function updateOrderStatus(id: string, status: string) {
-  const response = await api.patch(`/orders/${id}/status`, { status });
-  return response.data;
+  const res = await api(`/orders/${id}/status`, {
+    method: "PATCH",
+    body: { status },
+  });
+  if (!res.ok) throw await res.json();
+  return await res.json();
 }
 
 export async function getTotalOrdersSpend(): Promise<{ total: number }> {
-  const response = await api.get("/orders/total");
-  return response.data.data;
+  const res = await api("/orders/total");
+  if (!res.ok) throw await res.json();
+  const json = await res.json();
+  return json.data;
 }
+
 export async function getTotalOrdersCount(): Promise<{
   total: number;
   pending: number;
   completed: number;
 }> {
-  const response = await api.get("/orders/summary");
-  return response.data.data;
+  const res = await api("/orders/summary");
+  if (!res.ok) throw await res.json();
+  const json = await res.json();
+  return json.data;
 }
+
 export async function refundOrder(id: string, amount?: number) {
-  const response = await api.post(`/orders/${id}/refund`, { amount });
-  return response.data;
+  const res = await api(`/orders/${id}/refund`, {
+    method: "POST",
+    body: { amount },
+  });
+  if (!res.ok) throw await res.json();
+  return await res.json();
 }
 
 export async function getAllOrders(params?: {
@@ -63,6 +87,8 @@ export async function getAllOrders(params?: {
   status?: string;
   userId?: string;
 }) {
-  const response = await api.get("/orders/admin/all", { params });
-  return response.data;
+  const q = buildQuery(params);
+  const res = await api(`/orders/admin/all${q}`);
+  if (!res.ok) throw await res.json();
+  return await res.json();
 }

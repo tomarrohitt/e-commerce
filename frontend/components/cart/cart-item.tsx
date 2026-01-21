@@ -5,6 +5,7 @@ import { CartItemWithProduct } from "@/types";
 import { Loader2 } from "lucide-react";
 import { RemoveItemFromCartButton } from "./remove-item-from-cart-button";
 import { CartQuantity } from "./cart-quantity";
+import Image from "next/image";
 
 type CartItemProps = {
   item: CartItemWithProduct;
@@ -23,10 +24,11 @@ export function CartItem({ item, isUpdating }: CartItemProps) {
       >
         <div className="w-24 h-24 bg-linear-to-br from-blue-400 to-indigo-500 rounded-lg overflow-hidden ring-2 ring-transparent group-hover:ring-blue-300 transition-all duration-200">
           {item.product.thumbnail ? (
-            <img
+            <Image
               src={item.product.thumbnail}
+              fill
               alt={item.product.name}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+              className="object-cover group-hover:scale-110 transition-transform duration-300"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-white text-3xl">

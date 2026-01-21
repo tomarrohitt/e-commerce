@@ -1,6 +1,6 @@
 import { OrderCard } from "@/components/orders/order-card";
 import { Button } from "@/components/ui/button";
-import { getOrders } from "@/lib/api";
+import { getOrders } from "@/lib/api/orders";
 import Link from "next/link";
 
 export default async function OrdersPage() {

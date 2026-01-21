@@ -1,12 +1,25 @@
 import { Address } from "@/types";
-import api from "./server";
+import { api } from "./server";
 
 export async function getAddress(id: string): Promise<Address> {
-  const response = await api.get(`/addresses/${id}`);
-  return response.data;
+  const res = await api(`/addresses/${id}`);
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw err;
+  }
+
+  return await res.json();
 }
 
 export async function getAddressCount() {
-  const response = await api.get("/addresses/count");
-  return response.data.data;
+  const res = await api("/addresses/count");
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw err;
+  }
+
+  const json = await res.json();
+  return json.data;
 }

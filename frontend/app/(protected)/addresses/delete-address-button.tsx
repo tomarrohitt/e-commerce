@@ -2,20 +2,17 @@
 import { deleteAddress } from "@/actions/address";
 import { Spinner } from "@/components/ui/spinner";
 import { Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 
-export const DeleteAddressButton = ({
-  userId,
-  addressId,
-}: {
-  userId: string;
-  addressId: string;
-}) => {
+export const DeleteAddressButton = ({ addressId }: { addressId: string }) => {
   const [pending, startTransition] = useTransition();
+  const router = useRouter();
 
   const handleDelete = async () => {
     startTransition(async () => {
-      await deleteAddress(addressId, userId);
+      await deleteAddress(addressId);
+      router.refresh();
     });
   };
 

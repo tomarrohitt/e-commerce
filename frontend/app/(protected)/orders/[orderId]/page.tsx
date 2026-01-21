@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { CheckCircle, Clock, Ban, AlertCircle } from "lucide-react";
-import { getOrder } from "@/lib/api";
+import { getOrder } from "@/lib/api/orders";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { OrderShippingCard } from "@/components/orders/order-shipping-card";
@@ -9,9 +9,9 @@ import { OrderExtended } from "@/types";
 import { InvoiceDownloadButton } from "@/components/orders/invoice-download-button";
 
 interface OrderDetailsPageProps {
-  params: {
+  params: Promise<{
     orderId: string;
-  };
+  }>;
 }
 
 export default async function OrderDetailsPage({
@@ -94,9 +94,9 @@ export default async function OrderDetailsPage({
                           src={item.thumbnail}
                           loading="eager"
                           alt={item.name}
-                          width={80}
-                          height={80}
-                          className="w-full h-full object-cover"
+                          fill
+                          sizes="80px"
+                          className="object-cover"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-2xl">

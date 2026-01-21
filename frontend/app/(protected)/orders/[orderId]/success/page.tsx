@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getOrder } from "@/lib/api";
+import { getOrder } from "@/lib/api/orders";
 import {
   CheckCircle,
   MapPin,
@@ -22,11 +22,12 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import Image from "next/image";
 
 interface OrderDetailsPageProps {
-  params: {
+  params: Promise<{
     orderId: string;
-  };
+  }>;
 }
 
 export default async function OrderSuccessPage({
@@ -68,7 +69,9 @@ export default async function OrderSuccessPage({
               <span className="text-3xl">❌</span>
             </div>
             <CardTitle>Order Not Found</CardTitle>
-            <CardDescription>We couldn't retrieve this order.</CardDescription>
+            <CardDescription>
+              We couldn&apos;t retrieve this order.
+            </CardDescription>
           </CardHeader>
           <CardFooter className="justify-center">
             <Button asChild variant="destructive">
@@ -100,7 +103,7 @@ export default async function OrderSuccessPage({
             Order Confirmed!
           </h1>
           <p className="text-lg text-slate-600 max-w-md mx-auto">
-            Thank you for your purchase. We've received your order and are
+            Thank you for your purchase. We&apos;ve received your order and are
             getting it ready.
           </p>
         </div>
@@ -131,10 +134,12 @@ export default async function OrderSuccessPage({
                   {order.items.map((item) => (
                     <div key={item.productId} className="flex gap-4">
                       <div className="relative w-20 h-20 rounded-xl overflow-hidden border bg-slate-100 shrink-0">
-                        <img
+                        <Image
                           src={item.thumbnail}
+                          fill
+                          sizes="80px"
                           alt={item.name}
-                          className="w-full h-full object-cover"
+                          className="object-cover"
                         />
                       </div>
                       <div className="flex-1 min-w-0 flex flex-col justify-between py-1">

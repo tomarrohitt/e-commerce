@@ -3,19 +3,16 @@ import { PaymentSection } from "@/components/checkout/payment-section";
 import { PlaceOrderButton } from "@/components/checkout/place-order-button";
 import { ShippingSection } from "@/components/checkout/shipping-section";
 import { CheckoutProvider } from "@/components/context/checkout-context";
-import { getCart } from "@/lib/api";
+import { getCart } from "@/lib/api/cart";
 import { getAddresses } from "@/lib/api/addresses-cached";
-import { getTokenFromSession, getUserFromSession } from "@/lib/user-auth";
 import { ArrowLeft, Lock } from "lucide-react";
 import Link from "next/link";
 
 export default async function CheckoutPage() {
-  const [user, token] = await Promise.all([
-    getUserFromSession(),
-    getTokenFromSession(),
+  const [cart, { data: addresses }] = await Promise.all([
+    getCart(),
+    getAddresses(),
   ]);
-  const userId = user!.id;
-  const [cart, addresses] = await Promise.all([getCart(), getAddresses()]);
 
   const defaultAddressId =
     addresses.find((a) => a.isDefault)?.id || addresses[0]?.id || null;

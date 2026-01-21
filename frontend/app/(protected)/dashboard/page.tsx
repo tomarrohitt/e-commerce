@@ -1,7 +1,9 @@
 import Link from "next/link";
 
 import { getUserFromSession } from "@/lib/user-auth";
-import { getAddressCount, getCartCount, getTotalOrdersCount } from "@/lib/api";
+import { getTotalOrdersCount } from "@/lib/api/orders";
+import { getCartCount } from "@/lib/api/cart";
+import { getAddressCount } from "@/lib/api/addresses";
 
 export default async function DashboardPage() {
   const [user, cartCount, addressCount, ordersCount] = await Promise.all([
@@ -45,7 +47,7 @@ export default async function DashboardPage() {
           Welcome back, {user?.name}! 👋
         </h1>
         <p className="text-blue-100">
-          Here's what's happening with your account
+          Here&apos;s what&apos;s happening with your account
         </p>
       </div>
 

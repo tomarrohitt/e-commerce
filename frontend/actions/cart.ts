@@ -1,45 +1,79 @@
 "use server";
 
-import api from "@/lib/api";
+import { api } from "@/lib/api/server";
 import { revalidatePath } from "next/cache";
-import { refresh } from "next/cache";
 
 export async function removeFromCart(productId: string) {
   try {
-    await api.delete(`/cart/${productId}`);
+    const res = await api(`/cart/${productId}`, { method: "DELETE" });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw err;
+    }
+
     revalidatePath("/cart");
   } catch (error) {
     console.error("Error removing item from cart:", error);
   }
-  refresh();
 }
 
 export async function addToCart(productId: string, quantity: number) {
   try {
-    await api.post("/cart", { productId, quantity });
+    const res = await api("/cart", {
+      method: "POST",
+      body: { productId, quantity },
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw err;
+    }
+
     revalidatePath("/cart");
   } catch (error) {
-    console.error("Error adding item from cart:", error);
+    console.error("Error adding item to cart:", error);
   }
-  refresh();
 }
 
-export async function updateCartItem(productId: string, quantity: number) {
+export async function updateCartItem(productId: string, newQuantity: number) {
   try {
-    await api.patch(`/cart/${productId}`, { quantity });
+    const res = await api(`/cart/${productId}`, {
+      method: "PATCH",
+      body: { quantity: newQuantity },
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw err;
+    }
+
+    const data = await res.json();
+
     revalidatePath("/cart");
+
+    return {
+      success: true,
+      quantity: newQuantity,
+      data,
+    };
   } catch (error) {
     console.error("Error updating item in cart:", error);
+    return { success: false };
   }
-  refresh();
 }
 
 export async function clearCart() {
   try {
-    await api.delete("/cart");
+    const res = await api("/cart", { method: "DELETE" });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw err;
+    }
+
     revalidatePath("/cart");
   } catch (error) {
     console.error("Error clearing the cart:", error);
   }
-  refresh();
 }

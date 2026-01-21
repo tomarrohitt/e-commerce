@@ -2,6 +2,7 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { login } from "@/actions/auth";
+import { useSearchParams } from "next/navigation";
 
 const initialState = {
   success: false,
@@ -16,7 +17,13 @@ const initialState = {
   },
 };
 export const SignInForm = () => {
-  const [state, action, pending] = useActionState(login, initialState);
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") ?? "/";
+
+  const [state, action, pending] = useActionState(
+    login.bind(null, redirectTo),
+    initialState,
+  );
   return (
     <form action={action} className="space-y-6">
       {state.message && (

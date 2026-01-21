@@ -40,7 +40,7 @@ export default function AddAddressForm() {
     if (state.success) {
       redirect(pathname);
     }
-  }, [state.success]);
+  }, [state.success, pathname]);
 
   return (
     <>

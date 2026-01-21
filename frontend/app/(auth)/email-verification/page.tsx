@@ -2,13 +2,13 @@ import Link from "next/link";
 import { Mail, ArrowRight, RefreshCw } from "lucide-react";
 
 interface PageProps {
-  searchParams: {
-    email?: string;
-  };
+  searchParams: Promise<{
+    email: string;
+  }>;
 }
 
-export default function VerifyEmailPage({ searchParams }: PageProps) {
-  const email = searchParams?.email;
+export default async function VerifyEmailPage({ searchParams }: PageProps) {
+  const { email } = await searchParams;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -28,14 +28,14 @@ export default function VerifyEmailPage({ searchParams }: PageProps) {
               Check your inbox
             </h1>
             <p className="text-gray-500 mb-8 max-w-md mx-auto text-lg leading-relaxed">
-              We've sent a verification link to{" "}
+              We&apos;ve sent a verification link to{" "}
               <span className="font-semibold text-gray-900 block mt-1">
                 {email || "your email address"}
               </span>
             </p>
             <div className="p-5 bg-gray-50 rounded-xl border border-gray-100 mb-8">
               <p className="text-sm text-gray-500 mb-3">
-                Didn't receive the email? Check your spam folder or
+                Didn&apos;t receive the email? Check your spam folder or
               </p>
 
               <button className="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-all border border-blue-200">

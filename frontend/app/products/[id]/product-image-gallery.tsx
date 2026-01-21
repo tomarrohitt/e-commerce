@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 export function ProductImageGallery({
   images,
@@ -26,10 +27,11 @@ export function ProductImageGallery({
     <div className="space-y-4">
       {/* Main Image */}
       <div className="relative aspect-square rounded-2xl overflow-hidden bg-white shadow-lg group">
-        <img
+        <Image
           src={images[selectedImage]}
           alt={`${productName} - Image ${selectedImage + 1}`}
-          className="w-full h-full object-cover"
+          className="object-cover"
+          fill
         />
 
         {/* Navigation Arrows */}
@@ -77,10 +79,12 @@ export function ProductImageGallery({
                   : "border-gray-200 hover:border-blue-300 hover:scale-105"
               }`}
             >
-              <img
+              <Image
                 src={image}
+                width={48}
+                height={48}
                 alt={`${productName} thumbnail ${index + 1}`}
-                className="w-full h-full object-cover"
+                className="object-cover"
               />
             </button>
           ))}

@@ -1,7 +1,6 @@
 "use server";
 
-import api from "@/lib/api";
-import { refresh } from "next/cache";
+import { api } from "@/lib/api/server";
 import { redirect } from "next/navigation";
 
 type CreateOrderInput = {
@@ -26,31 +25,57 @@ type CreateOrderInput = {
 
 export const createOrder = async (data: CreateOrderInput) => {
   let orderId: string;
+
   try {
-    const response = await api.post("/orders", data);
-    orderId = response.data.data.orderId;
+    const res = await api("/orders", {
+      method: "POST",
+      body: data,
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw err;
+    }
+
+    const json = await res.json();
+    orderId = json.data.orderId;
   } catch (error) {
     console.error("Error creating order:", error);
     throw error;
   }
+
   redirect(`/orders/${orderId}`);
 };
 
 export const cancelOrder = async (orderId: string) => {
   try {
-    await api.post(`/orders/${orderId}/cancel`);
-    refresh();
+    const res = await api(`/orders/${orderId}/cancel`, {
+      method: "POST",
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw err;
+    }
   } catch (error) {
-    console.error("Error creating order:", error);
+    console.error("Error canceling order:", error);
     throw error;
   }
 };
+
 export const downloadInvoice = async (orderId: string): Promise<string> => {
   try {
-    const response = await api.get(`/invoice/download/${orderId}`);
-    return response.data.url;
+    const res = await api(`/invoice/download/${orderId}`);
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw err;
+    }
+
+    const json = await res.json();
+    return json.url;
   } catch (error) {
-    console.error("Error creating order:", error);
+    console.error("Error downloading invoice:", error);
     throw error;
   }
 };

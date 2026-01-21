@@ -2,6 +2,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Package } from "lucide-react";
 import Link from "next/link";
 
+export const dynamic = "force-static";
+
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center p-4">
@@ -14,7 +16,7 @@ export default function NotFound() {
             Product Not Found
           </h2>
           <p className="text-gray-500 mb-6">
-            This product doesn't exist or has been removed.
+            This product doesn&apos;t exist or has been removed.
           </p>
           <Link
             href="/products"

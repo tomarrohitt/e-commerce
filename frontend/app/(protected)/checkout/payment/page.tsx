@@ -1,17 +1,20 @@
 import Link from "next/link";
 import { CheckoutStripe } from "./checkout-stripe";
-import { getOrder } from "@/lib/api";
+import { api } from "@/lib/api/server";
 import { Package, MapPin, CreditCard, ShieldCheck } from "lucide-react";
 import { PaymentPendingPoller } from "./payment-pending-poller";
+import { getOrder } from "@/lib/api/orders";
+import Image from "next/image";
+import { Jersey_20 } from "next/font/google";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default async function PaymentPage({
   searchParams,
 }: {
-  searchParams: { orderId?: string };
+  searchParams: Promise<{ orderId?: string }>;
 }) {
-  const orderId = (await searchParams).orderId;
+  const { orderId } = await searchParams;
 
   if (!orderId) {
     return (
@@ -56,7 +59,9 @@ export default async function PaymentPage({
           <h2 className="text-2xl font-bold mb-2 text-gray-900">
             Order Not Found
           </h2>
-          <p className="text-gray-500 mb-6">We couldn't locate this order.</p>
+          <p className="text-gray-500 mb-6">
+            We couldn&apos;t locate this order.
+          </p>
           <Link
             href="/"
             className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
@@ -128,11 +133,15 @@ export default async function PaymentPage({
               <div className="space-y-4">
                 {order.items.map((item) => (
                   <div key={item.productId} className="flex gap-4">
-                    <img
-                      src={item.thumbnail}
-                      alt={item.name}
-                      className="w-20 h-20 object-cover rounded-lg"
-                    />
+                    <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-muted ring-1 ring-border">
+                      <Image
+                        src={item.thumbnail}
+                        alt={item.name}
+                        fill
+                        className="object-cover rounded-lg"
+                        sizes="80px"
+                      />
+                    </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-gray-900 truncate">
                         {item.name}

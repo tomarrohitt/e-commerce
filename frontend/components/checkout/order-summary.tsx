@@ -4,6 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingBag, Truck, ShieldCheck } from "lucide-react";
 import type { Cart, CartItemWithProduct } from "@/types";
+import Image from "next/image";
 
 interface OrderSummaryProps {
   cart: Cart;
@@ -54,12 +55,13 @@ export function OrderSummary({ children, cart }: OrderSummaryProps) {
 function OrderItem({ item }: { item: CartItemWithProduct }) {
   return (
     <div className="flex gap-4 group">
-      <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-muted ring-1 ring-border">
+      <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-muted ring-1 ring-border">
         {item.product.thumbnail ? (
-          <img
+          <Image
             src={item.product.thumbnail || "/placeholder.svg"}
             alt={item.product.name}
-            className="w-full h-full object-cover transition-transform group-hover:scale-105"
+            fill
+            className="object-cover transition-transform group-hover:scale-105"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-muted">

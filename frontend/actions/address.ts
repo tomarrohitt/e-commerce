@@ -1,6 +1,6 @@
 "use server";
 
-import api from "@/lib/api";
+import { api } from "@/lib/api/server";
 import { simplifyZodErrors } from "@/lib/error-simplifier";
 import { getUserFromSession } from "@/lib/user-auth";
 import {
@@ -9,7 +9,6 @@ import {
   type UpdateAddressInput,
 } from "@/types";
 import { updateAddressSchema } from "@/types/address";
-import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import z from "zod";
 
@@ -19,27 +18,27 @@ export async function createAddress(_: any, formData: FormData) {
 
   if (!result.success) {
     const formattedErrors = z.treeifyError(result.error);
-
     return {
       success: false,
       message: "Validation failed",
       errors: simplifyZodErrors(formattedErrors),
-      inputs: {
-        name: data.name,
-        street: data.street,
-        city: data.city,
-        state: data.state,
-        zipCode: data.zipCode,
-        country: data.country,
-        phoneNumber: data.phoneNumber,
-      },
+      inputs: data,
     };
   }
 
   try {
-    await api.post("/addresses", result.data);
-    const user = await getUserFromSession();
-    updateTag(`addresses-${user!.id}`);
+    const res = await api("/addresses", {
+      method: "POST",
+      body: result.data,
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw err;
+    }
+
+    await getUserFromSession();
+
     return {
       success: true,
       errors: {
@@ -51,44 +50,13 @@ export async function createAddress(_: any, formData: FormData) {
         country: "",
         phoneNumber: "",
       },
-      inputs: {
-        name: data.name,
-        street: data.street,
-        city: data.city,
-        state: data.state,
-        zipCode: data.zipCode,
-        country: data.country,
-        phoneNumber: data.phoneNumber,
-      },
+      inputs: data,
     };
   } catch (error: any) {
-    if (error instanceof Error) {
-      return {
-        success: false,
-        message: error.message,
-        errors: {
-          name: "",
-          street: "",
-          city: "",
-          state: "",
-          zipCode: "",
-          country: "",
-          phoneNumber: "",
-        },
-        inputs: {
-          name: data.name,
-          street: data.street,
-          city: data.city,
-          state: data.state,
-          zipCode: data.zipCode,
-          country: data.country,
-          phoneNumber: data.phoneNumber,
-        },
-      };
-    }
     return {
       success: false,
-      message: error.errors[0].message,
+      message:
+        error?.message || error?.errors?.[0]?.message || "Request failed",
       errors: {
         name: "",
         street: "",
@@ -98,15 +66,7 @@ export async function createAddress(_: any, formData: FormData) {
         country: "",
         phoneNumber: "",
       },
-      inputs: {
-        name: data.name,
-        street: data.street,
-        city: data.city,
-        state: data.state,
-        zipCode: data.zipCode,
-        country: data.country,
-        phoneNumber: data.phoneNumber,
-      },
+      inputs: data,
     };
   }
 }
@@ -117,54 +77,31 @@ export async function updateAddress(id: string, _: any, formData: FormData) {
 
   if (!result.success) {
     const formattedErrors = z.treeifyError(result.error);
-
     return {
       success: false,
       message: "Validation failed",
       errors: simplifyZodErrors(formattedErrors),
-      inputs: {
-        name: data.name,
-        street: data.street,
-        city: data.city,
-        state: data.state,
-        zipCode: data.zipCode,
-        country: data.country,
-        phoneNumber: data.phoneNumber,
-      },
+      inputs: data,
     };
   }
+
   try {
-    await api.patch(`/addresses/${id}`, result.data);
-    const user = await getUserFromSession();
-    updateTag(`addresses-${user!.id}`);
-  } catch (error: any) {
-    if (error instanceof Error) {
-      return {
-        success: false,
-        message: error.message,
-        errors: {
-          name: "",
-          street: "",
-          city: "",
-          state: "",
-          zipCode: "",
-          country: "",
-          phoneNumber: "",
-        },
-        inputs: {
-          name: data.name,
-          street: data.street,
-          city: data.city,
-          state: data.state,
-          zipCode: data.zipCode,
-          country: data.country,
-          phoneNumber: data.phoneNumber,
-        },
-      };
+    const res = await api(`/addresses/${id}`, {
+      method: "PATCH",
+      body: result.data,
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw err;
     }
+
+    await getUserFromSession();
+  } catch (error: any) {
     return {
       success: false,
-      message: error.errors[0].message,
+      message:
+        error?.message || error?.errors?.[0]?.message || "Request failed",
       errors: {
         name: "",
         street: "",
@@ -174,34 +111,35 @@ export async function updateAddress(id: string, _: any, formData: FormData) {
         country: "",
         phoneNumber: "",
       },
-      inputs: {
-        name: data.name,
-        street: data.street,
-        city: data.city,
-        state: data.state,
-        zipCode: data.zipCode,
-        country: data.country,
-        phoneNumber: data.phoneNumber,
-      },
+      inputs: data,
     };
   }
+
   redirect("/addresses");
 }
 
-export async function deleteAddress(id: string, userId: string) {
+export async function deleteAddress(id: string) {
   try {
-    await api.delete(`/addresses/${id}`);
-    updateTag(`addresses-${userId}`);
+    const res = await api(`/addresses/${id}`, { method: "DELETE" });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw err;
+    }
   } catch (error) {
-    console.error("Error removing item from cart:", error);
+    console.error("Error deleting address:", error);
   }
 }
 
-export async function setDefaultAddress(id: string, userId: string) {
+export async function setDefaultAddress(id: string) {
   try {
-    await api.patch(`/addresses/${id}/default`);
-    updateTag(`addresses-${userId}`);
+    const res = await api(`/addresses/${id}/default`, { method: "PATCH" });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw err;
+    }
   } catch (error) {
-    console.error("Error removing item from cart:", error);
+    console.error("Error setting default address:", error);
   }
 }

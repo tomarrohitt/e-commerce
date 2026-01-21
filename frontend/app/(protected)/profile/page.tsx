@@ -18,11 +18,8 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ProfilePicture } from "./profile-picture";
 import { getUserFromSession } from "@/lib/user-auth";
-import {
-  getAddressCount,
-  getTotalOrdersSpend,
-  getTotalOrdersCount,
-} from "@/lib/api";
+import { getTotalOrdersSpend, getTotalOrdersCount } from "@/lib/api/orders";
+import { getAddressCount } from "@/lib/api/addresses";
 
 export default async function ProfilePage() {
   const [user, totalSpend, ordersCount, addressCount] = await Promise.all([

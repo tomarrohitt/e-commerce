@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 interface ProductImageGalleryProps {
   images: string[];
   productName: string;
@@ -17,10 +19,11 @@ export function ProductImageGallery({
     <div>
       <div className="aspect-square bg-linear-to-br from-blue-400 to-indigo-500 rounded-2xl overflow-hidden mb-4">
         {mainImage ? (
-          <img
+          <Image
             src={mainImage}
             alt={productName}
-            className="w-full h-full object-cover"
+            className="object-cover"
+            fill
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
@@ -41,10 +44,11 @@ export function ProductImageGallery({
                   : "border-gray-200 hover:border-blue-400"
               }`}
             >
-              <img
+              <Image
                 src={image}
                 alt={`${productName} ${index + 1}`}
-                className="w-full h-full object-cover"
+                className="object-cover"
+                fill
               />
             </button>
           ))}

@@ -12,21 +12,21 @@ export default function Loading() {
       <div className="space-y-6">
         {[1, 2, 3].map((i) => (
           <Card key={i} className="pt-0 overflow-hidden">
-            <CardHeader className="bg-gray-50/50 border-b pt-6">
+            <CardHeader className="bg-gray-50 border-b pt-6">
               <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="space-y-1.5">
-                  <Skeleton className="h-4 w-16" />
-                  <Skeleton className="h-5 w-24" />
+                <div>
+                  <Skeleton className="h-3.5 w-12 mb-1" /> {/* text-sm */}
+                  <Skeleton className="h-5 w-60" /> {/* mono id */}
                 </div>
-                <div className="space-y-1.5">
-                  <Skeleton className="h-4 w-12" />
-                  <Skeleton className="h-5 w-32" />
+                <div>
+                  <Skeleton className="h-3.5 w-9 mb-1" />
+                  <Skeleton className="h-5 w-35" />
                 </div>
-                <div className="space-y-1.5">
-                  <Skeleton className="h-4 w-12" />
-                  <Skeleton className="h-6 w-20" />
+                <div>
+                  <Skeleton className="h-3.5 w-9 mb-1" />
+                  <Skeleton className="h-6 w-20" /> {/* text-lg */}
                 </div>
-                <Skeleton className="h-6 w-24 rounded-full" />
+                <Skeleton className="h-6 w-24 rounded-full" /> {/* badge */}
               </div>
             </CardHeader>
 
@@ -40,7 +40,7 @@ export default function Loading() {
                     <Skeleton className="w-16 h-16 rounded-lg shrink-0" />
 
                     <div className="flex-1 min-w-0 space-y-2">
-                      <Skeleton className="h-5 w-3/4 max-w-[200px]" />
+                      <Skeleton className="h-5 w-3/4 max-w-50" />
                       <Skeleton className="h-4 w-1/3" />
                     </div>
 

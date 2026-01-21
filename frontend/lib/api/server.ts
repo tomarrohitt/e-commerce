@@ -1,44 +1,57 @@
-import axios, { AxiosInstance } from "axios";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
 
-api.interceptors.request.use(
-  async (config) => {
-    const cookieStore = await cookies();
-    const cookieHeader = cookieStore.toString();
+type SmartBody = BodyInit | Record<string, any> | null | undefined;
 
-    if (cookieHeader) {
-      config.headers.Cookie = cookieHeader;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
+type NextFetchOptions = Omit<RequestInit, "body"> & {
+  body?: SmartBody;
+  next?: {
+    revalidate?: number | false;
+    tags?: string[];
+  };
+  cache?: RequestCache;
+};
 
-export async function serverApi<T = any>(
-  fn: (instance: AxiosInstance) => Promise<T>,
-): Promise<T> {
-  try {
-    const response = await fn(api);
-    return response as T;
-  } catch (error: any) {
-    if (axios.isAxiosError(error)) {
-      if (error.response?.status === 401) {
-        // This is safe here because it runs outside the Axios internal stack
-        redirect("/sign-in");
-      }
-    }
-    // Re-throw other errors so your page can handle 404s or 500s
-    throw error;
+function normalizeBody(body: SmartBody, headers: HeadersInit | undefined) {
+  const finalHeaders: Record<string, string> = {
+    ...(headers as any),
+  };
+
+  if (
+    body &&
+    typeof body === "object" &&
+    !(body instanceof FormData) &&
+    !(body instanceof Blob) &&
+    !(body instanceof ArrayBuffer)
+  ) {
+    finalHeaders["Content-Type"] ||= "application/json";
+    return { body: JSON.stringify(body), headers: finalHeaders };
   }
-}
 
-export default api;
+  return { body: body as BodyInit | undefined, headers: finalHeaders };
+}
+export async function api(endpoint: string, options: NextFetchOptions = {}) {
+  const { body, headers, ...rest } = options;
+  const { body: finalBody, headers: finalHeaders } = normalizeBody(
+    body,
+    headers,
+  );
+
+  const cookieStore = await cookies();
+  const cookieHeader = cookieStore.toString();
+  if (cookieHeader) finalHeaders["Cookie"] = cookieHeader;
+
+  const res = await fetch(`${API_URL}${endpoint}`, {
+    ...rest,
+    headers: finalHeaders,
+    body: finalBody,
+  });
+
+  if (res.status === 401) {
+    redirect("/sign-in");
+  }
+
+  return res;
+}

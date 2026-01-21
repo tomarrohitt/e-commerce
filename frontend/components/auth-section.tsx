@@ -1,13 +1,11 @@
 import Link from "next/link";
-import { getUserFromSession } from "@/lib/user-auth";
 import { UserDropdown } from "./user-dropdown";
-import { Loader2, ShoppingCart } from "lucide-react";
 import { CartCount } from "./cart-count";
-import { Suspense } from "react";
+import { getUserFromSession } from "@/lib/user-auth";
+import { ShoppingCart } from "lucide-react";
 
 export async function AuthSection() {
   const user = await getUserFromSession();
-
   if (!user) {
     return <UnProtectedSection />;
   }
@@ -41,9 +39,7 @@ export async function AuthSection() {
         aria-label="Shopping cart"
       >
         <ShoppingCart className="w-6 h-6" />
-        <Suspense fallback={<CartCountFallback />}>
-          <CartCount />
-        </Suspense>
+        <CartCount />
       </Link>
 
       <UserDropdown user={user} />
@@ -69,11 +65,3 @@ const UnProtectedSection = () => {
     </div>
   );
 };
-
-function CartCountFallback() {
-  return (
-    <span className="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center">
-      <Loader2 className="w-3 h-3 text-blue-500 animate-spin" />
-    </span>
-  );
-}

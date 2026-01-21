@@ -11,13 +11,7 @@ import { Button } from "@/components/ui/button";
 import EditAddressForm from "@/components/edit-address-form";
 
 export default async function AddressesPage() {
-  const [user, token] = await Promise.all([
-    getUserFromSession(),
-    getTokenFromSession(),
-  ]);
-
-  const userId = user!.id;
-  const addresses = await getAddresses();
+  const { data: addresses } = await getAddresses();
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100">
@@ -53,7 +47,7 @@ export default async function AddressesPage() {
         {addresses.length === 0 ? (
           <NoAddressesFound />
         ) : (
-          <AddressList userId={userId} addresses={addresses} />
+          <AddressList addresses={addresses} />
         )}
       </div>
     </div>
@@ -89,13 +83,7 @@ const NoAddressesFound = () => {
   );
 };
 
-const AddressList = ({
-  userId,
-  addresses,
-}: {
-  userId: string;
-  addresses: Address[];
-}) => {
+const AddressList = ({ addresses }: { addresses: Address[] }) => {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
       {addresses.map((address) => (
@@ -154,7 +142,7 @@ const AddressList = ({
 
             <div className="flex items-center gap-2 pt-4 border-t border-slate-100 mt-auto">
               {!address.isDefault && (
-                <SetToDefaultButton addressId={address.id} userId={userId} />
+                <SetToDefaultButton addressId={address.id} />
               )}
 
               <Modal
@@ -169,7 +157,7 @@ const AddressList = ({
               >
                 <EditAddressForm address={address} />
               </Modal>
-              <DeleteAddressButton addressId={address.id} userId={userId} />
+              <DeleteAddressButton addressId={address.id} />
             </div>
           </div>
         </div>

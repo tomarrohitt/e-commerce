@@ -1,4 +1,4 @@
-import api from "./server";
+import { api } from "./server";
 import type {
   CreateReviewInput,
   ReviewResponse,
@@ -7,14 +7,36 @@ import type {
 } from "@/types";
 
 export async function createReview(data: CreateReviewInput) {
-  const response = await api.post<ReviewsResponse>("/reviews", data);
-  return response.data.data;
+  const res = await api("/reviews", {
+    method: "POST",
+    body: data,
+  });
+
+  if (!res.ok) throw await res.json();
+
+  const json = (await res.json()) as ReviewsResponse;
+  return json.data;
 }
+
 export async function updateReview(data: ReviewTrim) {
-  const response = await api.patch<ReviewResponse>(`/reviews/${data.id}`, data);
-  return response.data.data;
+  const res = await api(`/reviews/${data.id}`, {
+    method: "PATCH",
+    body: data,
+  });
+
+  if (!res.ok) throw await res.json();
+
+  const json = (await res.json()) as ReviewResponse;
+  return json.data;
 }
+
 export async function removeReview(productId: string) {
-  const response = await api.delete<ReviewsResponse>(`/reviews/${productId}`);
-  return response.data.data;
+  const res = await api(`/reviews/${productId}`, {
+    method: "DELETE",
+  });
+
+  if (!res.ok) throw await res.json();
+
+  const json = (await res.json()) as ReviewsResponse;
+  return json.data;
 }
