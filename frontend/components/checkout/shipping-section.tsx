@@ -1,13 +1,11 @@
 "use client";
 
-import { MapPin, Plus, Check, Phone, User } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { MapPin, Check, Phone, User } from "lucide-react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { Address } from "@/types";
 import { useCheckout } from "../context/checkout-context";
-import AddAddressForm from "../add-address-form";
-import { Modal } from "../modal";
+import { AddressDialog } from "../address-modal";
 
 interface ShippingSectionProps {
   addresses: Address[];
@@ -31,18 +29,7 @@ export function ShippingSection({ addresses }: ShippingSectionProps) {
             You don&apos;t have any saved addresses yet
           </p>
 
-          <Modal
-            title="Add Shipping Address"
-            description="Fill in the details to save a new delivery address."
-            button={
-              <Button className="inline-flex items-center gap-2 px-5 py-2.5">
-                <Plus className="w-5 h-5" />
-                Add New Address
-              </Button>
-            }
-          >
-            <AddAddressForm />
-          </Modal>
+          <AddressDialog />
         </CardContent>
       </Card>
     );
@@ -60,22 +47,7 @@ export function ShippingSection({ addresses }: ShippingSectionProps) {
               Shipping Address
             </h2>
           </div>
-          <Modal
-            title="Add Shipping Address"
-            description="Fill in the details to save a new delivery address."
-            button={
-              <Button
-                size="sm"
-                variant="outline"
-                className="gap-1.5 bg-transparent"
-              >
-                <Plus className="w-4 h-4" />
-                Add New
-              </Button>
-            }
-          >
-            <AddAddressForm />
-          </Modal>
+          <AddressDialog />
         </div>
       </CardHeader>
       <CardContent className="p-5">

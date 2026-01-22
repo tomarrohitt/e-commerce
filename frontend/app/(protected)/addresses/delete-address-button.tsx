@@ -1,4 +1,3 @@
-"use client";
 import { deleteAddress } from "@/actions/address";
 import { Spinner } from "@/components/ui/spinner";
 import { Trash2 } from "lucide-react";
@@ -12,7 +11,6 @@ export const DeleteAddressButton = ({ addressId }: { addressId: string }) => {
   const handleDelete = async () => {
     startTransition(async () => {
       await deleteAddress(addressId);
-      router.refresh();
     });
   };
 

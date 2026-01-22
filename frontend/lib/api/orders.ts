@@ -1,4 +1,5 @@
 import { buildQuery } from "../build-query";
+import { getUserFromSession } from "../user-auth";
 import { api } from "./server";
 import type {
   OrderExtended,
@@ -31,20 +32,6 @@ export async function cancelOrder(id: string) {
   return await res.json();
 }
 
-export async function getOrderSummary() {
-  const res = await api("/orders/summary");
-  if (!res.ok) throw await res.json();
-  const json = await res.json();
-  return json.data;
-}
-
-export async function downloadInvoice(orderId: string): Promise<string> {
-  const res = await api(`/invoice/download/${orderId}`);
-  if (!res.ok) throw await res.json();
-  const json = await res.json();
-  return json.url;
-}
-
 export async function updateOrderStatus(id: string, status: string) {
   const res = await api(`/orders/${id}/status`, {
     method: "PATCH",
@@ -56,6 +43,7 @@ export async function updateOrderStatus(id: string, status: string) {
 
 export async function getTotalOrdersSpend(): Promise<{ total: number }> {
   const res = await api("/orders/total");
+
   if (!res.ok) throw await res.json();
   const json = await res.json();
   return json.data;
@@ -66,7 +54,12 @@ export async function getTotalOrdersCount(): Promise<{
   pending: number;
   completed: number;
 }> {
-  const res = await api("/orders/summary");
+  const user = await getUserFromSession();
+
+  const res = await api("/orders/summary", {
+    cache: "force-cache",
+    next: { tags: [`orders-summary-${user!.id}`] },
+  });
   if (!res.ok) throw await res.json();
   const json = await res.json();
   return json.data;

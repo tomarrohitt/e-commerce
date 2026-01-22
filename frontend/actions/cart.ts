@@ -1,7 +1,8 @@
 "use server";
 
 import { api } from "@/lib/api/server";
-import { revalidatePath } from "next/cache";
+import { getUserFromSession } from "@/lib/user-auth";
+import { revalidateTag } from "next/cache";
 
 export async function removeFromCart(productId: string) {
   try {
@@ -12,7 +13,8 @@ export async function removeFromCart(productId: string) {
       throw err;
     }
 
-    revalidatePath("/cart");
+    const user = await getUserFromSession();
+    revalidateTag(`cart-count-${user!.id}`);
   } catch (error) {
     console.error("Error removing item from cart:", error);
   }
@@ -29,8 +31,8 @@ export async function addToCart(productId: string, quantity: number) {
       const err = await res.json();
       throw err;
     }
-
-    revalidatePath("/cart");
+    const user = await getUserFromSession();
+    revalidateTag(`cart-count-${user!.id}`);
   } catch (error) {
     console.error("Error adding item to cart:", error);
   }
@@ -47,10 +49,7 @@ export async function updateCartItem(productId: string, newQuantity: number) {
       const err = await res.json();
       throw err;
     }
-
     const data = await res.json();
-
-    revalidatePath("/cart");
 
     return {
       success: true,
@@ -72,7 +71,8 @@ export async function clearCart() {
       throw err;
     }
 
-    revalidatePath("/cart");
+    const user = await getUserFromSession();
+    revalidateTag(`cart-count-${user!.id}`);
   } catch (error) {
     console.error("Error clearing the cart:", error);
   }

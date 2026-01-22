@@ -1,4 +1,4 @@
-import { useState, FormEvent, useMemo, useEffect } from "react";
+import { useState, FormEvent, useMemo } from "react";
 import {
   PaymentElement,
   useStripe,

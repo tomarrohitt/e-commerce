@@ -3,6 +3,8 @@ export interface Pagination {
   page: number;
   limit: number;
   totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
 }
 
 export interface ApiError {

@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { formatPrice } from "@/lib/format";
 import { getCart } from "@/lib/api/cart";
-import { ShoppingBag, ArrowRight, Package, ShoppingCart } from "lucide-react";
+import { ShoppingBag, ArrowRight, Package } from "lucide-react";
 import { ClearCartButton } from "@/components/cart/clear-cart-button";
-import { cookies } from "next/headers";
+import { EmptyCartState } from "@/components/cart/empty-cart-state";
+import { CartItemList } from "@/components/cart/cart-item-list";
 
 export default async function CartPage() {
-  await cookies();
   const cart = await getCart();
 
   if (!cart.items || cart.items.length === 0) {
@@ -51,11 +51,7 @@ export default async function CartPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-4">
-          {cart.items.map((item) => (
-            <CartItem key={item.productId} item={item} isUpdating={false} />
-          ))}
-        </div>
+        <CartItemList items={cart.items} />
 
         <div className="lg:col-span-1">
           <Card className="sticky top-0 shadow-lg border-2 border-gray-100  pt-0">
@@ -141,45 +137,6 @@ export default async function CartPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
-    </div>
-  );
-}
-
-function EmptyCartState() {
-  return (
-    <div className="flex-1 bg-muted/30 flex flex-col pt-30 items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
-      <div className="text-center max-w-lg w-full mb-12">
-        <div className="relative mb-8">
-          <div className="w-32 h-32 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
-            <ShoppingCart
-              className="w-16 h-16 text-primary"
-              strokeWidth={1.5}
-            />
-          </div>
-          <div className="absolute top-0 left-1/2 -translate-x-16 -translate-y-2 w-4 h-4 bg-primary/20 rounded-full animate-pulse" />
-          <div className="absolute bottom-4 right-1/2 translate-x-20 w-3 h-3 bg-primary/30 rounded-full animate-pulse delay-150" />
-          <div className="absolute top-8 right-1/2 translate-x-24 w-2 h-2 bg-primary/40 rounded-full animate-pulse delay-300" />
-        </div>
-
-        <h1 className="text-3xl font-bold text-foreground mb-3 text-balance">
-          Your Cart is Empty
-        </h1>
-        <p className="text-muted-foreground text-lg mb-8 text-pretty">
-          Looks like you haven&apos;t found anything you love yet. Let&apos;s
-          change that!
-        </p>
-
-        <Link href="/products">
-          <Button
-            size="lg"
-            className="group shadow-md hover:shadow-lg transition-all"
-          >
-            <ShoppingBag className="w-5 h-5 mr-2" />
-            Start Shopping
-            <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-          </Button>
-        </Link>
       </div>
     </div>
   );

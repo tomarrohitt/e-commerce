@@ -3,6 +3,7 @@ import { Raleway } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
 import { cn } from "@/lib/utils";
+import Footer from "@/components/footer";
 
 const raleway = Raleway({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -21,6 +22,7 @@ export default async function RootLayout({
       <body className={cn("min-h-screen flex flex-col", raleway.className)}>
         <Navbar />
         <main className="flex-1">{children}</main>
+        <Footer />
       </body>
     </html>
   );

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SignInForm } from "./sign-in-form";
+import { Suspense } from "react";
 
 export default function SignInPage() {
   return (
@@ -8,8 +9,9 @@ export default function SignInPage() {
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
         <p className="text-gray-500">Sign in to your account to continue</p>
       </div>
-
-      <SignInForm />
+      <Suspense fallback={<div>Loading...</div>}>
+        <SignInForm />
+      </Suspense>
 
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">

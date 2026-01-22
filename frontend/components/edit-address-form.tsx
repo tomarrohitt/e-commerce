@@ -1,14 +1,25 @@
 "use client";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { useActionState } from "react";
-import { createAddress, updateAddress } from "@/actions/address";
+import {
+  type Dispatch,
+  type SetStateAction,
+  useActionState,
+  useEffect,
+} from "react";
+import { updateAddress } from "@/actions/address";
 import { FormIds } from "@/lib/constants";
 
 import { FormFooter } from "./form-footer";
 import { Address } from "@/types";
 
-export default function EditAddressForm({ address }: { address: Address }) {
+export default function EditAddressForm({
+  address,
+  setOpen,
+}: {
+  address: Address;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+}) {
   const initialState = {
     success: false,
     message: "",
@@ -37,6 +48,13 @@ export default function EditAddressForm({ address }: { address: Address }) {
     updateAddressWithId,
     initialState,
   );
+
+  useEffect(() => {
+    if (state.success) {
+      setOpen(false);
+    }
+  }, [state.success, setOpen]);
+
   return (
     <>
       <form

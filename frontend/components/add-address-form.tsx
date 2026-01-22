@@ -2,12 +2,16 @@
 
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { useActionState, useEffect } from "react";
+import {
+  type Dispatch,
+  type SetStateAction,
+  useActionState,
+  useEffect,
+} from "react";
 import { createAddress } from "@/actions/address";
 import { FormIds } from "@/lib/constants";
 
 import { FormFooter } from "./form-footer";
-import { redirect, usePathname } from "next/navigation";
 
 const initialState = {
   success: false,
@@ -32,16 +36,18 @@ const initialState = {
   },
 };
 
-export default function AddAddressForm() {
+export default function AddAddressForm({
+  setOpen,
+}: {
+  setOpen: Dispatch<SetStateAction<boolean>>;
+}) {
   const [state, action, pending] = useActionState(createAddress, initialState);
-  const pathname = usePathname();
 
   useEffect(() => {
     if (state.success) {
-      redirect(pathname);
+      setOpen(false);
     }
-  }, [state.success, pathname]);
-
+  }, [state.success, setOpen]);
   return (
     <>
       <form

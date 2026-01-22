@@ -6,6 +6,7 @@ import { Address, Cart } from "@/types";
 import { useCheckout } from "../context/checkout-context";
 import { useTransition } from "react";
 import { createOrder } from "@/actions/order";
+import { useRouter } from "next/navigation";
 
 export const PlaceOrderButton = ({
   cart,
@@ -16,6 +17,7 @@ export const PlaceOrderButton = ({
 }) => {
   const { selectedAddressId } = useCheckout();
   const [pending, startTransition] = useTransition();
+  const router = useRouter();
 
   const address = selectedAddressId
     ? addresses.find((a) => a.id === selectedAddressId)

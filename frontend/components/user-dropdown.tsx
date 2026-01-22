@@ -1,58 +1,82 @@
 "use client";
 import { getImageUrl } from "@/lib/get-image-url";
 import { User } from "@/types";
+import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { LogoutButton } from "./logout-button";
+import { ChevronDown } from "lucide-react";
 
 type UserDropdownProps = {
   user: User;
 };
 
 export function UserDropdown({ user }: UserDropdownProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <div className="relative group min-w-40 flex justify-end">
-      <button className="flex items-center space-x-2 text-gray-700 hover:text-blue-500 transition-colors">
+    <div
+      className="relative"
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
+    >
+      <button className="flex items-center gap-2 focus:outline-none group py-2">
         {user.image ? (
-          <Image
-            src={getImageUrl(user.image)}
-            alt={user?.name?.charAt(0).toUpperCase()}
-            loading="eager"
-            width={32}
-            height={32}
-            className="rounded-full"
-            unoptimized
-          />
+          <motion.div whileHover={{ scale: 1.1 }}>
+            <Image
+              src={getImageUrl(user.image)}
+              alt={user.name || "User"}
+              width={36}
+              height={36}
+              className="rounded-full border-2 border-white shadow-sm"
+              unoptimized
+            />
+          </motion.div>
         ) : (
-          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-            {user?.name?.charAt(0).toUpperCase() || "U"}
+          <div className="w-9 h-9 bg-linear-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold shadow-sm">
+            {user.name?.charAt(0).toUpperCase() || "U"}
           </div>
         )}
-        <span className="text-sm font-medium">{user?.name}</span>
-        <svg
-          className="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+
+        <div className="hidden lg:flex flex-col items-start">
+          <span className="text-sm font-semibold text-gray-700 group-hover:text-blue-600 transition-colors">
+            {user.name}
+          </span>
+        </div>
+
+        <motion.div
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 9l-7 7-7-7"
-          />
-        </svg>
+          <ChevronDown className="w-4 h-4 text-gray-400 group-hover:text-blue-500" />
+        </motion.div>
       </button>
-      <div className="absolute right-[-10] top-10 w-38 bg-white rounded-lg shadow-lg py-2 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
-        <Link
-          href="/profile"
-          className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-500"
-        >
-          Profile
-        </Link>
-        <hr className="my-2" />
-        <LogoutButton />
-      </div>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            className="absolute right-0 top-full pt-2 w-56 z-50"
+          >
+            <div className="bg-white/80 shadow-xl border border-white/20 overflow-hidden ring-1 ring-black/5 p-1">
+              <div className="px-4 py-3 border-b border-gray-100">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {user.name}
+                </p>
+                <p className="text-xs text-gray-500 truncate">{user.email}</p>
+              </div>
+
+              <div className="border-t border-gray-100 p-1">
+                <LogoutButton />
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

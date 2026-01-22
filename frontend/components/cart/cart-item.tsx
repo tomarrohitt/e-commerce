@@ -17,7 +17,7 @@ export function CartItem({ item, isUpdating }: CartItemProps) {
   const exceedsStock = item.quantity > item.product.stockQuantity;
 
   return (
-    <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 p-6 flex space-x-4 border-2 border-transparent hover:border-blue-100">
+    <div className="relative bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 p-6 flex space-x-4 border-2 border-transparent hover:border-blue-100">
       <Link
         href={`/products/${item.productId}`}
         className="shrink-0 group relative"
@@ -28,7 +28,7 @@ export function CartItem({ item, isUpdating }: CartItemProps) {
               src={item.product.thumbnail}
               fill
               alt={item.product.name}
-              className="object-cover group-hover:scale-110 transition-transform duration-300"
+              className="object-cover group-hover:scale-110 transition-transform duration-300 rounded-lg"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-white text-3xl">

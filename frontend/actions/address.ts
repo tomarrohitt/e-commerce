@@ -9,6 +9,7 @@ import {
   type UpdateAddressInput,
 } from "@/types";
 import { updateAddressSchema } from "@/types/address";
+import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import z from "zod";
 
@@ -37,8 +38,7 @@ export async function createAddress(_: any, formData: FormData) {
       throw err;
     }
 
-    await getUserFromSession();
-
+    revalidateTag(`addresses-${(await getUserFromSession())!.id}`);
     return {
       success: true,
       errors: {
@@ -95,8 +95,21 @@ export async function updateAddress(id: string, _: any, formData: FormData) {
       const err = await res.json();
       throw err;
     }
-
-    await getUserFromSession();
+    revalidateTag(`addresses-${(await getUserFromSession())!.id}`);
+    return {
+      success: true,
+      message: "",
+      errors: {
+        name: "",
+        street: "",
+        city: "",
+        state: "",
+        zipCode: "",
+        country: "",
+        phoneNumber: "",
+      },
+      inputs: data,
+    };
   } catch (error: any) {
     return {
       success: false,
@@ -114,8 +127,6 @@ export async function updateAddress(id: string, _: any, formData: FormData) {
       inputs: data,
     };
   }
-
-  redirect("/addresses");
 }
 
 export async function deleteAddress(id: string) {
@@ -126,6 +137,7 @@ export async function deleteAddress(id: string) {
       const err = await res.json();
       throw err;
     }
+    revalidateTag(`addresses-${(await getUserFromSession())!.id}`);
   } catch (error) {
     console.error("Error deleting address:", error);
   }
@@ -139,6 +151,7 @@ export async function setDefaultAddress(id: string) {
       const err = await res.json();
       throw err;
     }
+    revalidateTag(`addresses-${(await getUserFromSession())!.id}`);
   } catch (error) {
     console.error("Error setting default address:", error);
   }

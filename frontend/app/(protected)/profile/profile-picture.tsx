@@ -49,9 +49,6 @@ export const ProfilePicture = ({ user }: { user: User }) => {
     startTransition(async () => {
       try {
         await imageUpload(compressedBlob);
-        setTimeout(() => {
-          router.refresh();
-        }, 100);
       } catch (error) {
         console.error("Upload failed", error);
         setOptimisticImage(null);

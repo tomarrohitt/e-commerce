@@ -1,6 +1,8 @@
 "use server";
 
 import { api } from "@/lib/api/server";
+import { getUserFromSession } from "@/lib/user-auth";
+import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 type CreateOrderInput = {
@@ -38,6 +40,11 @@ export const createOrder = async (data: CreateOrderInput) => {
     }
 
     const json = await res.json();
+    const user = await getUserFromSession();
+
+    revalidateTag(`cart-count-${user!.id}`);
+
+    revalidateTag(`orders-summary-${user!.id}`);
     orderId = json.data.orderId;
   } catch (error) {
     console.error("Error creating order:", error);

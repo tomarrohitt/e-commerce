@@ -87,16 +87,15 @@ export default async function OrderDetailsPage({
                   <div key={item.productId} className="p-6 flex gap-4">
                     <Link
                       href={`/products/${item.productId}`}
-                      className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden shrink-0 border border-gray-200"
+                      className="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden shrink-0 border border-gray-200"
                     >
                       {item.thumbnail ? (
                         <Image
                           src={item.thumbnail}
                           loading="eager"
                           alt={item.name}
-                          fill
                           sizes="80px"
-                          className="object-cover"
+                          fill
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-2xl">

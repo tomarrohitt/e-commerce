@@ -1,5 +1,6 @@
 import { Address } from "@/types";
 import { api } from "./server";
+import { getUserFromSession } from "../user-auth";
 
 export async function getAddress(id: string): Promise<Address> {
   const res = await api(`/addresses/${id}`);
@@ -13,7 +14,10 @@ export async function getAddress(id: string): Promise<Address> {
 }
 
 export async function getAddressCount() {
-  const res = await api("/addresses/count");
+  const res = await api("/addresses/count", {
+    cache: "force-cache",
+    next: { tags: [`address-count-${(await getUserFromSession())!.id}`] },
+  });
 
   if (!res.ok) {
     const err = await res.json();

@@ -1,4 +1,3 @@
-"use client";
 import { setDefaultAddress } from "@/actions/address";
 import { Spinner } from "@/components/ui/spinner";
 import { CheckCircle } from "lucide-react";
@@ -12,7 +11,6 @@ export const SetToDefaultButton = ({ addressId }: { addressId: string }) => {
   const handleSetToDefault = async () => {
     startTransition(async () => {
       await setDefaultAddress(addressId);
-      router.refresh();
     });
   };
 

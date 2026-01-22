@@ -1,16 +1,16 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
 import { useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { clearCart } from "@/actions/cart";
 
 export const ClearCartButton = () => {
-  const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const handleClearCart = async () => {
-    await clearCart();
+  const handleClearCart = () => {
+    startTransition(async () => {
+      await clearCart();
+    });
   };
   return (
     <Button
@@ -18,7 +18,11 @@ export const ClearCartButton = () => {
       disabled={pending}
       onClick={handleClearCart}
     >
-      <Trash2 className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+      {pending ? (
+        <Loader2 className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform animate-spin" />
+      ) : (
+        <Trash2 className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+      )}
       Clear Cart
     </Button>
   );

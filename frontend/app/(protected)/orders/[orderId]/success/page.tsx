@@ -136,9 +136,9 @@ export default async function OrderSuccessPage({
                       <div className="relative w-20 h-20 rounded-xl overflow-hidden border bg-slate-100 shrink-0">
                         <Image
                           src={item.thumbnail}
+                          alt={item.name}
                           fill
                           sizes="80px"
-                          alt={item.name}
                           className="object-cover"
                         />
                       </div>

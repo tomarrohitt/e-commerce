@@ -17,6 +17,8 @@ export async function getProducts(params?: {
   minPrice?: number;
   maxPrice?: number;
   inStock?: boolean;
+  sortBy?: "price" | "rating" | "createdAt" | undefined;
+  sortOrder?: "desc" | "asc" | undefined;
 }): Promise<PaginatedProducts> {
   const q = buildQuery(params);
   const res = await baseApi<ProductsListResponse>(`/products${q}`, {
@@ -40,7 +42,12 @@ export async function getProduct(id: string): Promise<Product> {
 }
 
 export async function getCategories() {
-  const res = await baseApi<{ data: any[] }>("/category");
+  const res = await baseApi<{ data: any[] }>("/category", {
+    cache: "force-cache",
+    next: {
+      tags: [`category`],
+    },
+  });
   return res.data;
 }
 
