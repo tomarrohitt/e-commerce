@@ -136,12 +136,6 @@ class CartService {
   }
 
   async updateCartItem(userId: string, productId: string, quantity: number) {
-    const existingItem = await cartRepository.getItem(userId, productId);
-
-    if (!existingItem) {
-      throw new NotFoundError("Item not in cart");
-    }
-
     const product = await productReplicasRepository.findbyId(productId);
 
     if (!product) {

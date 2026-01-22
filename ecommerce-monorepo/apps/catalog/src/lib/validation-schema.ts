@@ -84,9 +84,11 @@ export const listProductSchema = z.object({
     .transform((val) => val === "true")
     .optional(),
 
-  minPrice: z.coerce.number().min(0).optional(),
-  maxPrice: z.coerce.number().min(0).optional(),
+  minPrice: z.coerce.number().min(1).optional(),
+  maxPrice: z.coerce.number().max(1000000).optional(),
   categoryId: z.string().optional(),
+  sortBy: z.enum(["createdAt", "price", "rating"]).optional(),
+  sortOrder: z.enum(["asc", "desc"]).optional(),
 });
 
 export const createReviewSchema = z.object({

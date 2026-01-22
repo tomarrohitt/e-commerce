@@ -1,4 +1,4 @@
-import { Request, Response, Router } from "express";
+import { Response, Router } from "express";
 import imageUploadController from "../controller/avatar-controller";
 import { userController } from "../controller/user-controller";
 

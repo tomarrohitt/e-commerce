@@ -7,6 +7,7 @@ import {
   StoragePrefix,
 } from "@ecommerce/storage-service";
 import { BadRequestError, sendCreated, sendSuccess } from "@ecommerce/common";
+import { IdentityAuthMiddleware } from "../middleware/auth-middleware";
 
 class ImageUploadController {
   async getUploadUrl(req: Request, res: Response) {
@@ -15,7 +16,7 @@ class ImageUploadController {
     }
     const result = (await generatePresignedUrls(
       StoragePrefix.USER_PROFILE,
-      req.user.id
+      req.user.id,
     )) as { url: string; fields: Record<string, string>; key: string };
 
     const data = {
@@ -27,23 +28,38 @@ class ImageUploadController {
   }
 
   async confirmUpload(req: Request, res: Response) {
-    const { key } = req.body;
-
-    if (!key) {
-      throw new BadRequestError("Image key is required in the body.");
+    if (!req.user || !req.user.id) {
+      throw new BadRequestError("User ID missing from request context.");
     }
+    try {
+      const { key } = req.body;
 
-    if (req.user?.image) {
-      deleteImage(req.user.image);
+      if (!key) {
+        throw new BadRequestError("Image key is required in the body.");
+      }
+
+      const session = await auth.api.getSession({
+        headers: fromNodeHeaders(req.headers),
+      });
+
+      if (session && session.user?.image) {
+        await deleteImage(session.user.image);
+      }
+
+      await Promise.all([
+        auth.api.updateUser({
+          body: {
+            image: key,
+          },
+          headers: fromNodeHeaders(req.headers),
+        }),
+        IdentityAuthMiddleware.validateToken(req.headers),
+      ]);
+
+      sendCreated(res, { image: key }, "Profile image updated successfully.");
+    } catch (error) {
+      console.log(error);
     }
-    await auth.api.updateUser({
-      body: {
-        image: key,
-      },
-      headers: fromNodeHeaders(req.headers),
-    });
-
-    sendCreated(res, { image: key }, "Profile image updated successfully.");
   }
 }
 

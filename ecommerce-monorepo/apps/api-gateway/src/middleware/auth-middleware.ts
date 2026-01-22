@@ -87,14 +87,16 @@ export class GatewayAuthMiddleware {
         throw new NotAuthorizedError();
       }
 
-      const sessionCache = await redis.getSessionByToken(token);
-      if (sessionCache) {
-        req.user = sessionCache;
-        return next();
+      const shouldSkipCache = req.headers["x-skip-cache"] === "true";
+      if (!shouldSkipCache) {
+        const sessionCache = await redis.getSessionByToken(token);
+        if (sessionCache) {
+          req.user = sessionCache;
+          return next();
+        }
       }
 
       const userData = await validateWithIdentityService(token);
-
       redis
         .saveSessionDualLayer(token, userData, TOKEN_CACHE_TTL)
         .catch((err) => console.warn("[Gateway] Redis save failed:", err));

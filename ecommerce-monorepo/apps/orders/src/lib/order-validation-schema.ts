@@ -2,6 +2,7 @@ import { OrderStatus } from "@prisma/client";
 import { z } from "zod";
 
 const addressSchema = z.object({
+  name: z.string().min(3),
   street: z.string().min(5),
   city: z.string().min(2),
   state: z.string().min(2),

@@ -20,6 +20,17 @@ const EVENT_SELECT = {
   isActive: true,
 } satisfies Prisma.ProductSelect;
 
+type SortBy = "createdAt" | "price" | "rating";
+
+const orderByMap: Record<
+  NonNullable<SortBy>,
+  Prisma.ProductOrderByWithRelationInput
+> = {
+  createdAt: { createdAt: "desc" },
+  price: { price: "asc" },
+  rating: { rating: "desc" },
+};
+
 type ProductEventPayload = Prisma.ProductGetPayload<{
   select: typeof EVENT_SELECT;
 }>;
@@ -40,7 +51,7 @@ class ProductRepository {
     tx: Prisma.TransactionClient,
     eventType: ProductEventType,
     product: ProductEventPayload,
-    extraData: Record<string, any> = {}
+    extraData: Record<string, any> = {},
   ) {
     await tx.outboxEvent.create({
       data: {
@@ -67,7 +78,7 @@ class ProductRepository {
           return { id: product.id };
         });
       },
-      { model: "Product", operation: "create", field: "sku" }
+      { model: "Product", operation: "create", field: "sku" },
     );
   }
 
@@ -91,7 +102,7 @@ class ProductRepository {
           return { id };
         });
       },
-      { model: "Product", operation: "update", field: "sku" }
+      { model: "Product", operation: "update", field: "sku" },
     );
   }
 
@@ -117,14 +128,14 @@ class ProductRepository {
           return { id };
         });
       },
-      { model: "Product", operation: "delete" }
+      { model: "Product", operation: "delete" },
     );
   }
 
   async updateStock(
     id: string,
     quantity: number,
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
   ) {
     return await safeQuery(
       async () => {
@@ -144,7 +155,7 @@ class ProductRepository {
         if (tx) return transaction(tx);
         return await prisma.$transaction(transaction);
       },
-      { model: "Product", operation: "updateStock" }
+      { model: "Product", operation: "updateStock" },
     );
   }
 
@@ -160,7 +171,7 @@ class ProductRepository {
           return product;
         });
       },
-      { model: "Product", operation: "addImage" }
+      { model: "Product", operation: "addImage" },
     );
   }
 
@@ -190,7 +201,7 @@ class ProductRepository {
           return product;
         });
       },
-      { model: "Product", operation: "reorderImages" }
+      { model: "Product", operation: "reorderImages" },
     );
   }
 
@@ -209,7 +220,7 @@ class ProductRepository {
             },
           },
         }),
-      { model: "Product", operation: "find" }
+      { model: "Product", operation: "find" },
     );
   }
 
@@ -232,17 +243,39 @@ class ProductRepository {
             },
           },
         }),
-      { model: "Product", operation: "findByIds" }
+      { model: "Product", operation: "findByIds" },
     );
   }
 
   async findMany(filters: ListProductQuery) {
     return await safeQuery(
       async () => {
-        const { page, limit, search, inStock, minPrice, maxPrice, categoryId } =
-          filters;
+        const {
+          page,
+          limit,
+          search,
+          inStock,
+          minPrice,
+          maxPrice,
+          categoryId,
+          sortBy,
+          sortOrder,
+        } = filters;
 
         const skip = (page - 1) * limit;
+        const orderBy: Prisma.ProductOrderByWithRelationInput = sortBy
+          ? { [sortBy]: sortOrder ?? "desc" }
+          : { createdAt: "desc" };
+        const priceFilter =
+          minPrice !== undefined || maxPrice !== undefined
+            ? {
+                price: {
+                  ...(minPrice !== undefined && { gte: minPrice }),
+                  ...(maxPrice !== undefined && { lte: maxPrice }),
+                },
+              }
+            : {};
+
         const where: Prisma.ProductWhereInput = {
           ...(search && {
             OR: [
@@ -251,11 +284,13 @@ class ProductRepository {
               { sku: { contains: search, mode: "insensitive" } },
             ],
           }),
-          ...(minPrice && { price: { gte: minPrice } }),
-          ...(maxPrice && { price: { lte: maxPrice } }),
+
+          ...priceFilter,
+
           ...(inStock !== undefined && {
             stockQuantity: inStock ? { gt: 0 } : { equals: 0 },
           }),
+
           ...(categoryId && { categoryId }),
         };
 
@@ -264,7 +299,7 @@ class ProductRepository {
             where,
             skip,
             take: limit,
-            orderBy: { createdAt: "desc" },
+            orderBy,
             select: {
               id: true,
               name: true,
@@ -294,7 +329,7 @@ class ProductRepository {
         };
       },
 
-      { model: "Product", operation: "list" }
+      { model: "Product", operation: "list" },
     );
   }
 }

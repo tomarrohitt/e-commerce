@@ -17,7 +17,7 @@ export class InvoiceConsumer {
       [OrderEventType.PAID],
       async (event) => {
         await this.processInvoice(event.data);
-      }
+      },
     );
   }
 
@@ -41,7 +41,7 @@ export class InvoiceConsumer {
         address: data.shippingAddress,
       });
 
-      const key = `invoices/${data.userId}/${data.orderId}.pdf`;
+      const key = `uploads/invoices/${data.userId}/${data.orderId}.pdf`;
       const publicUrl = await S3Service.uploadInvoice(key, pdfBuffer);
 
       await prisma.$transaction(async (tx) => {
@@ -69,7 +69,7 @@ export class InvoiceConsumer {
     } catch (error: any) {
       if (error.code === "P2002") {
         console.warn(
-          `[Invoice] Invoice already exists for order ${data.orderId}. Skipping.`
+          `[Invoice] Invoice already exists for order ${data.orderId}. Skipping.`,
         );
         return;
       }

@@ -24,11 +24,11 @@ class OrderService {
       userId: string;
       userEmail: string;
       userName: string;
-    }
+    },
   ) {
     const subtotal = input.items.reduce(
       (sum, item) => sum + item.price * item.quantity,
-      0
+      0,
     );
 
     const taxAmount = Math.round(subtotal * env.TAX_RATE * 100) / 100;
@@ -37,7 +37,7 @@ class OrderService {
 
     if (Math.abs(calculatedTotal - input.totalAmount) > 0.05) {
       throw new BadRequestError(
-        `Total amount mismatch. Backend: ${calculatedTotal}, Frontend: ${input.totalAmount}`
+        `Total amount mismatch. Backend: ${calculatedTotal}, Frontend: ${input.totalAmount}`,
       );
     }
 
@@ -93,7 +93,7 @@ class OrderService {
 
   async getUserOrders(
     userId: string,
-    options: { status?: OrderStatus; limit: number; page: number }
+    options: { status?: OrderStatus; limit: number; page: number },
   ) {
     const offset = (options.page - 1) * options.limit;
 
@@ -138,14 +138,14 @@ class OrderService {
       ).includes(order.status)
     ) {
       throw new BadRequestError(
-        `Cannot cancel order in status ${order.status}`
+        `Cannot cancel order in status ${order.status}`,
       );
     }
 
     return await orderRepository.updateStatus(
       orderId,
       OrderStatus.CANCELLED,
-      "User Requested"
+      "User Requested",
     );
   }
 
@@ -166,6 +166,10 @@ class OrderService {
       clientSecret: intent.client_secret,
       paymentStatus: intent.status,
     };
+  }
+  async getTotalSpend(userId: string) {
+    const totalSpend = await orderRepository.findTotalSpendByUserId(userId);
+    return { total: totalSpend._sum.totalAmount };
   }
 
   async processPaymentReversal(paymentId: string, orderId: string) {
@@ -199,7 +203,7 @@ class OrderService {
 
         default:
           console.warn(
-            `[Payment] Unhandled payment status: ${paymentIntent.status} for ${paymentId}`
+            `[Payment] Unhandled payment status: ${paymentIntent.status} for ${paymentId}`,
           );
       }
     } catch (error: any) {

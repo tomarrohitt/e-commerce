@@ -23,7 +23,7 @@ class OrderController {
   async createOrder(req: Request, res: Response) {
     const input = validateAndThrow<CreateOrderInput>(
       createOrderSchema,
-      req.body
+      req.body,
     );
 
     const user = {
@@ -61,7 +61,7 @@ class OrderController {
   async cancelOrder(req: Request, res: Response) {
     const updatedOrder = await orderService.cancelOrder(
       req.params.id,
-      req.user
+      req.user,
     );
 
     return sendSuccess(res, updatedOrder, "Order cancelled successfully");
@@ -131,7 +131,7 @@ class OrderController {
           }
         } else {
           logger.error(
-            `[Stripe] ❌ No order found for Payment ID: ${paymentId}`
+            `[Stripe] ❌ No order found for Payment ID: ${paymentId}`,
           );
         }
       }
@@ -153,6 +153,11 @@ class OrderController {
     const status = await orderService.getPaymentStatus(orderId, id);
 
     return sendSuccess(res, status);
+  }
+  async getTotalSpend(req: Request, res: Response) {
+    const id = req.user.id;
+    const total = await orderService.getTotalSpend(id);
+    return sendSuccess(res, total);
   }
 }
 

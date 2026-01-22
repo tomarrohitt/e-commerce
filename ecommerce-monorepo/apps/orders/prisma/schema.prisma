@@ -68,6 +68,7 @@ model OrderItem {
 model OrderAddress {
   id String @id @default(cuid())
 
+  name        String
   street      String
   city        String
   state       String

@@ -12,7 +12,7 @@ class OrderRepository {
       subtotal: number;
       tax: number;
     },
-    paymentId: null
+    paymentId: null,
   ) {
     const {
       userId,
@@ -78,7 +78,7 @@ class OrderRepository {
           return order;
         });
       },
-      { model: "Order", operation: "create" }
+      { model: "Order", operation: "create" },
     );
   }
 
@@ -93,13 +93,13 @@ class OrderRepository {
             billingAddress: true,
           },
         }),
-      { model: "Order", operation: "findById" }
+      { model: "Order", operation: "findById" },
     );
   }
 
   async findByUserId(
     userId: string,
-    options: { status?: OrderStatus; limit: number; offset: number }
+    options: { status?: OrderStatus; limit: number; offset: number },
   ) {
     const { status, limit, offset } = options;
 
@@ -161,7 +161,7 @@ class OrderRepository {
           },
         };
       },
-      { model: "Order", operation: "findByUserId" }
+      { model: "Order", operation: "findByUserId" },
     );
   }
 
@@ -171,7 +171,7 @@ class OrderRepository {
         prisma.order.count({
           where: { userId, ...(status && { status }) },
         }),
-      { model: "Order", operation: "countUserOrders" }
+      { model: "Order", operation: "countUserOrders" },
     );
   }
 
@@ -275,7 +275,7 @@ class OrderRepository {
           return order;
         });
       },
-      { model: "Order", operation: "updateStatus" }
+      { model: "Order", operation: "updateStatus" },
     );
   }
   async updateInvoiceUrl(id: string, invoiceUrl: string) {
@@ -288,7 +288,7 @@ class OrderRepository {
           });
         });
       },
-      { model: "Order", operation: "updateStatus" }
+      { model: "Order", operation: "updateStatus" },
     );
   }
   async findByPaymentIntent(paymentId: string) {
@@ -300,7 +300,26 @@ class OrderRepository {
           },
           include: { items: true, shippingAddress: true, billingAddress: true },
         }),
-      { model: "Order", operation: "findByPaymentIntent" }
+      { model: "Order", operation: "findByPaymentIntent" },
+    );
+  }
+  async findTotalSpendByUserId(userId: string) {
+    return await safeQuery(
+      () =>
+        prisma.order.aggregate({
+          _sum: {
+            totalAmount: true,
+          },
+          where: {
+            userId: userId,
+            paid: true,
+            refunded: false,
+            status: {
+              notIn: ["CANCELLED", "REFUNDED", "FAILED"],
+            },
+          },
+        }),
+      { model: "Order", operation: "findByPaymentIntent" },
     );
   }
 }

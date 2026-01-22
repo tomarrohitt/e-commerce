@@ -49,7 +49,7 @@ class CartController {
 
     await cartService.updateCartItem(userId, productId, quantity);
 
-    return sendSuccess(res, null, "Item added to cart");
+    return sendSuccess(res, null, "Item update in cart");
   }
 
   async removeFromCart(req: Request, res: Response) {

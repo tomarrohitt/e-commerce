@@ -22,7 +22,7 @@ app.use(
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  }),
 );
 app.options("*", cors());
 app.use(requestLogger);
@@ -49,9 +49,10 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 const onProxyReq = (
   proxyReq: ClientRequest,
   req: Request,
-  res: ServerResponse
+  res: ServerResponse,
 ) => {
   const user = req.user;
+
   if (user) {
     proxyReq.setHeader("x-user-id", user.id);
     proxyReq.setHeader("x-user-email", user.email);
@@ -74,7 +75,7 @@ app.get("/api/validate", GatewayAuthMiddleware.authenticate, (req, res) => {
     return sendError(
       res,
       401,
-      "Unauthorized: No authentication token provided"
+      "Unauthorized: No authentication token provided",
     );
   }
   return sendSuccess(res, user);
@@ -93,7 +94,7 @@ routeConfigs.forEach((routeConfig) => {
       on: {
         proxyReq: onProxyReq,
       },
-    })
+    }),
   );
 });
 

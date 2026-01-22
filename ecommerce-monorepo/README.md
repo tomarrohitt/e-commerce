@@ -6,8 +6,8 @@ This repository contains the source code for a modern e-commerce platform, struc
 
 The repository is organized into two main directories: `apps` and `packages`.
 
--   `apps`: Contains the different applications that make up the e-commerce platform.
--   `packages`: Contains shared code, configurations, and utilities used by the applications.
+- `apps`: Contains the different applications that make up the e-commerce platform.
+- `packages`: Contains shared code, configurations, and utilities used by the applications.
 
 This structure is defined in the `pnpm-workspace.yaml` file:
 
@@ -19,24 +19,24 @@ packages:
 
 ### Applications
 
--   **api-gateway**: The main entry point for all incoming API requests. It routes requests to the appropriate microservice.
--   **catalog**: Manages the product catalog.
--   **identity**: Handles user authentication, authorization, and user-related information.
--   **orders**: Manages customer orders.
+- **api-gateway**: The main entry point for all incoming API requests. It routes requests to the appropriate microservice.
+- **catalog**: Manages the product catalog.
+- **identity**: Handles user authentication, authorization, and user-related information.
+- **orders**: Manages customer orders.
 
 ### Packages
 
--   **common**: A shared package containing common code such as error handlers, middlewares, types, and utility functions.
--   **database-config**: Contains shared database configurations.
--   **tsconfig**: Contains the base TypeScript configuration for the entire monorepo.
+- **common**: A shared package containing common code such as error handlers, middlewares, types, and utility functions.
+- **database-config**: Contains shared database configurations.
+- **tsconfig**: Contains the base TypeScript configuration for the entire monorepo.
 
 ## Build System
 
 This monorepo uses [Turborepo](https://turbo.build/) to manage the build process. The build pipeline is defined in `turbo.json`. The main scripts are:
 
--   `pnpm build`: Builds all the applications and packages.
--   `pnpm dev`: Runs all the applications in development mode.
--   `pnpm lint`: Lints the codebase.
+- `pnpm build`: Builds all the applications and packages.
+- `pnpm dev`: Runs all the applications in development mode.
+- `pnpm lint`: Lints the codebase.
 
 ```json
 {
@@ -134,3 +134,6 @@ Similar to the `api-gateway`, this configuration sets the output and root direct
 ```
 
 This is a straightforward extension of the base configuration, setting the output and root directories for the `common` package.
+
+uploads/user-profile/j4rKZSmvgc3gCaQpHJrTenVdHBlKtL4Y/1768734514868-36205.webp
+uploads/user-profile/j4rKZSmvgc3gCaQpHJrTenVdHBlKtL4Y/1768734662943-64598.webp
