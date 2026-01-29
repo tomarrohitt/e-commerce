@@ -20,7 +20,7 @@ export const authHooks: BetterAuthOptions["hooks"] = {
 
       throw new APIError("BAD_REQUEST", {
         success: false,
-        errors: formatted, // Changed from 'details' to 'errors'
+        errors: formatted,
       });
     }
 

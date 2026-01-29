@@ -2,7 +2,7 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 
 export default function Loading() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="fade-in-manual max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="bg-linear-to-r from-blue-50 via-indigo-50 to-blue-50 rounded-2xl p-8 mb-8 border-2 border-blue-100 shadow-sm h-35 animate-pulse opacity-40"></div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

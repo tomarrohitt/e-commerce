@@ -1,12 +1,12 @@
+"use client";
+
 import { setDefaultAddress } from "@/actions/address";
 import { Spinner } from "@/components/ui/spinner";
 import { CheckCircle } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 
 export const SetToDefaultButton = ({ addressId }: { addressId: string }) => {
   const [pending, startTransition] = useTransition();
-  const router = useRouter();
 
   const handleSetToDefault = async () => {
     startTransition(async () => {

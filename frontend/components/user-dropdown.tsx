@@ -3,7 +3,6 @@ import { getImageUrl } from "@/lib/get-image-url";
 import { User } from "@/types";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
-import Link from "next/link";
 import { useState } from "react";
 import { LogoutButton } from "./logout-button";
 import { ChevronDown } from "lucide-react";
@@ -15,6 +14,8 @@ type UserDropdownProps = {
 export function UserDropdown({ user }: UserDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
 
+  const imgUrl = getImageUrl(user.image);
+
   return (
     <div
       className="relative"
@@ -25,12 +26,12 @@ export function UserDropdown({ user }: UserDropdownProps) {
         {user.image ? (
           <motion.div whileHover={{ scale: 1.1 }}>
             <Image
-              src={getImageUrl(user.image)}
-              alt={user.name || "User"}
+              src={imgUrl}
+              alt=""
               width={36}
               height={36}
               className="rounded-full border-2 border-white shadow-sm"
-              unoptimized
+              unoptimized={true}
             />
           </motion.div>
         ) : (

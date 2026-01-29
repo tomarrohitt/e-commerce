@@ -17,6 +17,7 @@ export class EmailConsumer {
       "email-service-queue",
       ["order.*", "user.*"],
       async (event: Event) => {
+        console.log({ event: event.eventType, data: event.data });
         try {
           switch (event.eventType) {
             case UserEventType.REGISTERED:
@@ -44,7 +45,7 @@ export class EmailConsumer {
           logger.error("Failed to process email event", error);
           throw error;
         }
-      }
+      },
     );
   }
 }

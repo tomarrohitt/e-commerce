@@ -48,6 +48,7 @@ export enum UserEventType {
   VERIFIED = "user.verified",
   FORGOT_PASSWORD = "user.forgot_password",
   UPDATED = "user.updated",
+  IMAGE_UPDATED = "user.image_updated",
 }
 
 export interface UserAuthLinkData {

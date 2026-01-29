@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { OrderShippingCard } from "@/components/orders/order-shipping-card";
 import { OrderExtended } from "@/types";
 import { InvoiceDownloadButton } from "@/components/orders/invoice-download-button";
+import { notFound } from "next/navigation";
 
 interface OrderDetailsPageProps {
   params: Promise<{
@@ -19,6 +20,10 @@ export default async function OrderDetailsPage({
 }: OrderDetailsPageProps) {
   const { orderId } = await params;
   const order = await getOrder(orderId);
+
+  if (!order) {
+    notFound();
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {

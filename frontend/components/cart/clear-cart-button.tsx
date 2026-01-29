@@ -5,6 +5,9 @@ import { Button } from "../ui/button";
 import { useTransition } from "react";
 import { clearCart } from "@/actions/cart";
 
+const entranceAnim =
+  "animate-in fade-in slide-in-from-bottom-4 duration-600 ease-out fill-mode-both";
+
 export const ClearCartButton = () => {
   const [pending, startTransition] = useTransition();
   const handleClearCart = () => {
@@ -14,7 +17,7 @@ export const ClearCartButton = () => {
   };
   return (
     <Button
-      className="group shadow-md transition-all flex items-center text-white bg-red-500 hover:bg-red-600"
+      className={`group shadow-md transition-all flex items-center text-white bg-red-500 hover:bg-red-600 ${entranceAnim}`}
       disabled={pending}
       onClick={handleClearCart}
     >

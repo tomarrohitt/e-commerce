@@ -1,19 +1,22 @@
 import Link from "next/link";
-import { OrderItem, OrderStatusType } from "@/types";
+import { OrderItem } from "@/types";
 import Image from "next/image";
 
 interface OrderItemsListProps {
   orderItems: OrderItem[];
 }
 
+const entranceAnim =
+  "animate-in fade-in slide-in-from-bottom-4 duration-600 ease-out fill-mode-both";
+
 export function OrderItemsList({ orderItems }: OrderItemsListProps) {
   return (
     <>
       <div className="space-y-3 mb-4">
-        {orderItems.map((item) => (
+        {orderItems.map((item, i) => (
           <div
             key={item.productId}
-            className="flex items-center gap-4 p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all"
+            className={`flex items-center gap-4 p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all ${entranceAnim} delay-${100 + i * 100}`}
           >
             <Link
               href={`/products/${item.productId}`}

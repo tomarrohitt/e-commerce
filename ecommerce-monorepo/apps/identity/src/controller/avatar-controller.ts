@@ -2,12 +2,17 @@ import { Request, Response } from "express";
 import { fromNodeHeaders } from "better-auth/node";
 import auth from "../config/auth";
 import {
-  deleteImage,
   generatePresignedUrls,
   StoragePrefix,
 } from "@ecommerce/storage-service";
-import { BadRequestError, sendCreated, sendSuccess } from "@ecommerce/common";
+import {
+  BadRequestError,
+  sendCreated,
+  sendSuccess,
+  UserEventType,
+} from "@ecommerce/common";
 import { IdentityAuthMiddleware } from "../middleware/auth-middleware";
+import { dispatchUserEvent } from "../service/outbox-dispatcher";
 
 class ImageUploadController {
   async getUploadUrl(req: Request, res: Response) {
@@ -43,7 +48,9 @@ class ImageUploadController {
       });
 
       if (session && session.user?.image) {
-        await deleteImage(session.user.image);
+        await dispatchUserEvent(UserEventType.IMAGE_UPDATED, session.user, {
+          image: session.user.image,
+        });
       }
 
       await Promise.all([

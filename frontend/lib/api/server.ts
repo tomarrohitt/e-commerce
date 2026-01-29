@@ -1,7 +1,8 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL;
 
 type SmartBody = BodyInit | Record<string, any> | null | undefined;
 
@@ -32,16 +33,29 @@ function normalizeBody(body: SmartBody, headers: HeadersInit | undefined) {
 
   return { body: body as BodyInit | undefined, headers: finalHeaders };
 }
+
 export async function api(endpoint: string, options: NextFetchOptions = {}) {
-  const { body, headers, ...rest } = options;
+  const { body, headers: optionHeaders, ...rest } = options;
+
   const { body: finalBody, headers: finalHeaders } = normalizeBody(
     body,
-    headers,
+    optionHeaders,
   );
 
   const cookieStore = await cookies();
   const cookieHeader = cookieStore.toString();
-  if (cookieHeader) finalHeaders["Cookie"] = cookieHeader;
+  if (cookieHeader) {
+    finalHeaders["Cookie"] = cookieHeader;
+  }
+
+  const headersList = await headers();
+  const incomingOrigin = headersList.get("origin");
+
+  const origin = incomingOrigin || APP_URL;
+
+  if (origin) {
+    finalHeaders["Origin"] = origin;
+  }
 
   const res = await fetch(`${API_URL}${endpoint}`, {
     ...rest,

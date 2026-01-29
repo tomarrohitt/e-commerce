@@ -1,7 +1,10 @@
 "use client";
 
-import { register } from "@/actions/auth";
 import { useActionState } from "react";
+
+import { register } from "@/actions/auth";
+import { Field, FieldLabel, FieldError } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 
 const initialState = {
   success: false,
@@ -35,86 +38,59 @@ export const SignUpForm = () => {
         </div>
       )}
 
-      <div>
-        <label
-          htmlFor="name"
-          className="block text-sm font-medium text-gray-700 mb-2"
-        >
-          Full Name
-        </label>
-        <input
+      <Field className="gap-0">
+        <FieldLabel className="mb-1" htmlFor="name">
+          Full name
+        </FieldLabel>
+        <Input
+          id="name"
           name="name"
           type="text"
-          id="name"
           disabled={pending}
-          defaultValue={state.inputs?.name}
-          className={`w-full px-4 py-3 rounded-lg border ${
-            state.errors?.name
-              ? "border-red-500 focus:ring-red-500"
-              : "border-gray-300 focus:ring-blue-500"
-          } focus:ring-2 focus:border-transparent transition-all duration-200`}
+          defaultValue={state.inputs.name}
           placeholder="John Doe"
         />
-        {state.errors?.name && (
-          <p className="mt-1 text-sm text-red-500">{state.errors.name}</p>
-        )}
-      </div>
+        <FieldError className="my-1 text-xs">{state.errors.name}</FieldError>
+      </Field>
 
-      <div>
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium text-gray-700 mb-2"
-        >
-          Email Address
-        </label>
-        <input
+      <Field className="gap-0">
+        <FieldLabel className="mb-1" htmlFor="email">
+          Email address
+        </FieldLabel>
+        <Input
+          id="email"
           name="email"
           type="email"
-          id="email"
           disabled={pending}
-          defaultValue={state.inputs?.email}
-          className={`w-full px-4 py-3 rounded-lg border ${
-            state.errors?.email
-              ? "border-red-500 focus:ring-red-500"
-              : "border-gray-300 focus:ring-blue-500"
-          } focus:ring-2 focus:border-transparent`}
+          defaultValue={state.inputs.email}
           placeholder="you@example.com"
         />
-        {state.errors?.email && (
-          <p className="mt-1 text-sm text-red-500">{state.errors.email}</p>
-        )}
-      </div>
+        <FieldError className="my-1 text-xs">{state.errors.email}</FieldError>
+      </Field>
 
-      <div>
-        <label
-          htmlFor="password"
-          className="block text-sm font-medium text-gray-700 mb-2"
-        >
+      <Field className="gap-0">
+        <FieldLabel className="mb-1" htmlFor="password">
           Password
-        </label>
-        <input
+        </FieldLabel>
+        <Input
+          id="password"
           name="password"
           type="password"
-          id="password"
           disabled={pending}
-          className={`w-full px-4 py-3 rounded-lg border ${
-            state.errors?.password
-              ? "border-red-500 focus:ring-red-500"
-              : "border-gray-300 focus:ring-blue-500"
-          } focus:ring-2 focus:border-transparent`}
+          defaultValue={state.inputs.password}
           placeholder="••••••••"
         />
-        {state.errors?.password && (
-          <p className="mt-1 text-sm text-red-500">{state.errors.password}</p>
-        )}
-      </div>
+        <FieldError className="my-1 text-xs">
+          {state.errors.password}
+        </FieldError>
+      </Field>
 
       <button
         type="submit"
         disabled={pending}
-        className="w-full bg-blue-500 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center disabled:opacity-70"
+        className="w-full bg-blue-500 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 disabled:opacity-70 flex items-center justify-center"
       >
-        {pending ? "Creating Account..." : "Create Account"}
+        {pending ? "Creating account…" : "Create account"}
       </button>
     </form>
   );

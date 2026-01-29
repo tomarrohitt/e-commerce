@@ -1,6 +1,7 @@
 import { OrderCard } from "@/components/orders/order-card";
 import { Button } from "@/components/ui/button";
 import { getOrders } from "@/lib/api/orders";
+import { entranceAnim } from "@/lib/enter-animation";
 import Link from "next/link";
 
 export default async function OrdersPage() {
@@ -11,12 +12,12 @@ export default async function OrdersPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-8">
+      <div className={`mb-8 ${entranceAnim}`}>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">My Orders</h1>
         <p className="text-gray-500">View and track all your orders</p>
       </div>
 
-      <div className="space-y-6">
+      <div className={`space-y-6 ${entranceAnim} delay-100`}>
         {orders?.map((order) => (
           <OrderCard key={order.id} order={order} />
         ))}
@@ -27,7 +28,9 @@ export default async function OrdersPage() {
 
 function EmptyOrdersState() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div
+      className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 ${entranceAnim}`}
+    >
       <div className="bg-white rounded-xl shadow-md p-12 text-center">
         <div className="text-6xl mb-4">📦</div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">No Orders Yet</h2>

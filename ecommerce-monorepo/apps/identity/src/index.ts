@@ -17,6 +17,7 @@ import { adminUserRouter } from "./router/user-admin-router";
 import { env } from "./config/env";
 import { adminAddressRouter } from "./router/address-admin-router";
 import { logger } from "./config/logger";
+import { ImageCleanUpConsumer } from "./worker/image-clean-up";
 
 const eventBus = new EventBusService({
   serviceName: "identity-service",
@@ -27,6 +28,7 @@ const outboxProcessor = new OutboxProcessor(prisma, eventBus, {
   batchSize: 50,
   pollInterval: 500,
 });
+const imageConsumer = new ImageCleanUpConsumer(eventBus);
 
 const app = express();
 app.use(express.json());
@@ -65,6 +67,8 @@ async function startServer() {
     app.listen(PORT, () => {
       console.log(`Identity Service running on ${PORT}`);
       outboxProcessor.start();
+      imageConsumer.start();
+      console.log("Identity Service image worker is running");
     });
   } catch (error) {
     logger.error("Failed to start server:", error);

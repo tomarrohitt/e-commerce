@@ -1,9 +1,16 @@
-import { LoginInput, LoginResponse, RegistrationInput, User } from "@/types";
+import {
+  ChangePasswordInput,
+  LoginInput,
+  LoginResponse,
+  RegistrationInput,
+  User,
+} from "@/types";
 import { cookies } from "next/headers";
 import { api } from "./server";
+import { baseApi } from "./baseApi";
 
 export async function signUp(data: RegistrationInput): Promise<User> {
-  const res = await api("/auth/sign-up/email", {
+  const res = await baseApi("/auth/sign-up/email", {
     method: "POST",
     body: data,
   });
@@ -18,7 +25,7 @@ export async function signUp(data: RegistrationInput): Promise<User> {
 }
 
 export async function signIn(data: LoginInput): Promise<User> {
-  const res = await api("/auth/sign-in/email", {
+  const res = await baseApi("/auth/sign-in/email", {
     method: "POST",
     body: data,
   });
@@ -85,7 +92,7 @@ export async function getSession(): Promise<{ user: User } | null> {
 }
 
 export async function resendVerificationEmail(email: string) {
-  const res = await api("/auth/resend-verification-email", {
+  const res = await baseApi("/auth/resend-verification-email", {
     method: "POST",
     body: { email },
   });
@@ -99,7 +106,7 @@ export async function resendVerificationEmail(email: string) {
 }
 
 export async function forgotPassword(email: string) {
-  const res = await api("/auth/request-password-reset", {
+  const res = await baseApi("/auth/request-password-reset", {
     method: "POST",
     body: { email },
   });
@@ -116,7 +123,7 @@ export async function resetPassword(data: {
   token: string;
   newPassword: string;
 }) {
-  const res = await api("/auth/reset-password", {
+  const res = await baseApi("/auth/reset-password", {
     method: "POST",
     body: data,
   });
@@ -163,4 +170,13 @@ export async function refreshSession() {
       });
     }
   });
+}
+
+export async function changePassword(data: ChangePasswordInput) {
+  const res = await api("/auth/change-password", {
+    method: "POST",
+    body: data,
+  });
+
+  return res;
 }

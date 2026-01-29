@@ -29,12 +29,12 @@ export class UserCreatedConsumer {
           logger.error("Failed to process email event", error);
           throw error;
         }
-      }
+      },
     );
   }
 
   private async createUser(data: UserVerifiedEvent["data"]) {
-    const { name, image, userId } = data;
+    const { name, image = "", userId } = data;
     await prisma.user.create({
       data: {
         id: userId,

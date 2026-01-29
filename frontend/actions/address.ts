@@ -10,7 +10,6 @@ import {
 } from "@/types";
 import { updateAddressSchema } from "@/types/address";
 import { revalidateTag } from "next/cache";
-import { redirect } from "next/navigation";
 import z from "zod";
 
 export async function createAddress(_: any, formData: FormData) {
@@ -38,7 +37,10 @@ export async function createAddress(_: any, formData: FormData) {
       throw err;
     }
 
-    revalidateTag(`addresses-${(await getUserFromSession())!.id}`);
+    const userId = (await getUserFromSession())!.id;
+
+    revalidateTag(`addresses-${userId}`);
+    revalidateTag(`address-count-${userId}`);
     return {
       success: true,
       errors: {
@@ -137,7 +139,11 @@ export async function deleteAddress(id: string) {
       const err = await res.json();
       throw err;
     }
-    revalidateTag(`addresses-${(await getUserFromSession())!.id}`);
+
+    const userId = (await getUserFromSession())!.id;
+
+    revalidateTag(`addresses-${userId}`);
+    revalidateTag(`address-count-${userId}`);
   } catch (error) {
     console.error("Error deleting address:", error);
   }

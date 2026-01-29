@@ -24,7 +24,6 @@ export const ProfilePicture = ({ user }: { user: User }) => {
   const [optimisticImage, setOptimisticImage] = useState<string | null>(null);
 
   const [pending, startTransition] = useTransition();
-  const router = useRouter();
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

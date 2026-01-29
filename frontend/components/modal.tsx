@@ -8,6 +8,9 @@ import {
 } from "@/components/ui/dialog";
 import { Dispatch, SetStateAction } from "react";
 
+const entranceAnim =
+  "animate-in fade-in slide-in-from-bottom-4 duration-400 ease-out fill-mode-both";
+
 export function Modal({
   open,
   onOpenChange,

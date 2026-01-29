@@ -3,6 +3,7 @@ import { Search, ShoppingCart, Sparkles, Star, TrendingUp } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { ProductSearch } from "./product-search";
+import { entranceAnim } from "@/lib/enter-animation";
 
 export const ProductWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -22,9 +23,9 @@ export const ProductWrapper = ({ children }: { children: React.ReactNode }) => {
         <div className="relative max-w-7xl mx-auto px-6 lg:px-8 py-20">
           <div className="text-center max-w-4xl mx-auto">
             <div
-              className="flex items-center gap-2 justify-center my-10 
+              className={`flex items-center gap-2 justify-center my-10 
              bg-white/30 backdrop-blur-md border border-white/20 shadow-lg 
-             rounded-lg px-6 py-2 w-fit mx-auto"
+             rounded-lg px-6 py-2 w-fit mx-auto ${entranceAnim}`}
             >
               <Sparkles className="w-4 h-4 text-blue-600" />
               <span className="font-medium text-white">
@@ -32,31 +33,43 @@ export const ProductWrapper = ({ children }: { children: React.ReactNode }) => {
               </span>
             </div>
 
-            <h1 className="text-6xl lg:text-7xl text-white mb-6 leading-tight">
+            <h1
+              className={`text-6xl lg:text-7xl text-white mb-6 leading-tight ${entranceAnim} delay-75`}
+            >
               Shop Your
-              <span className="block bg-linear-to-r from-yellow-200 via-pink-200 to-yellow-200 bg-clip-text text-transparent bg-size-[200%_auto]">
+              <span
+                className={`block bg-linear-to-r from-yellow-200 via-pink-200 to-yellow-200 bg-clip-text text-transparent bg-size-[200%_auto] ${entranceAnim} delay-100`}
+              >
                 Favorites
               </span>
             </h1>
 
-            <p className="text-xl lg:text-2xl text-blue-100 mb-10 max-w-2xl mx-auto">
+            <p
+              className={`text-xl lg:text-2xl text-blue-100 mb-10 max-w-2xl mx-auto ${entranceAnim} delay-150`}
+            >
               Curated collection of premium products at unbeatable prices
             </p>
 
             <ProductSearch />
 
             <div className="flex items-center justify-center gap-8 mt-10 text-white/90">
-              <div className="flex items-center gap-2">
+              <div
+                className={`flex items-center gap-2 ${entranceAnim} delay-300`}
+              >
                 <Star className="w-5 h-5 fill-yellow-300 text-yellow-300" />
                 <span className="text-sm">4.8 Average Rating</span>
               </div>
               <Separator orientation="vertical" className="h-4 bg-white/30" />
-              <div className="flex items-center gap-2">
+              <div
+                className={`flex items-center gap-2 ${entranceAnim} delay-400`}
+              >
                 <ShoppingCart className="w-5 h-5" />
                 <span className="text-sm">1000+ Products</span>
               </div>
               <Separator orientation="vertical" className="h-4 bg-white/30" />
-              <div className="flex items-center gap-2">
+              <div
+                className={`flex items-center gap-2 ${entranceAnim} delay-500`}
+              >
                 <TrendingUp className="w-5 h-5" />
                 <span className="text-sm">Free Shipping</span>
               </div>

@@ -26,6 +26,27 @@ export const registrationSchema = z.object({
     ),
 });
 
+export const changePasswordSchema = z.object({
+  currentPassword: z
+    .string({ error: "Current Password is required" })
+    .min(1, "Current Password is required")
+    .min(8, "Must be at least 8 characters")
+    .max(128, "Must not exceed 128 characters")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+      "Must contain uppercase, lowercase, number, and special character",
+    ),
+  newPassword: z
+    .string({ error: "New Password is required" })
+    .min(1, "New Password is required")
+    .min(8, "Must be at least 8 characters")
+    .max(128, "Must not exceed 128 characters")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+      "Must contain uppercase, lowercase, number, and special character",
+    ),
+});
+
 export const loginSchema = registrationSchema.omit({ name: true });
 
 export const createAddressSchema = z.object({
@@ -109,3 +130,4 @@ export type UpdateAddressInput = z.infer<typeof updateAddressSchema>;
 
 export type RegistrationInput = z.infer<typeof registrationSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;

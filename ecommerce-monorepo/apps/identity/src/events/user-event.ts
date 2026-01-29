@@ -11,7 +11,7 @@ const redis = new RedisService({
 export class UserEventLog {
   async queueUserCreated(
     tx: Prisma.TransactionClient,
-    user: { id: string; email: string; name: string }
+    user: { id: string; email: string; name: string },
   ) {
     await tx.outboxEvent.create({
       data: {
@@ -28,7 +28,7 @@ export class UserEventLog {
 
   async queueUserUpdated(
     tx: Prisma.TransactionClient,
-    user: { id: string; email: string; name: string }
+    user: { id: string; email: string; name: string },
   ) {
     await redis.delete(`user:${user.id}`);
 

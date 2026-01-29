@@ -38,26 +38,17 @@ function normalizeBody(
 export async function baseApi<T>(
   endpoint: string,
   options: NextFetchOptions = {},
-): Promise<T> {
+) {
   const { body, headers, ...rest } = options;
 
   const normalized = normalizeBody(body, headers);
 
   const res = await fetch(`${API_URL}${endpoint}`, {
-    ...rest, // includes next, cache, etc.
+    ...rest,
     credentials: "omit",
     body: normalized.body,
     headers: normalized.headers,
   });
 
-  const contentType = res.headers.get("content-type") || "";
-  const isJson = contentType.includes("application/json");
-
-  const data = isJson ? await res.json() : await res.text();
-
-  if (!res.ok) {
-    throw data || { error: "No response from server" };
-  }
-
-  return data as T;
+  return res;
 }

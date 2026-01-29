@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth/minimal";
+import { openAPI } from "better-auth/plugins";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 import { authHooks } from "../middleware/validation-middleware";
@@ -43,6 +44,22 @@ const auth = betterAuth({
         input: true,
       },
     },
+    changeEmail: {
+      enabled: true,
+      sendChangeEmailConfirmation: async ({ user, newEmail, url }) => {
+        await dispatchUserEvent(
+          UserEventType.REGISTERED,
+          {
+            ...user,
+            email: newEmail,
+          },
+          { link: url },
+        );
+      },
+      sendChangeEmailVerification: async ({ user }) => {
+        await dispatchUserEvent(UserEventType.VERIFIED, user);
+      },
+    },
   },
 
   hooks: authHooks,
@@ -56,7 +73,7 @@ const auth = betterAuth({
       const link = url.split("&")[0] + `&callbackURL=${env.CLIENT_URL}`;
       await dispatchUserEvent(UserEventType.REGISTERED, user, { link });
     },
-    async afterEmailVerification(user) {
+    afterEmailVerification: async (user) => {
       await dispatchUserEvent(UserEventType.VERIFIED, user);
     },
   },
@@ -71,6 +88,8 @@ const auth = betterAuth({
       },
     },
   },
+
+  plugins: [openAPI()],
 });
 
 export default auth;

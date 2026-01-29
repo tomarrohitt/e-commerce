@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { CartItem } from "@/components/cart/cart-item";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { formatPrice } from "@/lib/format";
@@ -8,6 +7,7 @@ import { ShoppingBag, ArrowRight, Package } from "lucide-react";
 import { ClearCartButton } from "@/components/cart/clear-cart-button";
 import { EmptyCartState } from "@/components/cart/empty-cart-state";
 import { CartItemList } from "@/components/cart/cart-item-list";
+import { entranceAnim } from "@/lib/enter-animation";
 
 export default async function CartPage() {
   const cart = await getCart();
@@ -26,20 +26,34 @@ export default async function CartPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="bg-linear-to-r from-blue-50 via-indigo-50 to-blue-50 rounded-2xl p-8 mb-8 border-2 border-blue-100 shadow-sm h-35">
+      <div
+        className="
+    bg-linear-to-r from-blue-50 via-indigo-50 to-blue-50
+    rounded-2xl p-8 mb-8 border-2 border-blue-100 shadow-sm
+    opacity-0 fade-in-manual
+  "
+      >
         <div className="flex justify-between items-start">
           <div className="flex items-start gap-4">
-            <div className="w-16 h-16 bg-linear-to-br from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform">
+            <div
+              className={`w-16 h-16 bg-linear-to-br from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform ${entranceAnim}`}
+            >
               <ShoppingBag className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+              <h1
+                className={`text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3 ${entranceAnim}`}
+              >
                 Shopping Cart
-                <span className="text-sm font-normal px-3 py-1 bg-blue-500 text-white rounded-full shadow-sm">
+                <span
+                  className={`text-sm font-normal px-3 py-1 bg-blue-500 text-white rounded-full shadow-sm ${entranceAnim}`}
+                >
                   {cart.totalItems}
                 </span>
               </h1>
-              <p className="text-gray-500 flex items-center gap-2">
+              <p
+                className={`text-gray-500 flex items-center gap-2 ${entranceAnim} delay-75`}
+              >
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                 {cart.totalItems} {cart.totalItems === 1 ? "item" : "items"}{" "}
                 ready for checkout
@@ -53,7 +67,7 @@ export default async function CartPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <CartItemList items={cart.items} />
 
-        <div className="lg:col-span-1">
+        <div className={`lg:col-span-1 ${entranceAnim} delay-300`}>
           <Card className="sticky top-0 shadow-lg border-2 border-gray-100  pt-0">
             <CardHeader className="bg-linear-to-r from-blue-50 to-indigo-50  h-18 pt-6">
               <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { buildQuery } from "../build-query";
 import { getUserFromSession } from "../user-auth";
 import { api } from "./server";
@@ -41,13 +42,15 @@ export async function updateOrderStatus(id: string, status: string) {
   return await res.json();
 }
 
-export async function getTotalOrdersSpend(): Promise<{ total: number }> {
-  const res = await api("/orders/total");
+export const getTotalOrdersSpend = cache(
+  async (): Promise<{ total: number }> => {
+    const res = await api("/orders/total");
 
-  if (!res.ok) throw await res.json();
-  const json = await res.json();
-  return json.data;
-}
+    if (!res.ok) throw await res.json();
+    const json = await res.json();
+    return json.data;
+  },
+);
 
 export async function getTotalOrdersCount(): Promise<{
   total: number;

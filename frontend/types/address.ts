@@ -1,7 +1,7 @@
 import z from "zod";
 
 export const createAddressSchema = z.object({
-  name: z.string().trim().max(50).optional().default("Home"), // e.g. "Home"
+  name: z.string().trim().max(50).optional().default("Home"),
   isDefault: z.boolean().optional().default(false),
   street: z
     .string({ error: "Street is required" })
