@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SignInForm } from "./sign-in-form";
+import { SignInForm } from "./_components/sign-in-form";
 import { Suspense } from "react";
 
 export default function SignInPage() {

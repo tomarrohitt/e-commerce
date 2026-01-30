@@ -16,11 +16,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ProfilePicture } from "./profile-picture";
-import { getUserFromSession } from "@/lib/user-auth";
-import { getTotalOrdersSpend, getTotalOrdersCount } from "@/lib/api/orders";
-import { getAddressCount } from "@/lib/api/addresses";
+import { getUserFromSession } from "@/actions/session";
+import {
+  getTotalOrdersSpend,
+  getTotalOrdersCount,
+} from "@/lib/services/orders";
+import { getAddressCount } from "@/lib/services/addresses";
 import Link from "next/link";
-import { entranceAnim } from "@/lib/enter-animation";
+import { entranceAnim } from "@/lib/constants/enter-animation";
 
 export default async function ProfilePage() {
   const [user, totalSpend, ordersCount, addressCount] = await Promise.all([

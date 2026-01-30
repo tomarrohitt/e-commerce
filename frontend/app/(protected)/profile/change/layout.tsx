@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { Shield, ArrowLeft } from "lucide-react";
-import { entranceAnim } from "@/lib/enter-animation";
+import { entranceAnim } from "@/lib/constants/enter-animation";
 
 export default function SecurityLayout({ children }: { children: ReactNode }) {
   return (

@@ -1,7 +1,7 @@
 "use server";
 
-import { api } from "@/lib/api/server";
-import { getUserFromSession } from "@/lib/user-auth";
+import { api } from "@/lib/clients/server";
+import { getUserFromSession } from "./session";
 import { revalidateTag } from "next/cache";
 
 export async function removeFromCart(productId: string) {

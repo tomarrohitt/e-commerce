@@ -1,6 +1,6 @@
 "use server";
 
-import { api } from "@/lib/api/server";
+import { api } from "@/lib/clients/server";
 import {
   signIn,
   signUp,
@@ -8,8 +8,8 @@ import {
   forgotPassword,
   resetPassword,
   resendMail,
-} from "@/lib/api/auth-server";
-import { simplifyZodErrors } from "@/lib/error-simplifier";
+} from "@/lib/services/auth-server";
+import { simplifyZodErrors } from "@/lib/constants/error-simplifier";
 import {
   ChangePasswordInput,
   changePasswordSchema,
@@ -74,7 +74,7 @@ export async function login(redirectTo: string, _: any, formData: FormData) {
   redirect(redirectTo);
 }
 export async function register(_: any, formData: FormData) {
-  const data = Object.fromEntries(formData.entries()) as {
+  const data = Object.fromEntries(formData) as {
     name: string;
     email: string;
     password: string;

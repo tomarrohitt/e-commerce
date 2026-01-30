@@ -1,4 +1,4 @@
-import { getProducts } from "@/lib/api/product-cached";
+import { getProducts } from "@/lib/services/product-cached";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {

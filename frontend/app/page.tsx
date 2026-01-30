@@ -1,7 +1,7 @@
 "use client";
-import CategoriesSection from "@/components/home/category-section";
-import FeaturesSection from "@/components/home/feature-section";
-import HeroSection from "@/components/home/hero-section";
+import CategoriesSection from "./_components/category-section";
+import FeaturesSection from "./_components/feature-section";
+import HeroSection from "./_components/hero-section";
 
 export default function HomePage() {
   return (

@@ -1,6 +1,6 @@
 import { ArrowLeft, KeyRound } from "lucide-react";
 import Link from "next/link";
-import { ForgotPasswordForm } from "./forgot-password-form";
+import { ForgotPasswordForm } from "./_components/forgot-password-form";
 
 const ForgotPasswordPage = () => {
   return (

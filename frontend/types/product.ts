@@ -29,7 +29,6 @@ export interface CategorySchema {
   attributeSchema?: AttributeDefinition[];
 }
 
-// Update your existing Product type
 export interface Product {
   id: string;
   name: string;
@@ -117,8 +116,7 @@ export interface Review {
 export interface ReviewTrim {
   id: string;
   rating: number;
-  comment: string | null;
-  createdAt: string;
+  comment: string;
 }
 
 export interface ReviewsData {

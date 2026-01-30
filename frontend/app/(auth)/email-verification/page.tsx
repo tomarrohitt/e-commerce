@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Mail, ArrowRight, RefreshCw } from "lucide-react";
-import { ResendMailButton } from "./resend-mail-button";
+import { Mail, ArrowRight } from "lucide-react";
+import { ResendMailButton } from "./_components/resend-mail-button";
 
 interface PageProps {
   searchParams: Promise<{

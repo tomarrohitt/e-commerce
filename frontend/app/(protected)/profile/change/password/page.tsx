@@ -1,4 +1,4 @@
-import { entranceAnim } from "@/lib/enter-animation";
+import { entranceAnim } from "@/lib/constants/enter-animation";
 import { ChangePasswordForm } from "./change-password-form";
 import { LockKeyhole } from "lucide-react";
 

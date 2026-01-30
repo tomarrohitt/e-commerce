@@ -1,12 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { CheckCircle, Clock, Ban, AlertCircle } from "lucide-react";
-import { getOrder } from "@/lib/api/orders";
+import { getOrder } from "@/lib/services/orders";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { OrderShippingCard } from "@/components/orders/order-shipping-card";
+import { OrderShippingCard } from "@/app/(protected)/orders/_components/order-shipping-card";
 import { OrderExtended } from "@/types";
-import { InvoiceDownloadButton } from "@/components/orders/invoice-download-button";
+import { InvoiceDownloadButton } from "@/app/(protected)/orders/_components/invoice-download-button";
 import { notFound } from "next/navigation";
 
 interface OrderDetailsPageProps {

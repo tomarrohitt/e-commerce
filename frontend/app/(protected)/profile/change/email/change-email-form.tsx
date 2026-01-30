@@ -4,7 +4,7 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Mail, LockKeyhole, Info } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { entranceAnim } from "@/lib/enter-animation";
+import { entranceAnim } from "@/lib/constants/enter-animation";
 
 const changeEmailAction = async (prevState: any, formData: FormData) => {
   return prevState;

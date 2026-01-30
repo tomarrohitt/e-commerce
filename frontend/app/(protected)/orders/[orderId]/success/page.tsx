@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getOrder } from "@/lib/api/orders";
+import { getOrder } from "@/lib/services/orders";
 import {
   CheckCircle,
   MapPin,

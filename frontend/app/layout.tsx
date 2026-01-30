@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Raleway } from "next/font/google";
 import { Toaster } from "sonner";
-import Navbar from "@/components/navbar";
+import Navbar from "@/components/navbar/navbar";
 import { cn } from "@/lib/utils";
 import Footer from "@/components/footer";
 import "./globals.css";

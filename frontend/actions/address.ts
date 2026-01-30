@@ -1,8 +1,8 @@
 "use server";
 
-import { api } from "@/lib/api/server";
-import { simplifyZodErrors } from "@/lib/error-simplifier";
-import { getUserFromSession } from "@/lib/user-auth";
+import { api } from "@/lib/clients/server";
+import { simplifyZodErrors } from "@/lib/constants/error-simplifier";
+import { getUserFromSession } from "./session";
 import {
   createAddressSchema,
   type CreateAddressInput,

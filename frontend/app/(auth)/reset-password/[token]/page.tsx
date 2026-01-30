@@ -1,6 +1,5 @@
-import { baseApi } from "@/lib/api/baseApi";
 import { Lock } from "lucide-react";
-import { ResetPasswordForm } from "./reset-password-form";
+import { ResetPasswordForm } from "./_components/reset-password-form";
 import { notFound } from "next/navigation";
 
 interface Props {

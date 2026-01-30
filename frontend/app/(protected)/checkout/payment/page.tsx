@@ -1,11 +1,9 @@
 import Link from "next/link";
-import { CheckoutStripe } from "./checkout-stripe";
-import { api } from "@/lib/api/server";
+import { CheckoutStripe } from "./_components/checkout-stripe";
 import { Package, MapPin, CreditCard, ShieldCheck } from "lucide-react";
-import { PaymentPendingPoller } from "./payment-pending-poller";
-import { getOrder } from "@/lib/api/orders";
+import { PaymentPendingPoller } from "./_components/payment-pending-poller";
+import { getOrder } from "@/lib/services/orders";
 import Image from "next/image";
-import { Jersey_20 } from "next/font/google";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

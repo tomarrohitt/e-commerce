@@ -4,7 +4,7 @@ import { Camera } from "lucide-react";
 import { User } from "@/types";
 import { ImageCropModal } from "./image-crop-modal";
 import { imageUpload } from "@/actions/user";
-import { getImageUrl } from "@/lib/get-image-url";
+import { getImageUrl } from "@/lib/constants/get-image-url";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 

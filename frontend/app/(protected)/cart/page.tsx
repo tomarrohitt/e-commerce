@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { formatPrice } from "@/lib/format";
-import { getCart } from "@/lib/api/cart";
+import { formatPrice } from "@/lib/constants/format";
+import { getCart } from "@/lib/services/cart";
 import { ShoppingBag, ArrowRight, Package } from "lucide-react";
-import { ClearCartButton } from "@/components/cart/clear-cart-button";
-import { EmptyCartState } from "@/components/cart/empty-cart-state";
-import { CartItemList } from "@/components/cart/cart-item-list";
-import { entranceAnim } from "@/lib/enter-animation";
+import { ClearCartButton } from "./_components/clear-cart-button";
+import { EmptyCartState } from "./_components/empty-cart-state";
+import { CartItemList } from "./_components/cart-item-list";
+import { entranceAnim } from "@/lib/constants/enter-animation";
 
 export default async function CartPage() {
   const cart = await getCart();

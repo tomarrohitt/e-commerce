@@ -1,6 +1,6 @@
-import { getCategories, getProducts } from "@/lib/api/product-cached";
-import { ProductWrapper } from "./products-wrapper";
-import ProductListClient from "@/components/pages/product-list-client";
+import { getCategories, getProducts } from "@/lib/services/product-cached";
+import { ProductWrapper } from "./_components/products-wrapper";
+import ProductListClient from "./_components/product-list-client";
 import { Category } from "@/types";
 
 type Props = {

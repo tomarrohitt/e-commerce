@@ -1,14 +1,11 @@
-import { OrderCard } from "@/components/orders/order-card";
+import { OrderCard } from "./_components/order-card";
 import { Button } from "@/components/ui/button";
-import { getOrders } from "@/lib/api/orders";
-import { entranceAnim } from "@/lib/enter-animation";
+import { getOrders } from "@/lib/services/orders";
+import { entranceAnim } from "@/lib/constants/enter-animation";
 import Link from "next/link";
 
 export default async function OrdersPage() {
   const { orders } = await getOrders();
-  if (orders.length === 0) {
-    return <EmptyOrdersState />;
-  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -18,9 +15,11 @@ export default async function OrdersPage() {
       </div>
 
       <div className={`space-y-6 ${entranceAnim} delay-100`}>
-        {orders?.map((order) => (
-          <OrderCard key={order.id} order={order} />
-        ))}
+        {orders.length === 0 ? (
+          <EmptyOrdersState />
+        ) : (
+          orders?.map((order) => <OrderCard key={order.id} order={order} />)
+        )}
       </div>
     </div>
   );

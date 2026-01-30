@@ -1,7 +1,7 @@
 "use server";
 
-import { api } from "@/lib/api/server";
-import { refreshSession } from "@/lib/api/auth-server";
+import { api } from "@/lib/clients/server";
+import { refreshSession } from "@/lib/services/auth-server";
 
 export const imageUpload = async (compressedBlob: Blob) => {
   const res = await api("/user/get-upload-url", {

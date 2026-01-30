@@ -1,6 +1,6 @@
 import { Mail, Verified } from "lucide-react";
 import { ChangeEmailForm } from "./change-email-form";
-import { entranceAnim } from "@/lib/enter-animation";
+import { entranceAnim } from "@/lib/constants/enter-animation";
 
 export default function ChangeEmailPage() {
   return (

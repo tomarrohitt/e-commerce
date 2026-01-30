@@ -9,7 +9,7 @@ import {
   useEffect,
 } from "react";
 import { createAddress } from "@/actions/address";
-import { FormIds } from "@/lib/constants";
+import { FormIds } from "@/lib/constants/constants";
 
 import { FormFooter } from "./form-footer";
 
