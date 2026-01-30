@@ -17,7 +17,8 @@ export class EmailConsumer {
       "email-service-queue",
       ["order.*", "user.*"],
       async (event: Event) => {
-        console.log({ event: event.eventType, data: event.data });
+        console.log(`Received event: ${event.eventType}`);
+        console.log(`Received data: ${JSON.stringify(event.data)}`);
         try {
           switch (event.eventType) {
             case UserEventType.REGISTERED:

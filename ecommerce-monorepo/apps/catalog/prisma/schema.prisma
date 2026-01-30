@@ -21,31 +21,30 @@ model Product {
   stockQuantity Int      @default(0) @map("stock_quantity")
   sku           String   @unique
   images        String[]
-  thumbnail     String?  
+  thumbnail     String?
   isActive      Boolean  @default(true) @map("is_active")
 
-  rating        Float    @default(0.0)
-  reviewCount   Int      @default(0) @map("review_count")
-  reviews       Review[]
-  
-  attributes    Json?    
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  rating      Float    @default(0.0)
+  reviewCount Int      @default(0) @map("review_count")
+  reviews     Review[]
 
-  categoryId    String?   @map("category_id")
-  category      Category? @relation(fields: [categoryId], references: [id])
+  attributes Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  categoryId String?   @map("category_id")
+  category   Category? @relation(fields: [categoryId], references: [id])
 
   @@map("products")
 }
 
-
 model Category {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  slug      String   @unique
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
 
   attributeSchema Json? @map("attribute_schema")
-  
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -56,15 +55,15 @@ model Category {
 
 model Review {
   id        String   @id @default(cuid())
-  rating    Int      
+  rating    Int
   comment   String?  @db.Text
-  userId    String @map("user_id")
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   productId String   @map("product_id")
   product   Product  @relation(fields: [productId], references: [id])
   createdAt DateTime @default(now()) @map("created_at")
-  
-  @@unique([userId, productId]) 
+
+  @@unique([userId, productId])
   @@index([userId, productId])
   @@map("reviews")
 }
@@ -75,16 +74,17 @@ model VerifiedPurchase {
   productId String
   createdAt DateTime @default(now())
 
-  @@unique([userId, productId]) 
-  @@index([userId, productId])  
+  @@unique([userId, productId])
+  @@index([userId, productId])
   @@map("verified_purchases")
 }
 
 model User {
-  id            String    @id
-  name          String
-  image         String?
-  reviews   Review[]
+  id      String   @id
+  name    String
+  image   String?
+  reviews Review[]
+
   @@map("users")
 }
 
@@ -95,11 +95,13 @@ model OutboxEvent {
   payload     Json
   status      EventStatus @default(PENDING)
   createdAt   DateTime    @default(now()) @map("created_at")
-  publishedAt DateTime?   @map("published_at")
-  retries     Int         @default(0)
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  publishedAt DateTime? @map("published_at")
+  retries     Int       @default(0)
   error       String?
 
-  @@index([status, createdAt]) // For polling pending events
+  @@index([status, createdAt])
   @@index([aggregateId])
   @@map("outbox_events")
 }

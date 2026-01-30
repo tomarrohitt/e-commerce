@@ -18,11 +18,14 @@ const auth = betterAuth({
     autoSignInAfterVerification: true,
     sendResetPassword: async ({ user, token }) => {
       const url = `${env.CLIENT_URL}/reset-password/${token}`;
-      await dispatchUserEvent(UserEventType.FORGOT_PASSWORD, user, {
+      void dispatchUserEvent(UserEventType.FORGOT_PASSWORD, user, {
         link: url,
       });
     },
-    resetPasswordTokenExpiresIn: 1000 * 60 * 15,
+    onPasswordReset: async ({ user }) => {
+      console.log(`Password for user ${user.email} has been reset.`);
+    },
+    resetPasswordTokenExpiresIn: 1000 * 60 * 10,
   },
   baseURL: env.BASE_URL,
 
@@ -47,7 +50,7 @@ const auth = betterAuth({
     changeEmail: {
       enabled: true,
       sendChangeEmailConfirmation: async ({ user, newEmail, url }) => {
-        await dispatchUserEvent(
+        void dispatchUserEvent(
           UserEventType.REGISTERED,
           {
             ...user,
@@ -57,7 +60,7 @@ const auth = betterAuth({
         );
       },
       sendChangeEmailVerification: async ({ user }) => {
-        await dispatchUserEvent(UserEventType.VERIFIED, user);
+        void dispatchUserEvent(UserEventType.VERIFIED, user);
       },
     },
   },
@@ -70,11 +73,11 @@ const auth = betterAuth({
     autoSignInAfterVerification: true,
     expiresIn: 86400,
     sendVerificationEmail: async ({ user, url }) => {
-      const link = url.split("&")[0] + `&callbackURL=${env.CLIENT_URL}`;
-      await dispatchUserEvent(UserEventType.REGISTERED, user, { link });
+      console.log("sendVerificationEmail triggered for:", user.email);
+      void dispatchUserEvent(UserEventType.REGISTERED, user, { link: url });
     },
     afterEmailVerification: async (user) => {
-      await dispatchUserEvent(UserEventType.VERIFIED, user);
+      void dispatchUserEvent(UserEventType.VERIFIED, user);
     },
   },
 

@@ -16,7 +16,6 @@ export interface OutboxRecord {
   retryCount?: number;
   lastError?: string;
 }
-
 export interface OutboxPrismaClient {
   outboxEvent: {
     findMany: (args: {
@@ -42,6 +41,8 @@ export interface OutboxPrismaClient {
         status?: any;
       };
     }) => Promise<OutboxRecord>;
+
+    updateMany: (args: { where: any; data: any }) => Promise<{ count: number }>;
   };
 }
 

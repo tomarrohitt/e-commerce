@@ -14,7 +14,6 @@ export class OutboxProcessor implements IOutboxProcessor {
   private running = false;
   private processingLoop: Promise<void> | null = null;
   private readonly logger: ILogger;
-
   private readonly config: Required<OutboxProcessorConfig>;
 
   constructor(
@@ -25,36 +24,28 @@ export class OutboxProcessor implements IOutboxProcessor {
     this.config = {
       batchSize: config.batchSize ?? OUTBOX_DEFAULTS.BATCH_SIZE,
       pollInterval: config.pollInterval ?? OUTBOX_DEFAULTS.POLL_INTERVAL,
-      lockTimeout: config.lockTimeout ?? OUTBOX_DEFAULTS.LOCK_TIMEOUT,
+      lockTimeout: config.lockTimeout ?? OUTBOX_DEFAULTS.LOCK_TIMEOUT, // e.g., 30000ms
       maxRetries: config.maxRetries ?? 3,
     };
-
     this.logger = LoggerFactory.create("OutboxProcessor");
   }
+
+  // ... start/stop/isRunning methods remain the same ...
 
   async start(): Promise<void> {
     if (this.running) {
       this.logger.warn("Outbox processor already running");
       return;
     }
-
     this.running = true;
-
     this.processingLoop = this.loop();
   }
 
   async stop(): Promise<void> {
-    if (!this.running) {
-      return;
-    }
-
+    if (!this.running) return;
     this.logger.info("Stopping outbox processor");
     this.running = false;
-
-    if (this.processingLoop) {
-      await this.processingLoop;
-    }
-
+    if (this.processingLoop) await this.processingLoop;
     this.logger.info("Outbox processor stopped");
   }
 
@@ -65,12 +56,45 @@ export class OutboxProcessor implements IOutboxProcessor {
   private async loop(): Promise<void> {
     while (this.running) {
       try {
+        // 1. First, try to recover any stuck events
+        await this.recoverStaleEvents();
+
+        // 2. Then process new events
         await this.processBatch();
       } catch (error) {
         this.logger.error("Error in processing loop", error);
       }
 
       await this.sleep(this.config.pollInterval);
+    }
+  }
+
+  /**
+   * Resets events that have been in 'PROCESSING' state longer than the lockTimeout.
+   */
+  private async recoverStaleEvents(): Promise<void> {
+    try {
+      const staleThreshold = new Date(Date.now() - this.config.lockTimeout);
+
+      // Find events that are stuck in PROCESSING
+      const result = await this.prisma.outboxEvent.updateMany({
+        where: {
+          status: OutboxEventStatus.PROCESSING,
+          updatedAt: {
+            lt: staleThreshold,
+          },
+        },
+        data: {
+          status: OutboxEventStatus.PENDING,
+          // Optional: You might want to increment a retry counter here if you have one
+        },
+      });
+
+      if (result.count > 0) {
+        this.logger.warn(`Recovered ${result.count} stale outbox events.`);
+      }
+    } catch (error) {
+      this.logger.error("Failed to recover stale events", error);
     }
   }
 
@@ -86,16 +110,11 @@ export class OutboxProcessor implements IOutboxProcessor {
         orderBy: { createdAt: "asc" },
       });
 
-      if (events.length === 0) {
-        return;
-      }
+      if (events.length === 0) return;
 
       const lockedEvents = await this.lockEvents(events);
 
-      if (lockedEvents.length === 0) {
-        this.logger.debug("No events could be locked");
-        return;
-      }
+      if (lockedEvents.length === 0) return;
 
       await Promise.allSettled(
         lockedEvents.map((event) => this.processEvent(event)),
@@ -104,27 +123,21 @@ export class OutboxProcessor implements IOutboxProcessor {
       this.logger.error("Outbox batch processing error", error);
     }
   }
+
+  // ... lockEvents, processEvent, markEventAsFailed, formatTimestamp remain the same ...
   private async lockEvents(events: OutboxRecord[]): Promise<OutboxRecord[]> {
     const locked: OutboxRecord[] = [];
-
     for (const event of events) {
       try {
         const updated = await this.prisma.outboxEvent.update({
-          where: {
-            id: event.id,
-            status: OutboxEventStatus.PENDING,
-          },
-          data: {
-            status: OutboxEventStatus.PROCESSING,
-          },
+          where: { id: event.id, status: OutboxEventStatus.PENDING },
+          data: { status: OutboxEventStatus.PROCESSING },
         });
-
         locked.push(updated);
       } catch (error) {
-        this.logger.debug("Event already locked", { eventId: event.id });
+        // Concurrency handling
       }
     }
-
     return locked;
   }
 

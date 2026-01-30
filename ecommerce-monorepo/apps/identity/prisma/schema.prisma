@@ -113,6 +113,7 @@ model OutboxEvent {
   payload     Json
   status      EventStatus @default(PENDING)
   createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
   publishedAt DateTime?   @map("published_at")
   retries     Int         @default(0)
   error       String?

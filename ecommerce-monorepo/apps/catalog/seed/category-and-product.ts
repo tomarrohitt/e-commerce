@@ -643,7 +643,7 @@ async function main() {
   // await prisma.category.deleteMany();
   // await prisma.user.deleteMany();
   // await prisma.outboxEvent.deleteMany();
-  // await clearRedisStock();
+  await clearRedisStock();
 
   console.log("Creating dummy users...");
 
