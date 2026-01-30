@@ -28,7 +28,8 @@ export async function getProducts(params?: {
     },
   });
 
-  return res.data;
+  const json = await res.json();
+  return json.data;
 }
 
 export async function getProduct(id: string): Promise<Product> {
@@ -38,7 +39,8 @@ export async function getProduct(id: string): Promise<Product> {
       tags: [`product-${id}`],
     },
   });
-  return res.data;
+  const json = await res.json();
+  return json.data;
 }
 
 export async function getCategories() {
@@ -48,27 +50,32 @@ export async function getCategories() {
       tags: [`category`],
     },
   });
-  return res.data;
+  const json = await res.json();
+  return json.data;
 }
 
 export async function getCategory(id: string) {
   const res = await baseApi(`/category/${id}`);
-  return res;
+  const json = await res.json();
+  return json.data;
 }
 
 export async function getCategoryBySlug(slug: string) {
   const res = await baseApi(`/category/slug/${slug}`);
-  return res;
+  const json = await res.json();
+  return json.data;
 }
 
 export async function getReviews(productId: string): Promise<ReviewsData> {
   const res = await baseApi<ReviewsResponse>(
     `/reviews${buildQuery({ productId })}`,
   );
-  return res.data;
+  const json = await res.json();
+  return json.data;
 }
 
 export async function getReviewByProductId(productId: string) {
   const res = await baseApi<ReviewResponse>(`/reviews/status/${productId}`);
-  return res.data;
+  const json = await res.json();
+  return json.data;
 }

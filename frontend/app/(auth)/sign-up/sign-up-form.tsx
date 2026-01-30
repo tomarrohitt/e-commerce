@@ -78,7 +78,7 @@ export const SignUpForm = () => {
           type="password"
           disabled={pending}
           defaultValue={state.inputs.password}
-          placeholder="••••••••"
+          placeholder="••••••••••••••••"
         />
         <FieldError className="my-1 text-xs">
           {state.errors.password}

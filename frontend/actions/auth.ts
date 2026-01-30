@@ -1,14 +1,23 @@
 "use server";
 
 import { api } from "@/lib/api/server";
-import { signIn, signUp, changePassword } from "@/lib/api/auth-server";
+import {
+  signIn,
+  signUp,
+  changePassword,
+  forgotPassword,
+  resetPassword,
+  resendMail,
+} from "@/lib/api/auth-server";
 import { simplifyZodErrors } from "@/lib/error-simplifier";
 import {
   ChangePasswordInput,
   changePasswordSchema,
+  forgotPasswordSchema,
   LoginInput,
   loginSchema,
   registrationSchema,
+  resetPasswordSchema,
 } from "@/types";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -51,7 +60,7 @@ export async function login(redirectTo: string, _: any, formData: FormData) {
     }
     return {
       success: false,
-      message: "",
+      message: error.errors[0].message as string,
       errors: {
         email: "",
         password: "",
@@ -121,7 +130,7 @@ export async function register(_: any, formData: FormData) {
     };
   }
 
-  redirect("/email-verification");
+  redirect(`/email-verification?email=${result.data.email}`);
 }
 
 export async function logout() {
@@ -200,6 +209,132 @@ export async function changePasswordAction(_: any, formData: FormData) {
         currentPassword: data.currentPassword,
         newPassword: data.newPassword,
       },
+    };
+  }
+}
+
+export async function forgotPasswordAction(_: any, formData: FormData) {
+  const data = Object.fromEntries(formData) as { email: string };
+  const result = forgotPasswordSchema.safeParse({
+    ...data,
+  });
+
+  if (!result.success) {
+    const formattedErrors = z.treeifyError(result.error);
+    return {
+      success: false,
+      message: "Validation failed",
+      errors: simplifyZodErrors(formattedErrors),
+      inputs: {
+        email: data.email,
+      },
+    };
+  }
+
+  try {
+    const json = await forgotPassword({
+      email: result.data.email,
+      redirectTo: "http://localhost:3000/reset-password",
+    });
+
+    return {
+      success: json.status,
+      message: json.message,
+      errors: {
+        email: "",
+      },
+      inputs: {
+        email: data.email,
+      },
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Server Error",
+      errors: {
+        email: "",
+      },
+      inputs: {
+        email: data.email,
+      },
+    };
+  }
+}
+
+export async function resetPasswordAction(
+  token: string,
+  _: any,
+  formData: FormData,
+) {
+  const data = Object.fromEntries(formData) as {
+    newPassword: string;
+  };
+  const result = resetPasswordSchema.safeParse({ ...data, token });
+
+  if (!result.success) {
+    const formattedErrors = z.treeifyError(result.error);
+    return {
+      success: false,
+      message: "Validation failed",
+      errors: simplifyZodErrors(formattedErrors),
+      inputs: {
+        newPassword: data.newPassword,
+      },
+    };
+  }
+
+  try {
+    await resetPassword(result.data);
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Server Error",
+      errors: {
+        newPassword: "",
+      },
+      inputs: {
+        newPassword: data.newPassword,
+      },
+    };
+  }
+  redirect("/sign-in?reset=true");
+}
+
+export async function resendMailAction(email: string) {
+  const result = forgotPasswordSchema.safeParse({ email });
+
+  if (!result.success) {
+    const formattedErrors = z.treeifyError(result.error);
+    return {
+      success: false,
+      message: simplifyZodErrors(formattedErrors),
+    };
+  }
+
+  try {
+    console.log({ email });
+    const res = await resendMail(result.data);
+
+    if (!res.ok) {
+      const err = await res.json();
+      return {
+        success: false,
+        message: err.errors[0].message as string,
+      };
+    }
+
+    const json = await res.json();
+
+    console.log({ json });
+
+    return {
+      success: true,
+      message: "Email Sent",
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Email Send Failed",
     };
   }
 }

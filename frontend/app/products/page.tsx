@@ -1,6 +1,7 @@
 import { getCategories, getProducts } from "@/lib/api/product-cached";
 import { ProductWrapper } from "./products-wrapper";
 import ProductListClient from "@/components/pages/product-list-client";
+import { Category } from "@/types";
 
 type Props = {
   searchParams: Promise<{
@@ -20,7 +21,9 @@ export default async function ProductsPage(props: Props) {
     searchParams;
 
   const categories = await getCategories();
-  const categoryId = categories.find((c) => c.slug === category)?.id;
+
+  const categoryId = categories.find((c: Category) => c.slug === category)?.id;
+
   const { products, pagination } = await getProducts({
     limit: 40,
     search: q,
@@ -31,6 +34,8 @@ export default async function ProductsPage(props: Props) {
     minPrice,
     maxPrice,
   });
+
+  if (!products.length) return <div>Not Found</div>;
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-orange-50 to-slate-100">

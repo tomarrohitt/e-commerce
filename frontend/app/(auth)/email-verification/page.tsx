@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Mail, ArrowRight, RefreshCw } from "lucide-react";
+import { ResendMailButton } from "./resend-mail-button";
 
 interface PageProps {
   searchParams: Promise<{
@@ -11,14 +12,14 @@ export default async function VerifyEmailPage({ searchParams }: PageProps) {
   const { email } = await searchParams;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 px-20">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-2xl font-bold text-gray-900 tracking-tight">
           Verify your account
         </h2>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-lg">
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-lg mx-20">
         <div className="bg-white py-12 px-8 shadow-2xl rounded-2xl ring-1 ring-black/5">
           <div className="text-center">
             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-blue-100 mb-6 animate-pulse">
@@ -38,10 +39,7 @@ export default async function VerifyEmailPage({ searchParams }: PageProps) {
                 Didn&apos;t receive the email? Check your spam folder or
               </p>
 
-              <button className="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-all border border-blue-200">
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Click to resend
-              </button>
+              <ResendMailButton email={email} />
             </div>
 
             <Link

@@ -105,10 +105,13 @@ export async function resendVerificationEmail(email: string) {
   return await res.json();
 }
 
-export async function forgotPassword(email: string) {
+export async function forgotPassword(data: {
+  email: string;
+  redirectTo: string;
+}): Promise<{ status: boolean; message: string }> {
   const res = await baseApi("/auth/request-password-reset", {
     method: "POST",
-    body: { email },
+    body: data,
   });
 
   if (!res.ok) {
@@ -174,6 +177,14 @@ export async function refreshSession() {
 
 export async function changePassword(data: ChangePasswordInput) {
   const res = await api("/auth/change-password", {
+    method: "POST",
+    body: data,
+  });
+
+  return res;
+}
+export async function resendMail(data: { email: string }) {
+  const res = await api("/auth/send-verification-email", {
     method: "POST",
     body: data,
   });

@@ -47,7 +47,24 @@ export const changePasswordSchema = z.object({
     ),
 });
 
-export const loginSchema = registrationSchema.omit({ name: true });
+export const loginSchema = registrationSchema.omit({
+  name: true,
+});
+export const forgotPasswordSchema = loginSchema.omit({
+  password: true,
+});
+export const resetPasswordSchema = z.object({
+  newPassword: z
+    .string({ error: "New Password is required" })
+    .min(1, "New Password is required")
+    .min(8, "Must be at least 8 characters")
+    .max(128, "Must not exceed 128 characters")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+      "Must contain uppercase, lowercase, number, and special character",
+    ),
+  token: z.string({ error: "Token is required" }).min(1, "Token is required"),
+});
 
 export const createAddressSchema = z.object({
   name: z
