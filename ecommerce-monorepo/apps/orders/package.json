@@ -4,19 +4,22 @@
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/index.ts",
     "build": "npx tsc --build --force",
     "start": "node dist/index.js",
-    "prisma:generate": "prisma generate --schema=prisma/schema.prisma && prisma db push"
+    "prisma:generate": "prisma generate --schema=prisma/schema.prisma",
+    "prisma:migrate": "prisma migrate deploy",
+    "prisma:reset": "prisma migrate reset --force",
+    "prisma:studio": "prisma studio"
   },
   "private": true,
   "devDependencies": {
     "@types/node": "^24.10.1",
     "@types/pg": "^8.15.6",
     "nodemon": "^3.1.1",
-    "prisma": "7.0.0"
+    "prisma": "7.3.0"
   },
   "dependencies": {
     "@ecommerce/common": "workspace:*",
-    "@prisma/adapter-pg": "7.0.0",
-    "@prisma/client": "7.0.0",
+    "@prisma/adapter-pg": "7.3.0",
+    "@prisma/client": "7.3.0",
     "dotenv": "^17.2.3",
     "pg": "^8.16.3",
     "stripe": "^20.0.0"

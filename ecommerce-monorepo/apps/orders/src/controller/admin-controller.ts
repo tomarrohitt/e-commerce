@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import {
   BadRequestError,
+  OrderStatus,
   sendSuccess,
   validateAndThrow,
 } from "@ecommerce/common";
-import { OrderStatus } from "@prisma/client";
 import { adminOrderService } from "../services/admin-order-service";
 import {
   listAdminOrdersSchema,
@@ -15,7 +15,7 @@ class AdminController {
   async listAllOrdersAdmin(req: Request, res: Response) {
     const filters = validateAndThrow<ListOrderInput>(
       listAdminOrdersSchema,
-      req.query
+      req.query,
     );
     const result = await adminOrderService.listAllOrders({
       ...filters,
@@ -35,23 +35,21 @@ class AdminController {
 
     const order = await adminOrderService.updateOrderStatus(
       req.params.id,
-      status as OrderStatus
+      status as OrderStatus,
     );
 
     return sendSuccess(res, order);
   }
 
-  // POST /api/admin/orders/:id/cancel
   async cancelOrder(req: Request, res: Response) {
     const updatedOrder = await adminOrderService.updateOrderStatus(
       req.params.id,
-      OrderStatus.CANCELLED
+      OrderStatus.CANCELLED,
     );
 
     return sendSuccess(res, updatedOrder, "Order cancelled successfully");
   }
 
-  // POST /api/admin/orders/:id/refund
   async refundOrder(req: Request, res: Response) {
     const updatedOrder = await adminOrderService.refundOrder(req.params.id);
 

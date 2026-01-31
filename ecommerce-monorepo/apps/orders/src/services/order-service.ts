@@ -1,4 +1,4 @@
-import { OrderStatus } from "@prisma/client";
+import { OrderStatus } from "../generated/prisma-client";
 import { CreateOrderInput } from "../lib/order-validation-schema";
 import { orderRepository } from "../repository/order-repository";
 import { stripeService } from "./stripe-service";

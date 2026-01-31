@@ -10,6 +10,7 @@ import { GatewayAuthMiddleware } from "./middleware/auth-middleware";
 import { errorHandler, sendError, sendSuccess } from "@ecommerce/common";
 import { env } from "./config/env";
 import { requestLogger } from "./config/logger";
+import { selectRateLimiter } from "./config/rate-limiter-selector";
 
 const app = express();
 const PORT = env.PORT || 4000;
@@ -45,6 +46,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     express.urlencoded({ extended: true })(req, res, next);
   }
 });
+
+app.use(selectRateLimiter);
 
 const onProxyReq = (
   proxyReq: ClientRequest,

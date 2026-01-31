@@ -1,4 +1,4 @@
-import { Prisma, Product } from "@prisma/client";
+import { Prisma } from "../generated/prisma-client";
 import { prisma } from "../config/prisma";
 import {
   safeQuery,

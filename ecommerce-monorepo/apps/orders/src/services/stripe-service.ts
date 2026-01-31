@@ -6,7 +6,7 @@ class StripeService {
 
   constructor() {
     this.stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-      apiVersion: "2025-11-17.clover",
+      apiVersion: "2026-01-28.clover",
       typescript: true,
     });
   }
@@ -45,7 +45,7 @@ class StripeService {
     return this.stripe.webhooks.constructEvent(
       payload,
       signature,
-      env.STRIPE_WEBHOOK_SECRET
+      env.STRIPE_WEBHOOK_SECRET,
     );
   }
 }

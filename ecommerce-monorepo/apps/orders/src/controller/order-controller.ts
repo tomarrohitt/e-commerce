@@ -8,7 +8,7 @@ import {
   sendCreated,
 } from "@ecommerce/common";
 import { orderService } from "../services/order-service";
-import { OrderStatus } from "@prisma/client";
+import { OrderStatus } from "../generated/prisma-client";
 import {
   CreateOrderInput,
   createOrderSchema,

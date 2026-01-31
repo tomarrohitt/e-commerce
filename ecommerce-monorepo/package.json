@@ -3,28 +3,35 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-  "setup": "pnpm install && pnpm run prisma:generate && pnpm run build",
-
-  "build": "pnpm -r build",
-
-  "build:apps": "pnpm -r --filter ./apps/* build",
-  "build:packages": "pnpm -r --filter ./packages/* build",
-
-  "prisma:generate": "pnpm -r prisma:generate && pnpm -r prisma:db:push",
-  "prisma:db:push:force": "pnpm -r prisma:db:push -- --accept-data-loss",
-
-  "dev": "turbo run dev"
-}
-,
+    "setup": "pnpm install && pnpm prisma:generate && pnpm prisma:migrate",
+    "build": "pnpm -r build",
+    "build:apps": "pnpm -r --filter ./apps/* build",
+    "build:packages": "pnpm -r --filter ./packages/* build",
+    "prisma:generate": "pnpm -r --filter './apps/*' --if-present run prisma:generate",
+    "prisma:migrate": "pnpm -r --filter './apps/*' --if-present run prisma:migrate",
+    "dev": "turbo run dev"
+  },
   "devDependencies": {
     "prettier": "latest",
-    "prisma": "7^",
     "turbo": "^2.6.1",
     "typescript": "^5.0.0"
   },
   "packageManager": "pnpm@9.0.0",
   "dependencies": {
-    "@prisma/client": "7^",
     "tsconfig-paths": "^4.2.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "prisma": "7.3.0",
+      "@prisma/client": "7.3.0",
+      "@prisma/adapter-pg": "7.3.0"
+    },
+    "packageExtensions": {
+      "@prisma/client": {
+        "peerDependencies": {
+          "prisma": "*"
+        }
+      }
+    }
   }
 }

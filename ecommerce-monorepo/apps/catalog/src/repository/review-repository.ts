@@ -5,12 +5,12 @@ import {
   UpdateReviewInput,
   ListReviewsQuery,
 } from "../lib/validation-schema";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "../generated/prisma-client";
 
 class ReviewRepository {
   private async updateProductStats(
     tx: Prisma.TransactionClient,
-    productId: string
+    productId: string,
   ) {
     const stats = await tx.review.aggregate({
       where: { productId },
@@ -37,7 +37,7 @@ class ReviewRepository {
   async create(
     data: CreateReviewInput & {
       userId: string;
-    }
+    },
   ) {
     return await safeQuery(
       async () => {
@@ -52,7 +52,7 @@ class ReviewRepository {
 
         if (!hasPurchased) {
           throw new BadRequestError(
-            "You can only review products you have purchased."
+            "You can only review products you have purchased.",
           );
         }
 
@@ -85,7 +85,7 @@ class ReviewRepository {
 
         return { id };
       },
-      { model: "Review", operation: "create" }
+      { model: "Review", operation: "create" },
     );
   }
 
@@ -108,7 +108,7 @@ class ReviewRepository {
         });
         return { id };
       },
-      { model: "Review", operation: "update" }
+      { model: "Review", operation: "update" },
     );
   }
 
@@ -127,7 +127,7 @@ class ReviewRepository {
         });
         return { id };
       },
-      { model: "Review", operation: "delete" }
+      { model: "Review", operation: "delete" },
     );
   }
 
@@ -164,7 +164,7 @@ class ReviewRepository {
           },
         };
       },
-      { model: "Review", operation: "list" }
+      { model: "Review", operation: "list" },
     );
   }
 
@@ -187,7 +187,7 @@ class ReviewRepository {
         return existingReview;
       },
 
-      { model: "Review", operation: "check_exists" }
+      { model: "Review", operation: "check_exists" },
     );
   }
 }

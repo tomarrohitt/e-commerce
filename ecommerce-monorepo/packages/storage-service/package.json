@@ -16,8 +16,10 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@ecommerce/common": "workspace:*",
+    "@aws-sdk/client-s3": "^3.936.0",
     "@aws-sdk/s3-presigned-post": "^3.937.0",
-    "dotenv": "^17.2.3"
+    "@ecommerce/common": "workspace:*",
+    "dotenv": "^17.2.3",
+    "zod": "^4.1.12"
   }
 }
