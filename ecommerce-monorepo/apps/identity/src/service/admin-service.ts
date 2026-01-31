@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "../generated/prisma-client";
 import { prisma } from "../config/prisma";
 import { NotFoundError, safeQuery } from "@ecommerce/common";
 import {
@@ -61,7 +61,7 @@ class AdminService {
           },
         };
       },
-      { model: "User", operation: "findAllAdmin" }
+      { model: "User", operation: "findAllAdmin" },
     );
   }
 
@@ -77,7 +77,7 @@ class AdminService {
 
         return user;
       },
-      { model: "User", operation: "findById" }
+      { model: "User", operation: "findById" },
     );
   }
 
@@ -92,7 +92,7 @@ class AdminService {
           data,
         });
       },
-      { model: "User", operation: "update" }
+      { model: "User", operation: "update" },
     );
   }
 
@@ -106,7 +106,7 @@ class AdminService {
           where: { id },
         });
       },
-      { model: "User", operation: "delete" }
+      { model: "User", operation: "delete" },
     );
   }
 
@@ -158,7 +158,7 @@ class AdminService {
           },
         };
       },
-      { model: "Address", operation: "findAllAdmin" }
+      { model: "Address", operation: "findAllAdmin" },
     );
   }
 
@@ -168,7 +168,7 @@ class AdminService {
         prisma.address.findFirst({
           where: { id: addressId },
         }),
-      { model: "Address", operation: "findAddeessById" }
+      { model: "Address", operation: "findAddeessById" },
     );
 
     if (!address) {
@@ -200,10 +200,10 @@ class AdminService {
                 });
               }
             }
-          }
+          },
         );
       },
-      { model: "Address", operation: "delete" }
+      { model: "Address", operation: "delete" },
     );
   }
 
@@ -228,10 +228,10 @@ class AdminService {
               where: { id: addressId },
               data,
             });
-          }
+          },
         );
       },
-      { model: "Address", operation: "update" }
+      { model: "Address", operation: "update" },
     );
   }
 }

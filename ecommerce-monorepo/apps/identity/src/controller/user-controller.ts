@@ -9,7 +9,7 @@ import {
 } from "@ecommerce/common";
 import { env } from "../config/env";
 import { dispatchUserEvent } from "../service/outbox-dispatcher";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "../generated/prisma-client";
 
 const logger = LoggerFactory.create("IdentityService");
 
@@ -34,7 +34,7 @@ class UserController {
           });
 
           return user;
-        }
+        },
       );
 
       await redis.updateSessionData(req.user.sessionId, {
@@ -49,7 +49,7 @@ class UserController {
       await dispatchUserEvent(
         UserEventType.UPDATED,
         { id: updatedUser.id, name: updatedUser.name },
-        { image: updatedUser.image }
+        { image: updatedUser.image },
       );
 
       sendSuccess(res, updatedUser);

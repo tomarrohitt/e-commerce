@@ -4,7 +4,7 @@ import {
   CreateAddressInput,
   UpdateAddressInput,
 } from "../lib/address-validation-schema";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "../generated/prisma-client";
 
 class AddressService {
   async create(userId: string, data: CreateAddressInput) {
@@ -35,10 +35,10 @@ class AddressService {
                 isDefault: shouldBeDefault,
               },
             });
-          }
+          },
         );
       },
-      { model: "Address", operation: "create" }
+      { model: "Address", operation: "create" },
     );
   }
 
@@ -49,7 +49,7 @@ class AddressService {
           where: { userId },
           orderBy: [{ isDefault: "desc" }, { createdAt: "desc" }],
         }),
-      { model: "Address", operation: "findAll" }
+      { model: "Address", operation: "findAll" },
     );
   }
 
@@ -59,7 +59,7 @@ class AddressService {
         prisma.address.findFirst({
           where: { id: addressId, userId },
         }),
-      { model: "Address", operation: "findOne" }
+      { model: "Address", operation: "findOne" },
     );
 
     if (!address) {
@@ -73,7 +73,7 @@ class AddressService {
         prisma.address.count({
           where: { userId },
         }),
-      { model: "Address", operation: "findOne" }
+      { model: "Address", operation: "findOne" },
     );
 
     return count;
@@ -82,7 +82,7 @@ class AddressService {
   async update(
     userId: string,
     addressId: string,
-    data: UpdateAddressInput & { isDefault?: boolean }
+    data: UpdateAddressInput & { isDefault?: boolean },
   ) {
     const address = await safeQuery(
       () =>
@@ -90,7 +90,7 @@ class AddressService {
           where: { id: addressId, userId },
           data,
         }),
-      { model: "Address", operation: "update" }
+      { model: "Address", operation: "update" },
     );
     if (!address) {
       throw new NotFoundError("Address not found");
@@ -110,10 +110,10 @@ class AddressService {
               where: { id: addressId, userId },
               data: { isDefault: true },
             });
-          }
+          },
         );
       },
-      { model: "Address", operation: "update" }
+      { model: "Address", operation: "update" },
     );
     if (!address) {
       throw new NotFoundError("Address not found");
@@ -150,7 +150,7 @@ class AddressService {
           }
         });
       },
-      { model: "Address", operation: "delete" }
+      { model: "Address", operation: "delete" },
     );
   }
 }

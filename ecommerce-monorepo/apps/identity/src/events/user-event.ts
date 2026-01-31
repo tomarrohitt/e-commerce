@@ -1,5 +1,5 @@
 import { RedisService } from "@ecommerce/common";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "../generated/prisma-client";
 import { env } from "../config/env";
 
 const redis = new RedisService({
