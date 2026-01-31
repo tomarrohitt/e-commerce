@@ -3,13 +3,13 @@
 import { simplifyZodErrors } from "@/lib/constants/error-simplifier";
 import { createReview, updateReview } from "@/lib/services/products";
 import { createReviewSchema, updateReviewSchema } from "@/types";
+import { revalidateTag } from "next/cache";
 import z from "zod";
 
 export const createReviewAction = async (_: any, formData: FormData) => {
   const rawRating = formData.get("rating");
   const rawComment = formData.get("comment");
   const productId = formData.get("productId");
-
   const data = {
     rating: Number(rawRating),
     comment: rawComment as string,
@@ -29,6 +29,8 @@ export const createReviewAction = async (_: any, formData: FormData) => {
 
   try {
     await createReview(result.data);
+    revalidateTag(`product-${productId}`);
+    revalidateTag(`reviews-${productId}`);
     return {
       success: true,
       message: "Review Posted",
@@ -85,7 +87,7 @@ export const updateReviewAction = async (
 ) => {
   const rawRating = formData.get("rating");
   const rawComment = formData.get("comment");
-
+  const productId = formData.get("productId");
   const data = {
     rating: Number(rawRating),
     comment: rawComment as string,
@@ -104,6 +106,8 @@ export const updateReviewAction = async (
 
   try {
     await updateReview({ ...data, id });
+    revalidateTag(`product-${productId}`);
+    revalidateTag(`reviews-${productId}`);
     return {
       success: true,
       message: "Review Posted",

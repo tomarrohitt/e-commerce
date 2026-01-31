@@ -8,6 +8,7 @@ import { OrderShippingCard } from "@/app/(protected)/orders/_components/order-sh
 import { OrderExtended } from "@/types";
 import { InvoiceDownloadButton } from "@/app/(protected)/orders/_components/invoice-download-button";
 import { notFound } from "next/navigation";
+import { entranceAnim } from "@/lib/constants/enter-animation";
 
 interface OrderDetailsPageProps {
   params: Promise<{
@@ -45,8 +46,12 @@ export default async function OrderDetailsPage({
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      {/* Header */}
-      <div className="mb-8">
+      <div
+        className={`mb-8 ${entranceAnim}`}
+        style={{
+          animationDelay: "100ms",
+        }}
+      >
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold text-gray-900">
@@ -83,13 +88,22 @@ export default async function OrderDetailsPage({
         <div className="lg:col-span-2 space-y-6">
           {/* Order Items */}
           <Card className="shadow-md pt-0">
-            <CardHeader className="bg-gray-50 border-b pt-6">
+            <CardHeader
+              className={`bg-gray-50 border-b pt-6 ${entranceAnim}`}
+              style={{
+                animationDelay: "150ms",
+              }}
+            >
               <h2 className="text-lg font-bold text-gray-900">Order Items</h2>
             </CardHeader>
             <CardContent className="p-0">
               <div className="divide-y">
-                {order.items.map((item) => (
-                  <div key={item.productId} className="p-6 flex gap-4">
+                {order.items.map((item, index) => (
+                  <div
+                    key={item.productId}
+                    className={`p-6 flex gap-4 ${entranceAnim}`}
+                    style={{ animationDelay: `${100 + index * 40}ms` }}
+                  >
                     <Link
                       href={`/products/${item.productId}`}
                       className="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden shrink-0 border border-gray-200"
@@ -142,27 +156,51 @@ export default async function OrderDetailsPage({
           />
         </div>
 
-        {/* Right Column: Summary & Payment */}
         <div className="lg:col-span-1">
           <Card className="shadow-md sticky top-6 pt-0">
-            <CardHeader className="bg-gray-50 border-b pt-6">
+            <CardHeader
+              className={`bg-gray-50 border-b pt-6 ${entranceAnim}`}
+              style={{
+                animationDelay: "100ms",
+              }}
+            >
               <h2 className="text-lg font-bold text-gray-900">Order Summary</h2>
             </CardHeader>
             <CardContent>
               <div className="space-y-3 text-sm">
-                <div className="flex justify-between text-gray-500">
+                <div
+                  className={`flex justify-between text-gray-500 ${entranceAnim}`}
+                  style={{
+                    animationDelay: "130ms",
+                  }}
+                >
                   <span>Subtotal</span>
                   <span>${Number(order.subtotal).toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-gray-500">
+                <div
+                  className={`flex justify-between text-gray-500 ${entranceAnim}`}
+                  style={{
+                    animationDelay: "160ms",
+                  }}
+                >
                   <span>Tax</span>
                   <span>${Number(order.tax).toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-gray-500">
+                <div
+                  className={`flex justify-between text-gray-500 ${entranceAnim}`}
+                  style={{
+                    animationDelay: "190ms",
+                  }}
+                >
                   <span>Shipping</span>
                   <span className="text-green-500 font-medium">Free</span>
                 </div>
-                <div className="pt-3 border-t flex justify-between items-center">
+                <div
+                  className={`pt-3 border-t flex justify-between items-center ${entranceAnim}`}
+                  style={{
+                    animationDelay: "220ms",
+                  }}
+                >
                   <span className="text-base font-bold text-gray-900">
                     Total
                   </span>
@@ -173,14 +211,24 @@ export default async function OrderDetailsPage({
               </div>
 
               <div className="mt-6 pt-6 border-t">
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                <h3
+                  className={`text-sm font-semibold text-gray-900 mb-3 ${entranceAnim}`}
+                  style={{
+                    animationDelay: "250ms",
+                  }}
+                >
                   Payment Status
                 </h3>
                 <PaymentStatus order={order} />
               </div>
 
               {order.invoiceUrl && (
-                <div className="mt-6 block w-full text-center">
+                <div
+                  className={`mt-6 block w-full text-center ${entranceAnim}`}
+                  style={{
+                    animationDelay: "280ms",
+                  }}
+                >
                   <InvoiceDownloadButton
                     orderId={order.id}
                     className="w-full"
@@ -188,7 +236,12 @@ export default async function OrderDetailsPage({
                 </div>
               )}
 
-              <div className="mt-6 text-center">
+              <div
+                className={`mt-6 text-center ${entranceAnim}`}
+                style={{
+                  animationDelay: "300ms",
+                }}
+              >
                 <p className="text-xs text-gray-400">
                   Need help with this order?{" "}
                   <a href="/support" className="text-blue-500 hover:underline">
@@ -220,7 +273,12 @@ function PaymentStatus({ order }: { order: OrderExtended }) {
   switch (status) {
     case "SUCCESS":
       return (
-        <div className="bg-green-50 border border-green-100 rounded-lg p-4 flex items-center gap-3">
+        <div
+          className={`${entranceAnim} bg-green-50 border border-green-100 rounded-lg p-4 flex items-center gap-3 `}
+          style={{
+            animationDelay: "270ms",
+          }}
+        >
           <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-500 shrink-0">
             <CheckCircle className="w-5 h-5" />
           </div>
@@ -238,7 +296,10 @@ function PaymentStatus({ order }: { order: OrderExtended }) {
 
     case "REFUNDED":
       return (
-        <div className="bg-red-50 border border-red-100 rounded-lg p-4 flex items-center gap-3">
+        <div
+          className={`${entranceAnim} bg-red-50 border border-red-100 rounded-lg p-4 flex items-center gap-3`}
+          style={{ animationDelay: "270ms" }}
+        >
           <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-500 shrink-0">
             <AlertCircle className="w-5 h-5" />
           </div>
@@ -253,7 +314,12 @@ function PaymentStatus({ order }: { order: OrderExtended }) {
 
     case "CANCELLED":
       return (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-center gap-3">
+        <div
+          className={`${entranceAnim} bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-center gap-3`}
+          style={{
+            animationDelay: "270ms",
+          }}
+        >
           <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 shrink-0">
             <Ban className="w-5 h-5" />
           </div>
@@ -268,7 +334,12 @@ function PaymentStatus({ order }: { order: OrderExtended }) {
 
     case "PENDING":
       return (
-        <div className="bg-orange-50 border border-orange-100 rounded-lg p-4">
+        <div
+          className={`${entranceAnim} bg-orange-50 border border-orange-100 rounded-lg p-4 `}
+          style={{
+            animationDelay: "270ms",
+          }}
+        >
           <div className="flex items-center gap-2 mb-3">
             <Clock className="w-4 h-4 text-orange-500" />
             <span className="text-sm font-medium text-orange-800">

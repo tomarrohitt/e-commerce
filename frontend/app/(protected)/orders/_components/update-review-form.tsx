@@ -1,4 +1,4 @@
-import { createReviewAction, updateReviewAction } from "@/actions/review";
+import { updateReviewAction } from "@/actions/review";
 import { Button } from "@/components/ui/button";
 import { DrawerClose, DrawerFooter } from "@/components/ui/drawer";
 import { Field, FieldError } from "@/components/ui/field";
@@ -44,7 +44,7 @@ export const UpdateReviewForm = ({
 
   useEffect(() => {
     if (state.success) {
-      toast.success("Review Posted");
+      toast.success("Review Updated");
       setOpen(false);
     }
   }, [state.success]);
@@ -61,6 +61,13 @@ export const UpdateReviewForm = ({
           {state.message}
         </div>
       )}
+
+      <Input
+        className="opacity-0"
+        value={productId}
+        name="productId"
+        type="hidden"
+      />
 
       <div className="flex flex-col items-center gap-2">
         <div className="flex flex-row-reverse justify-center gap-1 group">

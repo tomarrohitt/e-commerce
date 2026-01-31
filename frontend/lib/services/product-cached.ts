@@ -69,7 +69,15 @@ export async function getCategoryBySlug(slug: string) {
 }
 
 export async function getReviews(productId: string): Promise<ReviewsData> {
-  const res = await baseApi<ReviewsResponse>(`/reviews?productId=${productId}`);
+  const res = await baseApi<ReviewsResponse>(
+    `/reviews?productId=${productId}`,
+    {
+      cache: "force-cache",
+      next: {
+        tags: [`reviews-${productId}`],
+      },
+    },
+  );
   const json = await res.json();
   return json.data;
 }

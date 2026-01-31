@@ -14,11 +14,18 @@ export default async function OrdersPage() {
         <p className="text-gray-500">View and track all your orders</p>
       </div>
 
-      <div className={`space-y-6 ${entranceAnim} delay-100`}>
+      <div
+        className={`space-y-6 ${entranceAnim}`}
+        style={{
+          animationDelay: "80ms",
+        }}
+      >
         {orders.length === 0 ? (
           <EmptyOrdersState />
         ) : (
-          orders?.map((order) => <OrderCard key={order.id} order={order} />)
+          orders?.map((order, index) => (
+            <OrderCard key={order.id} order={order} index={index} />
+          ))
         )}
       </div>
     </div>
@@ -29,6 +36,9 @@ function EmptyOrdersState() {
   return (
     <div
       className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 ${entranceAnim}`}
+      style={{
+        animationDelay: "100ms",
+      }}
     >
       <div className="bg-white rounded-xl shadow-md p-12 text-center">
         <div className="text-6xl mb-4">📦</div>

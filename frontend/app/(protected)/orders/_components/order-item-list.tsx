@@ -6,12 +6,13 @@ import ProductCard from "@/app/products/_components/product-card";
 
 interface OrderItemsListProps {
   orderItems: OrderItem[];
+  status: string;
 }
 
 const entranceAnim =
   "animate-in fade-in slide-in-from-bottom-4 duration-600 ease-out fill-mode-both";
 
-export function OrderItemsList({ orderItems }: OrderItemsListProps) {
+export function OrderItemsList({ orderItems, status }: OrderItemsListProps) {
   return (
     <>
       <div className="space-y-3 mb-4">
@@ -19,7 +20,7 @@ export function OrderItemsList({ orderItems }: OrderItemsListProps) {
           <div
             key={item.productId}
             className={`relative flex items-center gap-4 p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all ${entranceAnim}`}
-            style={{ animationDelay: `${100 + i * 100}ms` }}
+            style={{ animationDelay: `${100 + i * 20}ms` }}
           >
             <Link
               href={`/products/${item.productId}`}
@@ -49,7 +50,7 @@ export function OrderItemsList({ orderItems }: OrderItemsListProps) {
               </p>
             </div>
 
-            <ReviewDrawer product={item} />
+            {status === "DELIVERED" && <ReviewDrawer product={item} />}
 
             <div className="text-right shrink-0">
               <p className="font-semibold text-gray-900">

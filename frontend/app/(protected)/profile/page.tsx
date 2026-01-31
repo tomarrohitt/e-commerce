@@ -36,7 +36,7 @@ export default async function ProfilePage() {
   const stats = {
     totalOrders: ordersCount.total,
     totalSpent: totalSpend.total,
-    wishlistItems: 8,
+    wishlistItems: 0,
     savedAddresses: addressCount.count,
   };
 
@@ -89,15 +89,6 @@ export default async function ProfilePage() {
                       </Badge>
                     )}
                   </div>
-                  <Link href="/profile/edit" className="w-full">
-                    <Button
-                      variant="default"
-                      className="mt-8 w-full bg-linear-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
-                    >
-                      <Edit2 className="w-4 h-4 mr-2" />
-                      Edit Profile
-                    </Button>
-                  </Link>
                 </div>
               </CardContent>
             </Card>

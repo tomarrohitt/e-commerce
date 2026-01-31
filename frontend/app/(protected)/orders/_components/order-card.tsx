@@ -3,15 +3,22 @@ import { OrderStatusBadge } from "./order-status-badge";
 import { OrderItemsList } from "./order-item-list";
 import { OrderActions } from "./order-actions";
 import { Order } from "@/types";
+import { entranceAnim } from "@/lib/constants/enter-animation";
 
 interface OrderCardProps {
   order: Order;
+  index: number;
 }
 
-export function OrderCard({ order }: OrderCardProps) {
+export function OrderCard({ order, index }: OrderCardProps) {
   return (
     <Card className="hover:shadow-lg transition-shadow pt-0">
-      <CardHeader className="bg-gray-50 border-b pt-6">
+      <CardHeader
+        className={`bg-gray-50 border-b pt-6 ${entranceAnim}`}
+        style={{
+          animationDelay: `${100 + index * 300}ms`,
+        }}
+      >
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm text-gray-500">Order ID</p>
@@ -39,9 +46,14 @@ export function OrderCard({ order }: OrderCardProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <OrderItemsList orderItems={order.items} />
+        <OrderItemsList orderItems={order.items} status={order.status} />
 
-        <div className="bg-gray-50 rounded-lg p-4 mb-4">
+        <div
+          className={`bg-gray-50 rounded-lg p-4 mb-4 ${entranceAnim}`}
+          style={{
+            animationDelay: `${120 + index * 300}ms`,
+          }}
+        >
           <p className="text-sm font-semibold text-gray-700 mb-2">
             Shipping Address:
           </p>
