@@ -9,6 +9,7 @@
     "build:packages": "pnpm -r --filter ./packages/* build",
     "prisma:generate": "pnpm -r --filter './apps/*' --if-present run prisma:generate",
     "prisma:migrate": "pnpm -r --filter './apps/*' --if-present run prisma:migrate",
+    "prisma:push": "pnpm -r --filter './apps/*' --if-present run prisma:push",
     "dev": "turbo run dev"
   },
   "devDependencies": {
