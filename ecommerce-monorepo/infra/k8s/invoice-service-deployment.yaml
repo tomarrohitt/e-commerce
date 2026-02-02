@@ -13,35 +13,32 @@ spec:
         app: invoice
     spec:
       initContainers:
-        - name: prisma-db-push
-          image: ecommerce-invoice:latest
+        - name: prisma-migrate
+          image: ecommerce-monorepo-invoice-service
           imagePullPolicy: IfNotPresent
-
-          command: ["npx", "prisma", "db", "push"]
+          command: ["npx", "prisma", "migrate", "deploy"]
           env:
             - name: DATABASE_URL
               value: "postgresql://postgres:password@postgres-service:5432/invoice"
       containers:
         - name: invoice
-          image: ecommerce-invoice:latest
+          image: ecommerce-monorepo-invoice-service
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 6000
+            - containerPort: 4005
           env:
             - name: PORT
-              value: "6000"
+              value: "4005"
             - name: NODE_ENV
               value: "production"
             - name: DATABASE_URL
               value: "postgresql://postgres:password@postgres-service:5432/invoice"
             - name: RABBITMQ_URL
               value: "amqp://rabbitmq:password@rabbitmq-service:5672"
-
             - name: AWS_REGION
               value: "eu-north-1"
             - name: AWS_BUCKET_NAME
               value: "erce-amazon-s3"
-
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
@@ -61,6 +58,5 @@ spec:
   selector:
     app: invoice
   ports:
-    - protocol: TCP
-      port: 6000
-      targetPort: 6000
+    - port: 4005
+      targetPort: 4005

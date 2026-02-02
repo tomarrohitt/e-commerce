@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { prisma } from "../../../invoice/src/config/prisma";
-import { eventBus } from "../../../invoice/src/config/event-bus";
+import { prisma } from "../config/prisma";
+import { eventBus } from "../config/event-bus";
 
 const TIMEOUT_MS = 3000;
 

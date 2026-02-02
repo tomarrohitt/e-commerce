@@ -316,6 +316,9 @@ importers:
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
+      express-async-errors:
+        specifier: ^3.1.1
+        version: 3.1.1(express@4.22.1)
       pg:
         specifier: ^8.16.3
         version: 8.18.0

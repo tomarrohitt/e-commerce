@@ -1,15 +1,10 @@
-# -----------------------------------------------------------------------------
-# STAGE 1: BASE
-# -----------------------------------------------------------------------------
 FROM node:22-slim AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 RUN corepack enable && corepack prepare pnpm@10.0.0 --activate
 
-# -----------------------------------------------------------------------------
-# STAGE 2: BUILDER
-# -----------------------------------------------------------------------------
+
 FROM base AS builder
 WORKDIR /app
 
@@ -74,6 +69,6 @@ COPY --from=builder /app/apps/orders/prisma.config.ts ./apps/orders/prisma.confi
 # Set working directory to orders app
 WORKDIR /app/apps/orders
 
-EXPOSE 4001
+EXPOSE 4004
 
 CMD ["node", "dist/index.js"]

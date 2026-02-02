@@ -12,18 +12,22 @@ spec:
       labels:
         app: catalog
     spec:
+      # 👇 1. Init Container (Runs once then dies)
       initContainers:
-        - name: prisma-db-push
-          image: ecommerce-catalog:latest
+        - name: prisma-migrate
+          image: ecommerce-monorepo-catalog-service
           imagePullPolicy: IfNotPresent
-
-          command: ["npx", "prisma", "db", "push"]
+          command: ["/bin/sh", "-c"]
+          args:
+            - echo "DATABASE_URL=$DATABASE_URL" > .env && npx prisma migrate deploy
           env:
             - name: DATABASE_URL
               value: "postgresql://postgres:password@postgres-service:5432/catalog"
+
+      # 👇 2. Main Container (Runs forever) - THIS WAS MISSING
       containers:
         - name: catalog
-          image: ecommerce-catalog:latest
+          image: ecommerce-monorepo-catalog-service
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 4002
@@ -32,26 +36,22 @@ spec:
               value: "4002"
             - name: NODE_ENV
               value: "production"
-            - name: CLIENT_URL
-              value: "http://localhost:3000"
-
-            - name: BASE_URL
-              value: "http://api-gateway-service"
-            - name: BETTER_AUTH_URL
-              value: "http://api-gateway-service/api/v1/auth"
-
             - name: DATABASE_URL
               value: "postgresql://postgres:password@postgres-service:5432/catalog"
             - name: RABBITMQ_URL
               value: "amqp://rabbitmq:password@rabbitmq-service:5672"
             - name: REDIS_URL
               value: "redis://redis-service:6379/0"
-
+            - name: BASE_URL
+              value: "http://api-gateway:4000"
+            - name: CLIENT_URL
+              value: "http://localhost:3000"
+            - name: BETTER_AUTH_URL
+              value: "http://identity-service:4001/api/v1/auth"
             - name: AWS_REGION
               value: "eu-north-1"
             - name: AWS_BUCKET_NAME
               value: "erce-amazon-s3"
-
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
@@ -71,6 +71,5 @@ spec:
   selector:
     app: catalog
   ports:
-    - protocol: TCP
-      port: 4002
+    - port: 4002
       targetPort: 4002

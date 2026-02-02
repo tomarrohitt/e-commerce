@@ -1,0 +1,86 @@
+apiVersion: skaffold/v2beta29
+kind: Config
+metadata:
+  name: ecommerce-monorepo
+build:
+  artifacts:
+    # --- Cart Service ---
+    - image: ecommerce-monorepo-cart-service
+      context: . # Added for consistency
+      docker:
+        dockerfile: apps/cart/Dockerfile
+      sync:
+        manual: # 👈 FIXED: Added 'manual' wrapper
+          - src: "apps/cart/src/**/*.ts"
+            dest: .
+
+    # --- Catalog Service ---
+    - image: ecommerce-monorepo-catalog-service
+      context: .
+      docker:
+        dockerfile: apps/catalog/Dockerfile
+      sync:
+        manual:
+          - src: "apps/catalog/src/**/*.ts"
+            dest: .
+
+    # --- API Gateway ---
+    - image: ecommerce-monorepo-api-gateway-service
+      context: .
+      docker:
+        dockerfile: apps/api-gateway/Dockerfile
+      sync:
+        manual:
+          - src: "apps/api-gateway/src/**/*.ts"
+            dest: .
+
+    # --- Identity Service ---
+    - image: ecommerce-monorepo-identity-service
+      context: .
+      docker:
+        dockerfile: apps/identity/Dockerfile
+      sync:
+        manual:
+          - src: "apps/identity/src/**/*.ts"
+            dest: .
+
+    # --- Orders Service ---
+    - image: ecommerce-monorepo-orders-service
+      context: .
+      docker:
+        dockerfile: apps/orders/Dockerfile
+      sync:
+        manual:
+          - src: "apps/orders/src/**/*.ts"
+            dest: .
+
+    # --- Email Service ---
+    - image: ecommerce-monorepo-email-service
+      context: .
+      docker:
+        dockerfile: apps/email/Dockerfile
+      sync:
+        manual:
+          - src: "apps/email/src/**/*.ts"
+            dest: .
+
+    # --- Invoice Service ---
+    - image: ecommerce-monorepo-invoice-service
+      context: .
+      docker:
+        dockerfile: apps/invoice/Dockerfile
+      sync:
+        manual:
+          - src: "apps/invoice/src/**/*.ts"
+            dest: .
+
+deploy:
+  kubectl:
+    manifests:
+      - infra/k8s/cart-service-deployment.yaml
+      - infra/k8s/catalog-service-deployment.yaml
+      - infra/k8s/api-gateway-service-deployment.yaml
+      - infra/k8s/identity-service-deployment.yaml
+      - infra/k8s/orders-service-deployment.yaml
+      - infra/k8s/email-service-deployment.yaml
+      - infra/k8s/invoice-service-deployment.yaml

@@ -1,15 +1,11 @@
-# -----------------------------------------------------------------------------
-# STAGE 1: BASE
-# -----------------------------------------------------------------------------
+
 FROM node:22-slim AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 RUN corepack enable && corepack prepare pnpm@10.0.0 --activate
 
-# -----------------------------------------------------------------------------
-# STAGE 2: BUILDER
-# -----------------------------------------------------------------------------
+
 FROM base AS builder
 WORKDIR /app
 
@@ -30,8 +26,8 @@ COPY packages/common/src ./packages/common/src
 COPY packages/storage-service/src ./packages/storage-service/src
 COPY apps/catalog/src ./apps/catalog/src
 COPY apps/catalog/prisma ./apps/catalog/prisma
-COPY apps/catalog/prisma.config.ts ./apps/catalog/prisma.config.ts 
 
+COPY apps/cart/prisma.config.ts /app/apps/catalog/prisma.config.ts
 
 # Build packages first
 RUN pnpm --filter @ecommerce/common build
@@ -75,11 +71,13 @@ COPY --from=builder /app/apps/catalog/node_modules ./apps/catalog/node_modules
 COPY --from=builder /app/apps/catalog/dist ./apps/catalog/dist
 COPY --from=builder /app/apps/catalog/package.json ./apps/catalog/package.json
 COPY --from=builder /app/apps/catalog/prisma ./apps/catalog/prisma
-COPY --from=builder /app/apps/catalog/prisma.config.ts .apps/catalog/prisma.config.ts 
+COPY --from=builder /app/apps/catalog/prisma.config.ts ./apps/catalog/prisma.config.ts
+
+
 
 # Set working directory to catalog app
 WORKDIR /app/apps/catalog
 
-EXPOSE 4001
+EXPOSE 4002
 
 CMD ["node", "dist/index.js"]

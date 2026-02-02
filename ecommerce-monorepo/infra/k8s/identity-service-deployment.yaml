@@ -13,19 +13,17 @@ spec:
         app: identity
     spec:
       initContainers:
-        - name: prisma-db-push
-          image: ecommerce-identity:latest
+        - name: prisma-migrate
+          image: ecommerce-monorepo-identity-service
           imagePullPolicy: IfNotPresent
-
-          command: ["npx", "prisma", "db", "push"]
+          command: ["npx", "prisma", "migrate", "deploy"]
           env:
             - name: DATABASE_URL
               value: "postgresql://postgres:password@postgres-service:5432/identity"
       containers:
         - name: identity
-          image: ecommerce-identity:latest
+          image: ecommerce-monorepo-identity-service
           imagePullPolicy: IfNotPresent
-
           ports:
             - containerPort: 4001
           env:
@@ -33,26 +31,21 @@ spec:
               value: "4001"
             - name: NODE_ENV
               value: "production"
-            - name: CLIENT_URL
-              value: "http://localhost:3000"
-
-            - name: BASE_URL
-              value: "http://api-gateway-service"
-            - name: BETTER_AUTH_URL
-              value: "http://api-gateway-service/api/v1/auth"
-
             - name: DATABASE_URL
               value: "postgresql://postgres:password@postgres-service:5432/identity"
             - name: RABBITMQ_URL
               value: "amqp://rabbitmq:password@rabbitmq-service:5672"
             - name: REDIS_URL
               value: "redis://redis-service:6379/0"
-
+            - name: BASE_URL
+              value: "http://api-gateway:4000"
+            - name: CLIENT_URL
+              value: "http://localhost:3000"
             - name: AWS_REGION
               value: "eu-north-1"
             - name: AWS_BUCKET_NAME
               value: "erce-amazon-s3"
-
+            # Secrets
             - name: INTERNAL_SERVICE_SECRET
               valueFrom:
                 secretKeyRef:
@@ -82,6 +75,5 @@ spec:
   selector:
     app: identity
   ports:
-    - protocol: TCP
-      port: 4001
+    - port: 4001
       targetPort: 4001

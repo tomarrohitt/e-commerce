@@ -1,3 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rabbitmq-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,7 +26,6 @@ spec:
       containers:
         - name: rabbitmq
           image: rabbitmq:management-alpine
-          # 👇 ADD THIS SECTION
           env:
             - name: RABBITMQ_DEFAULT_USER
               value: "rabbitmq"

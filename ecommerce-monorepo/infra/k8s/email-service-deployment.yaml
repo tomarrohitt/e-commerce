@@ -14,26 +14,21 @@ spec:
     spec:
       containers:
         - name: email
-          image: ecommerce-email:latest
+          image: ecommerce-monorepo-email-service
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
-          imagePullPolicy: IfNotPresent
           env:
             - name: PORT
               value: "5000"
-
             - name: RABBITMQ_URL
               value: "amqp://rabbitmq:password@rabbitmq-service:5672"
-
             - name: SMTP_HOST
               value: "smtp-relay.brevo.com"
-
             - name: SMTP_SECURE
               value: "false"
-
             - name: SMTP_PORT
               value: "587"
-
             - name: SMTP_FROM
               value: "tomarrohit3240@gmail.com"
             - name: SMTP_USER
@@ -41,7 +36,6 @@ spec:
                 secretKeyRef:
                   name: email-secrets
                   key: SMTP_USER
-
             - name: SMTP_PASS
               valueFrom:
                 secretKeyRef:
@@ -56,6 +50,5 @@ spec:
   selector:
     app: email
   ports:
-    - protocol: TCP
-      port: 5000
+    - port: 5000
       targetPort: 5000

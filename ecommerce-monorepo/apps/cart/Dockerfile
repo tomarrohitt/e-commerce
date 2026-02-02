@@ -20,8 +20,8 @@ RUN pnpm install --frozen-lockfile
 COPY packages/common/src ./packages/common/src
 COPY apps/cart/src ./apps/cart/src
 COPY apps/cart/prisma ./apps/cart/prisma
-COPY apps/cart/prisma.config.ts ./apps/cart/prisma.config.ts 
 
+COPY apps/cart/prisma.config.ts ./apps/cart/prisma.config.ts 
 
 RUN pnpm --filter @ecommerce/common build
 
@@ -52,10 +52,10 @@ COPY --from=builder /app/apps/cart/node_modules ./apps/cart/node_modules
 COPY --from=builder /app/apps/cart/dist ./apps/cart/dist
 COPY --from=builder /app/apps/cart/package.json ./apps/cart/package.json
 COPY --from=builder /app/apps/cart/prisma ./apps/cart/prisma
-COPY --from=builder /app/apps/cart/prisma.config.ts .apps/cart/prisma.config.ts 
+COPY --from=builder /app/apps/cart/prisma.config.ts ./apps/cart/prisma.config.ts
 
 WORKDIR /app/apps/cart
 
-EXPOSE 4001
+EXPOSE 4003
 
 CMD ["node", "dist/index.js"]

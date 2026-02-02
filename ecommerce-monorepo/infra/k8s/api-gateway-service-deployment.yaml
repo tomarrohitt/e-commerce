@@ -14,39 +14,38 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: ecommerce-api-gateway:latest
+          image: ecommerce-monorepo-api-gateway
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 4000
-          imagePullPolicy: IfNotPresent
           env:
             - name: PORT
               value: "4000"
             - name: NODE_ENV
               value: "production"
-
             - name: REDIS_URL
               value: "redis://redis-service:6379/0"
-
             - name: CLIENT_URL
               value: "http://localhost:3000"
-
+            # Service Discovery
             - name: IDENTITY_SERVICE_URL
               value: "http://identity-service:4001"
-
             - name: CATALOG_SERVICE_URL
               value: "http://catalog-service:4002"
-
             - name: CART_SERVICE_URL
               value: "http://cart-service:4003"
-
             - name: ORDERS_SERVICE_URL
               value: "http://orders-service:4004"
-
             - name: INVOICE_SERVICE_URL
               value: "http://invoice-service:6000"
-
+            - name: EMAIL_SERVICE_URL
+              value: "http://email-service:5000"
+            # Secrets
             - name: INTERNAL_SERVICE_SECRET
-              value: "random-key"
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: INTERNAL_SERVICE_SECRET
 ---
 apiVersion: v1
 kind: Service
