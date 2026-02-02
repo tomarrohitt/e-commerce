@@ -1,12 +1,7 @@
 import "dotenv/config";
 import "express-async-errors";
 import express from "express";
-import {
-  currentUser,
-  errorHandler,
-  EventBusService,
-  OutboxProcessor,
-} from "@ecommerce/common";
+import { currentUser, errorHandler, OutboxProcessor } from "@ecommerce/common";
 import { prisma } from "./config/prisma";
 import { env } from "./config/env";
 
@@ -18,11 +13,8 @@ import { OrderCreatedConsumer } from "./events/order-created-consumer";
 import { OrderCancelledConsumer } from "./events/order-cancelled-consumer";
 import { OrderDeliveredConsumer } from "./events/order-delivered-consumer";
 import { UserCreatedConsumer } from "./events/user-created-consumer";
-
-const eventBus = new EventBusService({
-  serviceName: "catalog-service",
-  url: env.RABBITMQ_URL,
-});
+import { eventBus } from "./config/event-bus";
+import { healthCheck } from "./controllers/health-controller";
 
 const outboxProcessor = new OutboxProcessor(prisma, eventBus, {
   batchSize: 50,
@@ -40,6 +32,8 @@ const PORT = env.PORT;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.get("/api/catalog/health", healthCheck);
+
 app.use(currentUser);
 
 app.use("/api/products", productRouter);
@@ -52,20 +46,17 @@ app.use(errorHandler);
 async function startServer() {
   try {
     await eventBus.connect();
-
-    // Start Consumers
     await orderCreatedConsumer.start();
     await orderCancelledConsumer.start();
     await orderDeliveredConsumer.start();
     await userCreatedConsumer.start();
-    // Start Outbox
     outboxProcessor.start();
 
     app.listen(PORT, () => {
-      console.log(`✅ Catalog Service running on ${PORT}`);
+      console.log(`Catalog Service running on ${PORT}`);
     });
   } catch (error) {
-    console.error("❌ Failed to start server:", error);
+    console.error("Failed to start server:", error);
     process.exit(1);
   }
 }

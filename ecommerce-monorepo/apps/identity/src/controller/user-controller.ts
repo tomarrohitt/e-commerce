@@ -2,22 +2,16 @@ import { Request, Response } from "express";
 import { prisma } from "../config/prisma";
 import {
   LoggerFactory,
-  RedisService,
   sendError,
   sendSuccess,
   UserEventType,
 } from "@ecommerce/common";
 import { env } from "../config/env";
 import { dispatchUserEvent } from "../service/outbox-dispatcher";
-import { Prisma } from "../generated/prisma-client";
+import { Prisma } from ".prisma/client";
+import { redis } from "../config/redis";
 
 const logger = LoggerFactory.create("IdentityService");
-
-const redis = new RedisService({
-  url: env.REDIS_URL,
-  maxRetries: 3,
-  retryDelay: 50,
-});
 
 class UserController {
   async update(req: Request, res: Response) {

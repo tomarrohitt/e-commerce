@@ -3,16 +3,14 @@ import {
   errorHandler,
   EventBusService,
   OutboxProcessor,
+  sendSuccess,
 } from "@ecommerce/common";
 import { env } from "./config/env";
 import { InvoiceConsumer } from "./events/invoice-consumer";
 import { prisma } from "./config/prisma";
 import invoiceRouter from "./router/invoice-router";
-
-const eventBus = new EventBusService({
-  serviceName: "invoice-service",
-  url: env.RABBITMQ_URL,
-});
+import { eventBus } from "./config/event-bus";
+import { healthCheck } from "./controller/health-controller";
 
 const outboxProcessor = new OutboxProcessor(prisma, eventBus, {
   batchSize: 50,
@@ -29,9 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/invoice/download", invoiceRouter);
 
-app.get("/health", (req, res) => {
-  res.json({ status: "OK", service: "invoice-service" });
-});
+app.get("/api/invoice/health", healthCheck);
 
 app.use(errorHandler);
 

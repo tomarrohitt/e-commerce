@@ -77,6 +77,7 @@ COPY --from=builder /app/apps/identity/prisma ./apps/identity/prisma
 COPY --from=builder /app/apps/identity/prisma.config.ts ./apps/identity/prisma.config.ts 
 
 
+
 # Set working directory to identity app
 WORKDIR /app/apps/identity
 

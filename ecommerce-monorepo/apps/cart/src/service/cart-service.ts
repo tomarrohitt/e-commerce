@@ -21,7 +21,7 @@ class CartService {
 
     if (quantity > product.stockQuantity) {
       throw new BadRequestError(
-        `We only have ${product.stockQuantity} items in stockQuantity.`
+        `We only have ${product.stockQuantity} items in stockQuantity.`,
       );
     }
 
@@ -34,12 +34,12 @@ class CartService {
 
         if (remainingAllowed <= 0) {
           throw new BadRequestError(
-            `You already have the maximum available stockQuantity (${product.stockQuantity}) in your cart.`
+            `You already have the maximum available stockQuantity (${product.stockQuantity}) in your cart.`,
           );
         }
 
         throw new BadRequestError(
-          `You have ${existingItem.quantity} in your cart. You can only add ${remainingAllowed} more.`
+          `You have ${existingItem.quantity} in your cart. You can only add ${remainingAllowed} more.`,
         );
       }
 
@@ -99,7 +99,7 @@ class CartService {
         await cartRepository.updateQuantity(
           userId,
           cartItem.productId,
-          quantity
+          quantity,
         );
       }
 
@@ -148,14 +148,14 @@ class CartService {
 
     if (quantity > product.stockQuantity) {
       throw new BadRequestError(
-        `Cannot update to ${quantity}. Only ${product.stockQuantity} items left in stockQuantity.`
+        `Cannot update to ${quantity}. Only ${product.stockQuantity} items left in stockQuantity.`,
       );
     }
 
     await cartRepository.updateQuantity(userId, productId, quantity);
   }
   async validateCart(
-    userId: string
+    userId: string,
   ): Promise<{ valid: boolean; errors: string[] }> {
     const cart = await this.getCart(userId);
     const errors: string[] = [];
@@ -169,7 +169,7 @@ class CartService {
         errors.push(`"${item.product.name}" is out of stockQuantity.`);
       } else if (item.quantity > item.product.stockQuantity) {
         errors.push(
-          `"${item.product.name}" only has ${item.product.stockQuantity} items left in stockQuantity.`
+          `"${item.product.name}" only has ${item.product.stockQuantity} items left in stockQuantity.`,
         );
       }
     }

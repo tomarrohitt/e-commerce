@@ -9,6 +9,7 @@ import {
   currentUser,
   OutboxProcessor,
   EventBusService,
+  sendSuccess,
 } from "@ecommerce/common";
 import { prisma } from "./config/prisma";
 import internalRouter from "./router/internal-router";
@@ -18,11 +19,8 @@ import { env } from "./config/env";
 import { adminAddressRouter } from "./router/address-admin-router";
 import { logger } from "./config/logger";
 import { ImageCleanUpConsumer } from "./worker/image-clean-up";
-
-const eventBus = new EventBusService({
-  serviceName: "identity-service",
-  url: env.RABBITMQ_URL,
-});
+import { healthCheck } from "./controller/health-controller";
+import { eventBus } from "./config/event-bus";
 
 const outboxProcessor = new OutboxProcessor(prisma, eventBus, {
   batchSize: 50,
@@ -58,6 +56,8 @@ app.use("/api/user", userRouter);
 app.use("/api/addresses", addressRouter);
 app.use("/api/admin/user", adminUserRouter);
 app.use("/api/admin/addresses", adminAddressRouter);
+
+app.get("/api/identity/health", healthCheck);
 
 app.use(errorHandler);
 

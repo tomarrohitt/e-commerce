@@ -12,14 +12,51 @@ const redisService = new RedisService({
 
 const redis = redisService.getClient();
 
+const normalizeUrl = (url: string): string => {
+  let normalized = url.toLowerCase();
+
+  normalized = normalized.split("?")[0];
+  normalized = normalized.replace(
+    /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g,
+    ":id",
+  );
+
+  normalized = normalized.replace(/\/(\d+)/g, "/:id");
+
+  if (normalized.endsWith("/") && normalized.length > 1) {
+    normalized = normalized.slice(0, -1);
+  }
+
+  return normalized;
+};
+
+const createEndpointKey = (req: any) => {
+  const userKey = req.user?.id || ipKeyGenerator(req.ip) || "127.0.0.1";
+  const endpoint = normalizeUrl(req.originalUrl);
+
+  return `${userKey}:${req.method}:${endpoint}`;
+};
+
 export const generalLimiter = rateLimit({
   store: new RedisStore({
     // @ts-expect-error
     sendCommand: (...args: string[]) => redis.call(...args),
+    prefix: "rl:general",
   }),
   windowMs: 5 * 60 * 1000,
   max: 100,
+  handler: (req, res, next, options) => {
+    res.status(options.statusCode).json({
+      success: false,
+      errors: [
+        {
+          message: options.message,
+        },
+      ],
+    });
+  },
   message: "Too many requests, please try again later.",
+
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => {
@@ -31,53 +68,89 @@ export const authLimiter = rateLimit({
   store: new RedisStore({
     // @ts-expect-error
     sendCommand: (...args: string[]) => redis.call(...args),
+    prefix: "rl:auth",
   }),
-  windowMs: 7 * 60 * 1000,
-  max: 5,
-  skipSuccessfulRequests: true,
-  message: "Too many login attempts, please try again later.",
-  keyGenerator: (req) => {
-    return ipKeyGenerator(req.ip || "127.0.0.1") || "unknown";
+  handler: (req, res, next, options) => {
+    res.status(options.statusCode).json({
+      success: false,
+      errors: [
+        {
+          message: options.message,
+        },
+      ],
+    });
   },
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: "Too many login attempts, please try again later.",
+  keyGenerator: createEndpointKey,
 });
 
 export const writeLimiter = rateLimit({
   store: new RedisStore({
     // @ts-expect-error
     sendCommand: (...args: string[]) => redis.call(...args),
+    prefix: "rl:write",
   }),
-  windowMs: 60 * 1000,
-  max: 20,
-  message: "Too many write requests, please slow down.",
-  skip: (req) => req.method === "GET",
-
-  keyGenerator: (req) => {
-    return ipKeyGenerator(req.ip || "127.0.0.1") || "unknown";
+  handler: (req, res, next, options) => {
+    res.status(options.statusCode).json({
+      success: false,
+      errors: [
+        {
+          message: options.message,
+        },
+      ],
+    });
   },
+  windowMs: 1 * 60 * 1000,
+  max: 60,
+  skip: (req) => req.method === "GET",
+  message: "Too many actions (cart/orders), please slow down.",
+  keyGenerator: createEndpointKey,
 });
 
 export const adminLimiter = rateLimit({
   store: new RedisStore({
     // @ts-expect-error
     sendCommand: (...args: string[]) => redis.call(...args),
+    prefix: "rl:admin",
   }),
-  windowMs: 60 * 1000,
-  max: 50,
-  message: "Too many admin operations, please slow down.",
-  keyGenerator: (req) => {
-    return req.user?.id || ipKeyGenerator(req.ip || "127.0.0.1") || "unknown";
+  handler: (req, res, next, options) => {
+    res.status(options.statusCode).json({
+      success: false,
+      errors: [
+        {
+          message: options.message,
+        },
+      ],
+    });
   },
+
+  message: "Too many admin operations, please slow down.",
+  windowMs: 1 * 60 * 1000,
+  max: 200,
+  keyGenerator: createEndpointKey,
 });
 
 export const publicLimiter = rateLimit({
   store: new RedisStore({
     // @ts-expect-error
     sendCommand: (...args: string[]) => redis.call(...args),
+    prefix: "rl:public",
   }),
-  windowMs: 15 * 60 * 1000,
-  max: 50,
-  message: "Too many requests, please try again later.",
-  keyGenerator: (req) => {
-    return ipKeyGenerator(req.ip || "127.0.0.1") || "unknown";
+
+  handler: (req, res, next, options) => {
+    res.status(options.statusCode).json({
+      success: false,
+      errors: [
+        {
+          message: options.message,
+        },
+      ],
+    });
   },
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  message: "You are browsing too fast!",
+  keyGenerator: createEndpointKey,
 });

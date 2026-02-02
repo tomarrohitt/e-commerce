@@ -1,4 +1,4 @@
-import { OrderStatus } from "../generated/prisma-client";
+import { OrderStatus } from ".prisma/client";
 import { CreateOrderInput } from "../lib/order-validation-schema";
 import { orderRepository } from "../repository/order-repository";
 import { stripeService } from "./stripe-service";
@@ -6,17 +6,11 @@ import {
   NotFoundError,
   ForbiddenError,
   BadRequestError,
-  RedisService,
   UserContext,
 } from "@ecommerce/common";
 import { env } from "../config/env";
 import { prisma } from "../config/prisma";
-
-const redis = new RedisService({
-  url: env.REDIS_URL,
-  maxRetries: 3,
-  retryDelay: 50,
-});
+import { redis } from "../config/redis";
 
 class OrderService {
   async createOrder(

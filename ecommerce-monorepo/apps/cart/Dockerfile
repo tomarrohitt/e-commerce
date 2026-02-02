@@ -1,15 +1,10 @@
-# -----------------------------------------------------------------------------
-# STAGE 1: BASE
-# -----------------------------------------------------------------------------
+
 FROM node:22-slim AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 RUN corepack enable && corepack prepare pnpm@10.0.0 --activate
 
-# -----------------------------------------------------------------------------
-# STAGE 2: BUILDER
-# -----------------------------------------------------------------------------
 FROM base AS builder
 WORKDIR /app
 
@@ -38,7 +33,8 @@ RUN pnpm --filter @ecommerce/common build
 # Generate Prisma client
 WORKDIR /app/apps/cart
 ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public"
-RUN pnpm exec prisma generate --schema=./prisma/schema.prisma
+
+RUN pnpm prisma generate --schema=./prisma/schema.prisma
 
 # Build cart service
 WORKDIR /app
@@ -70,7 +66,6 @@ COPY --from=builder /app/apps/cart/dist ./apps/cart/dist
 COPY --from=builder /app/apps/cart/package.json ./apps/cart/package.json
 COPY --from=builder /app/apps/cart/prisma ./apps/cart/prisma
 COPY --from=builder /app/apps/cart/prisma.config.ts .apps/cart/prisma.config.ts 
-
 
 # Set working directory to cart app
 WORKDIR /app/apps/cart

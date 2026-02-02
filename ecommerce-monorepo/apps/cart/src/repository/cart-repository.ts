@@ -1,11 +1,6 @@
 import { CartItem, RedisService } from "@ecommerce/common";
 import { env } from "../config/env";
-
-const redis = new RedisService({
-  url: env.REDIS_URL,
-  maxRetries: 3,
-  retryDelay: 50,
-});
+import { redis } from "../config/redis";
 
 class CartRepository {
   private getCartKey(userId: string): string {

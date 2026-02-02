@@ -41,6 +41,7 @@ export const servicesUrlEnv = {
   CART_SERVICE_URL: z.string(),
   ORDERS_SERVICE_URL: z.string(),
   INVOICE_SERVICE_URL: z.string(),
+  EMAIL_SERVICE_URL: z.string(),
 };
 
 export const awsEnv = {

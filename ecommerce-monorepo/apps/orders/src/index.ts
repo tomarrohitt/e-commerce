@@ -7,6 +7,7 @@ import {
   errorHandler,
   EventBusService,
   OutboxProcessor,
+  sendSuccess,
 } from "@ecommerce/common";
 import { prisma } from "./config/prisma";
 import { env } from "./config/env";
@@ -19,11 +20,8 @@ import { PaymentConsumer } from "./events/payment-consumer";
 import { InventorySyncConsumer } from "./events/inventory-sync-consumer";
 import { InvoiceGeneratedConsumer } from "./events/invoice-generated-consumer";
 import { checkStaleOrders } from "./workers/order-timeout";
-
-const eventBus = new EventBusService({
-  serviceName: "order-service",
-  url: env.RABBITMQ_URL,
-});
+import { healthCheck } from "./controller/health-controller";
+import { eventBus } from "./config/event-bus";
 
 const outboxProcessor = new OutboxProcessor(prisma, eventBus, {
   batchSize: 50,
@@ -42,8 +40,10 @@ const PORT = env.PORT;
 app.post(
   "/api/orders/webhook",
   express.raw({ type: "application/json" }),
-  orderController.handleStripeWebhook
+  orderController.handleStripeWebhook,
 );
+
+app.get("/api/orders/health", healthCheck);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

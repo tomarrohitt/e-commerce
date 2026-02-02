@@ -5,7 +5,7 @@ import {
   UpdateReviewInput,
   ListReviewsQuery,
 } from "../lib/validation-schema";
-import { Prisma } from "../generated/prisma-client";
+import { Prisma } from ".prisma/client";
 
 class ReviewRepository {
   private async updateProductStats(

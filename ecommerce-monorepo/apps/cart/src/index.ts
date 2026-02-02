@@ -1,25 +1,29 @@
 import "express-async-errors";
 import express from "express";
-import { EventBusService, errorHandler, currentUser } from "@ecommerce/common";
+import {
+  EventBusService,
+  errorHandler,
+  currentUser,
+  sendSuccess,
+} from "@ecommerce/common";
 import { ProductConsumer } from "./events/product-consumer";
 import cartRouter from "./router/cart-router";
 import { env } from "./config/env";
 import { OrderCreatedConsumer } from "./events/order-consumer";
+import { eventBus } from "./config/event-bus";
+import { healthCheck } from "./controller/health-controller";
 
 const app = express();
 const PORT = env.PORT || 4003;
 
 const SERVICE_MODE = env.SERVICE_MODE || "ALL";
 
-const eventBus = new EventBusService({
-  serviceName: "cart-service",
-  url: env.RABBITMQ_URL,
-});
-
 const productConsumer = new ProductConsumer(eventBus);
 const orderCreatedConsumer = new OrderCreatedConsumer(eventBus);
 
 app.use(errorHandler);
+
+app.get("/api/cart/health", healthCheck);
 
 async function start() {
   try {

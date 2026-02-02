@@ -77,7 +77,6 @@ COPY --from=builder /app/apps/catalog/package.json ./apps/catalog/package.json
 COPY --from=builder /app/apps/catalog/prisma ./apps/catalog/prisma
 COPY --from=builder /app/apps/catalog/prisma.config.ts .apps/catalog/prisma.config.ts 
 
-
 # Set working directory to catalog app
 WORKDIR /app/apps/catalog
 

@@ -14,6 +14,11 @@ export interface RouteConfig {
 
 export const routeConfigs: RouteConfig[] = [
   {
+    path: "/api/identity/health",
+    target: env.IDENTITY_SERVICE_URL,
+    rules: [{ method: "GET", protected: false }],
+  },
+  {
     path: "/api/auth",
     target: env.IDENTITY_SERVICE_URL,
     rules: [{ method: "ALL", protected: false }],
@@ -37,6 +42,11 @@ export const routeConfigs: RouteConfig[] = [
     path: "/api/admin/addresses",
     target: env.IDENTITY_SERVICE_URL,
     rules: [{ method: "ALL", protected: true, adminOnly: true }],
+  },
+  {
+    path: "/api/catalog/health",
+    target: env.CATALOG_SERVICE_URL,
+    rules: [{ method: "GET", protected: false }],
   },
   {
     path: "/api/products",
@@ -74,9 +84,19 @@ export const routeConfigs: RouteConfig[] = [
     rules: [{ method: "GET", protected: true }],
   },
   {
+    path: "/api/cart/health",
+    target: env.CART_SERVICE_URL,
+    rules: [{ method: "GET", protected: false }],
+  },
+  {
     path: "/api/cart",
     target: env.CART_SERVICE_URL,
     rules: [{ method: "ALL", protected: true }],
+  },
+  {
+    path: "/api/orders/health",
+    target: env.ORDERS_SERVICE_URL,
+    rules: [{ method: "GET", protected: false }],
   },
   {
     path: "/api/orders",
@@ -94,8 +114,18 @@ export const routeConfigs: RouteConfig[] = [
     rules: [{ method: "POST", protected: false }],
   },
   {
+    path: "/api/invoice/health",
+    target: env.INVOICE_SERVICE_URL,
+    rules: [{ method: "GET", protected: false }],
+  },
+  {
     path: "/api/invoice",
     target: env.INVOICE_SERVICE_URL,
     rules: [{ method: "ALL", protected: false }],
+  },
+  {
+    path: "/api/email/health",
+    target: env.EMAIL_SERVICE_URL,
+    rules: [{ method: "GET", protected: false }],
   },
 ];

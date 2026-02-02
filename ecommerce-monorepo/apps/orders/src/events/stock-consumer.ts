@@ -1,7 +1,7 @@
 import { EventBusService, ProductEventType, Event } from "@ecommerce/common";
 import { orderRepository } from "../repository/order-repository";
 import { stripeService } from "../services/stripe-service";
-import { OrderStatus } from "../generated/prisma-client";
+import { OrderStatus } from ".prisma/client";
 import { prisma } from "../config/prisma";
 
 export class StockConsumer {
@@ -17,7 +17,7 @@ export class StockConsumer {
         if (event.eventType === ProductEventType.STOCK_RESERVED) {
           await orderRepository.updateStatus(
             orderId,
-            OrderStatus.AWAITING_PAYMENT
+            OrderStatus.AWAITING_PAYMENT,
           );
         } else if (event.eventType === ProductEventType.STOCK_FAILED) {
           const order = await orderRepository.findById(orderId);
@@ -37,7 +37,7 @@ export class StockConsumer {
           await orderRepository.updateStatus(
             orderId,
             OrderStatus.CANCELLED,
-            "Inventory Error"
+            "Inventory Error",
           );
 
           if (order.paymentId) {
@@ -56,7 +56,7 @@ export class StockConsumer {
             }
           }
         }
-      }
+      },
     );
   }
 }

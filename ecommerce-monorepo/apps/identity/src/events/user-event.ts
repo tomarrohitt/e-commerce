@@ -1,12 +1,7 @@
 import { RedisService } from "@ecommerce/common";
-import { Prisma } from "../generated/prisma-client";
+import { Prisma } from ".prisma/client";
 import { env } from "../config/env";
-
-const redis = new RedisService({
-  url: env.REDIS_URL,
-  maxRetries: 3,
-  retryDelay: 50,
-});
+import { redis } from "../config/redis";
 
 export class UserEventLog {
   async queueUserCreated(

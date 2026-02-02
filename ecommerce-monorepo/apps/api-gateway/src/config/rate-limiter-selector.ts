@@ -15,7 +15,10 @@ export const selectRateLimiter = (
   const path = req.originalUrl;
   const method = req.method;
 
-  if (path.startsWith("/api/auth")) {
+  if (path.startsWith("/api/orders/webhook")) {
+    return next();
+  }
+  if (path.startsWith("/api/auth") && method !== "GET") {
     return authLimiter(req, res, next);
   }
 

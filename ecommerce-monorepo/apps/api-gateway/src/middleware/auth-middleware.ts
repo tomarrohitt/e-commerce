@@ -7,15 +7,9 @@ import {
   DatabaseOpError,
   HttpClient,
   CircuitBreakerOpenError,
-  RedisService,
 } from "@ecommerce/common";
 import { env } from "../config/env";
-
-const redis = new RedisService({
-  url: env.REDIS_URL,
-  maxRetries: 3,
-  retryDelay: 50,
-});
+import { redis } from "../config/redis";
 
 const IDENTITY_PATH = "/api/internal/validate-session";
 const INTERNAL_SERVICE_SECRET = env.INTERNAL_SERVICE_SECRET;

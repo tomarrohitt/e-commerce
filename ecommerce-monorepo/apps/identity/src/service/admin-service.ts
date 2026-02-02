@@ -1,4 +1,4 @@
-import { Prisma } from "../generated/prisma-client";
+import { Prisma } from ".prisma/client";
 import { prisma } from "../config/prisma";
 import { NotFoundError, safeQuery } from "@ecommerce/common";
 import {
