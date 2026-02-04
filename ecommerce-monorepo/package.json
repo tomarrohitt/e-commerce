@@ -6,6 +6,7 @@
     "setup": "pnpm install && pnpm prisma:generate && pnpm prisma:migrate",
     "build": "pnpm -r build",
     "build:apps": "pnpm -r --filter ./apps/* build",
+    "start": "pnpm -r --parallel --filter './apps/*' start",
     "build:packages": "pnpm -r --filter ./packages/* build",
     "prisma:generate": "pnpm -r --filter './apps/*' --if-present run prisma:generate",
     "prisma:migrate": "pnpm -r --filter './apps/*' --if-present run prisma:migrate",
@@ -14,6 +15,7 @@
   },
   "devDependencies": {
     "prettier": "latest",
+    "tsx": "^4.21.0",
     "turbo": "^2.6.1",
     "typescript": "^5.0.0"
   },

@@ -22,9 +22,6 @@ const auth = betterAuth({
         link: url,
       });
     },
-    onPasswordReset: async ({ user }) => {
-      console.log(`Password for user ${user.email} has been reset.`);
-    },
     resetPasswordTokenExpiresIn: 1000 * 60 * 10,
   },
   baseURL: env.BASE_URL,

@@ -4,17 +4,15 @@ metadata:
   name: ecommerce-monorepo
 build:
   artifacts:
-    # --- Cart Service ---
     - image: ecommerce-monorepo-cart-service
-      context: . # Added for consistency
+      context: .
       docker:
         dockerfile: apps/cart/Dockerfile
       sync:
-        manual: # 👈 FIXED: Added 'manual' wrapper
+        manual:
           - src: "apps/cart/src/**/*.ts"
             dest: .
 
-    # --- Catalog Service ---
     - image: ecommerce-monorepo-catalog-service
       context: .
       docker:
@@ -24,7 +22,6 @@ build:
           - src: "apps/catalog/src/**/*.ts"
             dest: .
 
-    # --- API Gateway ---
     - image: ecommerce-monorepo-api-gateway-service
       context: .
       docker:
@@ -77,10 +74,4 @@ build:
 deploy:
   kubectl:
     manifests:
-      - infra/k8s/cart-service-deployment.yaml
-      - infra/k8s/catalog-service-deployment.yaml
-      - infra/k8s/api-gateway-service-deployment.yaml
-      - infra/k8s/identity-service-deployment.yaml
-      - infra/k8s/orders-service-deployment.yaml
-      - infra/k8s/email-service-deployment.yaml
-      - infra/k8s/invoice-service-deployment.yaml
+      - infra/k8s/*

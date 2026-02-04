@@ -1,9 +1,9 @@
 {
   "name": "email-service",
   "scripts": {
-    "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/index.ts",
+    "dev": "nodemon --exec tsx src/index.ts",
     "build": "npx tsc --build --force",
-    "start": "node dist/index.js"
+    "start": "node -r dotenv/config dist/index.js"
   },
   "private": true,
   "dependencies": {

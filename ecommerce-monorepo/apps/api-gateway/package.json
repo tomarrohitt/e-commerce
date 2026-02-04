@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "nodemon --exec node --no-deprecation -r ts-node/register -r tsconfig-paths/register src/index.ts",
+    "dev": "nodemon --exec tsx src/index.ts",
     "build": "npx tsc --build --force",
-    "start": "node dist/index.js"
+    "start": "node -r dotenv/config dist/index.js"
   },
   "dependencies": {
     "@ecommerce/common": "workspace:*",
