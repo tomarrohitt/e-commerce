@@ -9,10 +9,6 @@ export async function getUserFromSession(): Promise<User | null> {
   const sessionToken = cookieStore.get("better-auth.session_token");
 
   if (!sessionData || !sessionToken) {
-    if (sessionData || sessionToken) {
-      cookieStore.delete("better-auth.session_data");
-      cookieStore.delete("better-auth.session_token");
-    }
     return null;
   }
 

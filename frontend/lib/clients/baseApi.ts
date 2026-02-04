@@ -1,4 +1,5 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const ORIGIN_URL = process.env.NEXT_PUBLIC_ORIGIN_URL;
 
 type SmartBody = BodyInit | Record<string, any> | null | undefined;
 
@@ -47,7 +48,10 @@ export async function baseApi<T>(
     ...rest,
     credentials: "omit",
     body: normalized.body,
-    headers: normalized.headers,
+    headers: {
+      ...normalized.headers,
+      Origin: ORIGIN_URL ?? "http://localhost:3000",
+    },
   });
 
   return res;

@@ -32,6 +32,7 @@ export async function signIn(data: LoginInput): Promise<User> {
 
   if (!res.ok) {
     const err = await res.json();
+    console.log(err);
     throw err;
   }
 
