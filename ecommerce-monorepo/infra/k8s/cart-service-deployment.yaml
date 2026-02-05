@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: cart-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: cart-service
@@ -16,7 +16,7 @@ spec:
         - name: ocir-secret
       initContainers:
         - name: prisma-migrate
-          image: iad.ocir.io/idgxrtixsdtd/ecommerce:cart-service
+          image: iad.ocir.io/idgxrtixsdtd/ecommerce:cart
           imagePullPolicy: Always
           command: ["/bin/sh", "-c"]
           args:
@@ -26,7 +26,7 @@ spec:
               value: "postgresql://postgres:password@postgres-service:5432/cart"
       containers:
         - name: cart-service
-          image: iad.ocir.io/idgxrtixsdtd/ecommerce:cart-service
+          image: iad.ocir.io/idgxrtixsdtd/ecommerce:cart
           imagePullPolicy: Always
           resources:
             requests:

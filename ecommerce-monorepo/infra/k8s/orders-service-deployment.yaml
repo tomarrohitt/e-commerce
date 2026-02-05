@@ -16,7 +16,7 @@ spec:
         - name: ocir-secret
       initContainers:
         - name: prisma-migrate
-          image: iad.ocir.io/idgxrtixsdtd/ecommerce:orders-service
+          image: iad.ocir.io/idgxrtixsdtd/ecommerce:orders
           imagePullPolicy: Always
           command: ["npx", "prisma", "migrate", "deploy"]
           env:
@@ -24,7 +24,7 @@ spec:
               value: "postgresql://postgres:password@postgres-service:5432/orders"
       containers:
         - name: orders-service
-          image: iad.ocir.io/idgxrtixsdtd/ecommerce:orders-service
+          image: iad.ocir.io/idgxrtixsdtd/ecommerce:orders
           imagePullPolicy: Always
           resources:
             requests:

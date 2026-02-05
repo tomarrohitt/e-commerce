@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: identity-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: identity
@@ -16,7 +16,7 @@ spec:
         - name: ocir-secret
       initContainers:
         - name: prisma-migrate
-          image: iad.ocir.io/idgxrtixsdtd/ecommerce:identity-service
+          image: iad.ocir.io/idgxrtixsdtd/ecommerce:identity
           imagePullPolicy: Always
           command: ["npx", "prisma", "migrate", "deploy"]
           env:
@@ -24,7 +24,7 @@ spec:
               value: "postgresql://postgres:password@postgres-service:5432/identity"
       containers:
         - name: identity-service
-          image: iad.ocir.io/idgxrtixsdtd/ecommerce:identity-service
+          image: iad.ocir.io/idgxrtixsdtd/ecommerce:identity
           imagePullPolicy: Always
           resources:
             requests:

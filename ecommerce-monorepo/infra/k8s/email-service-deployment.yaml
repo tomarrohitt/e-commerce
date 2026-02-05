@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: email-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: email
@@ -16,7 +16,7 @@ spec:
         - name: ocir-secret
       containers:
         - name: email-service
-          image: iad.ocir.io/idgxrtixsdtd/ecommerce:email-service
+          image: iad.ocir.io/idgxrtixsdtd/ecommerce:email
           imagePullPolicy: Always
           resources:
             requests:

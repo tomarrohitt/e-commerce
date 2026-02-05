@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: catalog-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: catalog
@@ -16,7 +16,7 @@ spec:
         - name: ocir-secret
       initContainers:
         - name: prisma-migrate
-          image: iad.ocir.io/idgxrtixsdtd/ecommerce:catalog-service
+          image: iad.ocir.io/idgxrtixsdtd/ecommerce:catalog
           imagePullPolicy: Always
           command: ["/bin/sh", "-c"]
           args:
@@ -27,14 +27,15 @@ spec:
 
       containers:
         - name: catalog-service
-          image: iad.ocir.io/idgxrtixsdtd/ecommerce:catalog-service
+          image: iad.ocir.io/idgxrtixsdtd/ecommerce:catalog
           imagePullPolicy: Always
-          requests:
-            memory: "512Mi"
-            cpu: "500m"
-          limits:
-            memory: "1Gi"
-            cpu: "1000m"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
           ports:
             - containerPort: 4002
           env:
