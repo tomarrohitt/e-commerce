@@ -68,13 +68,13 @@ spec:
                   key: STRIPE_PUBLISHABLE_KEY
           readinessProbe:
             httpGet:
-              path: /health
+              path: /api/orders/health
               port: 4004
             initialDelaySeconds: 15
             periodSeconds: 5
           livenessProbe:
             httpGet:
-              path: /health
+              path: /api/orders/health
               port: 4004
             initialDelaySeconds: 30
             periodSeconds: 10

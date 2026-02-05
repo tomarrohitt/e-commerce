@@ -75,13 +75,13 @@ spec:
                   key: AWS_SECRET_ACCESS_KEY
           readinessProbe:
             httpGet:
-              path: /health
+              path: /api/catalog/health
               port: 4002
             initialDelaySeconds: 15
             periodSeconds: 5
           livenessProbe:
             httpGet:
-              path: /health
+              path: /api/catalog/health
               port: 4002
             initialDelaySeconds: 30
             periodSeconds: 10

@@ -61,13 +61,13 @@ spec:
               value: "http://api-gateway:4000"
           readinessProbe:
             httpGet:
-              path: /health
+              path: /api/cart/health
               port: 4003
             initialDelaySeconds: 15
             periodSeconds: 5
           livenessProbe:
             httpGet:
-              path: /health
+              path: /api/cart/health
               port: 4003
             initialDelaySeconds: 30
             periodSeconds: 10
