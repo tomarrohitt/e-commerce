@@ -29,6 +29,13 @@ spec:
     spec:
       containers:
         - name: postgres
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "1000m"
           image: postgres:16
           env:
             - name: POSTGRES_PASSWORD

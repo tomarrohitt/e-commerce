@@ -12,18 +12,27 @@ spec:
       labels:
         app: orders
     spec:
+      imagePullSecrets:
+        - name: ocir-secret
       initContainers:
         - name: prisma-migrate
-          image: ecommerce-monorepo-orders-service
-          imagePullPolicy: IfNotPresent
+          image: iad.ocir.io/idgxrtixsdtd/ecommerce:orders-service
+          imagePullPolicy: Always
           command: ["npx", "prisma", "migrate", "deploy"]
           env:
             - name: DATABASE_URL
               value: "postgresql://postgres:password@postgres-service:5432/orders"
       containers:
-        - name: orders
-          image: ecommerce-monorepo-orders-service
-          imagePullPolicy: IfNotPresent
+        - name: orders-service
+          image: iad.ocir.io/idgxrtixsdtd/ecommerce:orders-service
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
           ports:
             - containerPort: 4004
           env:

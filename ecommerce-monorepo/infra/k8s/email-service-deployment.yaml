@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: email-service
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: email
@@ -12,10 +12,19 @@ spec:
       labels:
         app: email
     spec:
+      imagePullSecrets:
+        - name: ocir-secret
       containers:
-        - name: email
-          image: ecommerce-monorepo-email-service
-          imagePullPolicy: IfNotPresent
+        - name: email-service
+          image: iad.ocir.io/idgxrtixsdtd/ecommerce:email-service
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
           ports:
             - containerPort: 5000
           env:

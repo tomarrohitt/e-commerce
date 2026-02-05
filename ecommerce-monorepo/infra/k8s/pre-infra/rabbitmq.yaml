@@ -25,6 +25,13 @@ spec:
     spec:
       containers:
         - name: rabbitmq
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
           image: rabbitmq:management-alpine
           env:
             - name: RABBITMQ_DEFAULT_USER

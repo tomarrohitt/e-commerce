@@ -12,18 +12,27 @@ spec:
       labels:
         app: invoice
     spec:
+      imagePullSecrets:
+        - name: ocir-secret
       initContainers:
         - name: prisma-migrate
-          image: ecommerce-monorepo-invoice-service
-          imagePullPolicy: IfNotPresent
+          image: iad.ocir.io/idgxrtixsdtd/ecommerce:invoice-service
+          imagePullPolicy: Always
           command: ["npx", "prisma", "migrate", "deploy"]
           env:
             - name: DATABASE_URL
               value: "postgresql://postgres:password@postgres-service:5432/invoice"
       containers:
-        - name: invoice
-          image: ecommerce-monorepo-invoice-service
-          imagePullPolicy: IfNotPresent
+        - name: invoice-service
+          image: iad.ocir.io/idgxrtixsdtd/ecommerce:invoice-service
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
           ports:
             - containerPort: 4005
           env:

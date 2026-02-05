@@ -12,10 +12,19 @@ spec:
       labels:
         app: api-gateway
     spec:
+      imagePullSecrets:
+        - name: ocir-secret
       containers:
         - name: api-gateway
-          image: ecommerce-monorepo-api-gateway
-          imagePullPolicy: IfNotPresent
+          image: iad.ocir.io/idgxrtixsdtd/ecommerce:api-gateway
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
           ports:
             - containerPort: 4000
           env:
@@ -27,7 +36,6 @@ spec:
               value: "redis://redis-service:6379/0"
             - name: CLIENT_URL
               value: "http://localhost:3000"
-            # Service Discovery
             - name: IDENTITY_SERVICE_URL
               value: "http://identity-service:4001"
             - name: CATALOG_SERVICE_URL
@@ -40,7 +48,6 @@ spec:
               value: "http://invoice-service:6000"
             - name: EMAIL_SERVICE_URL
               value: "http://email-service:5000"
-            # Secrets
             - name: INTERNAL_SERVICE_SECRET
               valueFrom:
                 secretKeyRef:

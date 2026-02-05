@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: catalog-service
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: catalog
@@ -12,11 +12,12 @@ spec:
       labels:
         app: catalog
     spec:
-      # 👇 1. Init Container (Runs once then dies)
+      imagePullSecrets:
+        - name: ocir-secret
       initContainers:
         - name: prisma-migrate
-          image: ecommerce-monorepo-catalog-service
-          imagePullPolicy: IfNotPresent
+          image: iad.ocir.io/idgxrtixsdtd/ecommerce:catalog-service
+          imagePullPolicy: Always
           command: ["/bin/sh", "-c"]
           args:
             - echo "DATABASE_URL=$DATABASE_URL" > .env && npx prisma migrate deploy
@@ -24,11 +25,16 @@ spec:
             - name: DATABASE_URL
               value: "postgresql://postgres:password@postgres-service:5432/catalog"
 
-      # 👇 2. Main Container (Runs forever) - THIS WAS MISSING
       containers:
-        - name: catalog
-          image: ecommerce-monorepo-catalog-service
-          imagePullPolicy: IfNotPresent
+        - name: catalog-service
+          image: iad.ocir.io/idgxrtixsdtd/ecommerce:catalog-service
+          imagePullPolicy: Always
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
           ports:
             - containerPort: 4002
           env:

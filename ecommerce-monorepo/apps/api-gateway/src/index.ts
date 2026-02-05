@@ -48,7 +48,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-app.use(selectRateLimiter);
+// app.use(selectRateLimiter);
 
 const onProxyReq = (
   proxyReq: ClientRequest,

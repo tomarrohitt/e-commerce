@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: identity-service
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: identity
@@ -12,18 +12,27 @@ spec:
       labels:
         app: identity
     spec:
+      imagePullSecrets:
+        - name: ocir-secret
       initContainers:
         - name: prisma-migrate
-          image: ecommerce-monorepo-identity-service
-          imagePullPolicy: IfNotPresent
+          image: iad.ocir.io/idgxrtixsdtd/ecommerce:identity-service
+          imagePullPolicy: Always
           command: ["npx", "prisma", "migrate", "deploy"]
           env:
             - name: DATABASE_URL
               value: "postgresql://postgres:password@postgres-service:5432/identity"
       containers:
-        - name: identity
-          image: ecommerce-monorepo-identity-service
-          imagePullPolicy: IfNotPresent
+        - name: identity-service
+          image: iad.ocir.io/idgxrtixsdtd/ecommerce:identity-service
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
           ports:
             - containerPort: 4001
           env:
