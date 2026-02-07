@@ -59,7 +59,7 @@ spec:
             - name: BASE_URL
               value: "http://api-gateway:4000"
             - name: CLIENT_URL
-              value: "http://localhost:3000"
+              value: "https://rohit-ecommerce-microservice.vercel.app"
             - name: AWS_REGION
               value: "eu-north-1"
             - name: AWS_BUCKET_NAME
