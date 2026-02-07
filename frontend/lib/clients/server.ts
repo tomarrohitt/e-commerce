@@ -1,8 +1,17 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL;
+// 1. FORCE ABSOLUTE URL ON SERVER
+// We prioritize SERVER_API_URL. If missing, we fallback to the hardcoded backend.
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://rohit-ecommerce-microservice.dedyn.io/api";
+
+// 2. FORCE PUBLIC ORIGIN
+// This is the URL of your FRONTEND (Vercel). The Backend expects this in the "Origin" header.
+const DEFAULT_ORIGIN =
+  process.env.NEXT_PUBLIC_ORIGIN_URL ||
+  "https://rohit-ecommerce-microservice.vercel.app";
 
 type SmartBody = BodyInit | Record<string, any> | null | undefined;
 
@@ -48,16 +57,30 @@ export async function api(endpoint: string, options: NextFetchOptions = {}) {
     finalHeaders["Cookie"] = cookieHeader;
   }
 
+  // --- ORIGIN LOGIC FIXED ---
   const headersList = await headers();
   const incomingOrigin = headersList.get("origin");
 
-  const origin = incomingOrigin || APP_URL;
+  // Priority:
+  // 1. Browser's real origin (if available)
+  // 2. APP_URL from env
+  // 3. Hardcoded Vercel domain (Fallback)
+  const origin =
+    incomingOrigin || process.env.NEXT_PUBLIC_APP_URL || DEFAULT_ORIGIN;
 
   if (origin) {
     finalHeaders["Origin"] = origin;
   }
+  // --------------------------
 
-  const res = await fetch(`${API_URL}${endpoint}`, {
+  // --- URL LOGIC FIXED ---
+  // Ensure we don't double-slash. If endpoint is "/auth...", fullUrl is "https://.../api/auth..."
+  // (Assuming BASE_URL ends in /api)
+  const fullUrl = `${BASE_URL}${endpoint}`;
+
+  console.log(`[API Request] ${fullUrl} | Origin: ${origin}`); // Debug log
+
+  const res = await fetch(fullUrl, {
     ...rest,
     headers: finalHeaders,
     body: finalBody,
