@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "npm list @tailwindcss/postcss && ls -R node_modules/@tailwindcss || echo 'MISSING' && next build",
     "start": "rm -rf ./next && next build && next start",
     "lint": "next lint"
   },
@@ -27,17 +27,18 @@
     "shadcn": "^3.6.3",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
+    "@tailwindcss/postcss": "^4.0.0",
+    "postcss": "^8.4.0",
     "vaul": "^1.1.2",
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "baseline-browser-mapping": "^2.9.6",
     "eslint": "^9.39.2",
-    "eslint-config-next": "16.1.4",
+    "eslint-config-next": "^15",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.4.0",
     "typescript": "^5"
