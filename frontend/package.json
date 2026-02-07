@@ -27,11 +27,12 @@
     "shadcn": "^3.6.3",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
+    "@tailwindcss/postcss": "^4.0.0",
+    "postcss": "^8.4.0",
     "vaul": "^1.1.2",
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
