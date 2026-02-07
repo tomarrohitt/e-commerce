@@ -21,12 +21,8 @@ export const getCartCount = cache(async () => {
     next: { tags: [`cart-count-${(await getUserFromSession())!.id}`] },
   });
 
-  console.log({ res });
-
   if (!res.ok) {
     const err = await res.json();
-    console.log({ res });
-
     throw err;
   }
 

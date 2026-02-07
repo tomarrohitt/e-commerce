@@ -312,7 +312,6 @@ export async function resendMailAction(email: string) {
   }
 
   try {
-    console.log({ email });
     const res = await resendMail(result.data);
 
     if (!res.ok) {
@@ -324,8 +323,6 @@ export async function resendMailAction(email: string) {
     }
 
     const json = await res.json();
-
-    console.log({ json });
 
     return {
       success: true,
