@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "npm list @tailwindcss/postcss && ls -R node_modules/@tailwindcss || echo 'MISSING' && next build",
     "start": "rm -rf ./next && next build && next start",
     "lint": "next lint"
   },
