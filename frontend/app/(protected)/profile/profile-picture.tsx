@@ -3,7 +3,7 @@ import { useState, useTransition } from "react";
 import { Camera } from "lucide-react";
 import { User } from "@/types";
 import { ImageCropModal } from "./image-crop-modal";
-import { imageUpload } from "@/actions/user";
+import { confirmUpload, getPreassignedUploadUrl } from "@/actions/user";
 import { getImageUrl } from "@/lib/constants/get-image-url";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -47,7 +47,24 @@ export const ProfilePicture = ({ user }: { user: User }) => {
 
     startTransition(async () => {
       try {
-        await imageUpload(compressedBlob);
+        const { uploadUrl, fields } =
+          await getPreassignedUploadUrl(compressedBlob);
+
+        const formData = new FormData();
+        Object.keys(fields).forEach((key) => {
+          formData.append(key, fields[key]);
+        });
+        formData.append("file", compressedBlob, "profile.webp");
+
+        const uploadResponse = await fetch(uploadUrl, {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error("Failed to upload to S3");
+        }
+        await confirmUpload(fields.key);
       } catch (error) {
         console.error("Upload failed", error);
         setOptimisticImage(null);

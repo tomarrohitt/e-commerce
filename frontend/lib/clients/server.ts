@@ -78,8 +78,6 @@ export async function api(endpoint: string, options: NextFetchOptions = {}) {
   // (Assuming BASE_URL ends in /api)
   const fullUrl = `${BASE_URL}${endpoint}`;
 
-  console.log(`[API Request] ${fullUrl} | Origin: ${origin}`); // Debug log
-
   const res = await fetch(fullUrl, {
     ...rest,
     headers: finalHeaders,
