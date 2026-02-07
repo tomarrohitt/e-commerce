@@ -6,7 +6,7 @@ metadata:
     app: invoice
     tier: background
 spec:
-  replicas: 2
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -37,11 +37,11 @@ spec:
           imagePullPolicy: Always
           resources:
             requests:
-              memory: "128Mi"
+              memory: "256Mi"
               cpu: "50m"
             limits:
-              memory: "256Mi"
-              cpu: "150m"
+              memory: "512Mi"
+              cpu: "300m"
           ports:
             - containerPort: 4005
               name: http
@@ -57,7 +57,7 @@ spec:
             - name: AWS_REGION
               value: "eu-north-1"
             - name: AWS_BUCKET_NAME
-              value: "erce-amazon-s3"
+              value: "ecommerce-node-microservices"
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
@@ -101,7 +101,7 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: invoice-service
-  minReplicas: 2
+  minReplicas: 1s
   maxReplicas: 2
   metrics:
     - type: Resource
