@@ -14,9 +14,6 @@ export const imageUpload = async (compressedBlob: Blob) => {
   }
 
   const json = await res.json();
-  if (!json.success) {
-    throw new Error("Failed to get upload URL");
-  }
 
   const { uploadUrl, fields } = json.data;
 
@@ -30,6 +27,9 @@ export const imageUpload = async (compressedBlob: Blob) => {
     method: "POST",
     body: formData,
   });
+
+  const uploadJson = await uploadResponse.json();
+  console.log({ uploadResponse, uploadJson });
 
   if (!uploadResponse.ok) {
     throw new Error("Failed to upload to S3");
