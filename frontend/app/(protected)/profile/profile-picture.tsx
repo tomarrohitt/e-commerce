@@ -98,12 +98,12 @@ export const ProfilePicture = ({ user }: { user: User }) => {
         <button
           onClick={() => document.getElementById("profile-pic-input")?.click()}
           disabled={pending}
-          className="absolute bottom-0 right-0 w-10 h-10 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center shadow-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="absolute bottom-0 right-0 size-10  bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center shadow-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed z-100"
         >
           {pending ? (
             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
-            <Camera className="w-5 h-5 text-white" />
+            <Camera className="w-6 h-6 text-white " />
           )}
         </button>
 
