@@ -45,7 +45,7 @@ spec:
             - name: REDIS_URL
               value: "redis://redis-service:6379/0"
             - name: CLIENT_URL
-              value: "http://localhost:3000"
+              value: "https://rohit-ecommerce-microservice.dedyn.io"
             - name: IDENTITY_SERVICE_URL
               value: "http://identity-service:4001"
             - name: CATALOG_SERVICE_URL

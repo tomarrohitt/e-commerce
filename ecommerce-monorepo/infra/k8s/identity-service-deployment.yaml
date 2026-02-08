@@ -59,11 +59,11 @@ spec:
             - name: BASE_URL
               value: "http://api-gateway:4000"
             - name: CLIENT_URL
-              value: "http://localhost:3000"
+              value: "https://rohit-ecommerce-microservice.dedyn.io"
             - name: AWS_REGION
-              value: "eu-north-1"
+              value: "ap-south-1"
             - name: AWS_BUCKET_NAME
-              value: "erce-amazon-s3"
+              value: "ecommerce-node-microservices"
             - name: INTERNAL_SERVICE_SECRET
               valueFrom:
                 secretKeyRef:

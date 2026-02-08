@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      imagePullSecrets:
+        - name: ocir-secret
+      containers:
+      - name: frontend
+        image: iad.ocir.io/idgxrtixsdtd/ecommerce:frontend
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+          value: "pk_test_51SRYEnA4Mr7wN5Jm8hotlYOkMdTjvnJIEVvTj5KQMkpxdEF2BvmgW00ZKHIQHh6gGoexgMIL0d48gExR9ibCfk4U00z0tzHmNB"
+      
+        - name: INTERNAL_API_URL
+          value: "http://api-gateway:4000/api"
+        
+        - name: NEXT_PUBLIC_API_URL
+          value: "https://rohit-ecommerce-microservice.dedyn.io/api"
+
+        - name: NEXT_PUBLIC_ORIGIN_URL
+          value: "https://rohit-ecommerce-microservice.dedyn.io"
+        
+        - name: NEXT_PUBLIC_AWS_REGION
+          value: "ap-south-1"
+        
+        - name: NEXT_PUBLIC_AWS_BUCKET_NAME
+          value: "ecommerce-node-microservices"
+        
+        - name: NODE_ENV
+          value: "production"
+
+        - name: NEXT_SERVER_ACTIONS_ENCRYPTION_KEY
+          value: "01293x0192x3m012.12x123xo12o"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 80       # Ingress talks to port 80
+      targetPort: 3000 # Container listens on 3000
+  type: ClusterIP

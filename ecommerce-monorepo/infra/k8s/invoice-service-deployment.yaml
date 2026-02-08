@@ -57,7 +57,7 @@ spec:
             - name: AWS_REGION
               value: "eu-north-1"
             - name: AWS_BUCKET_NAME
-              value: "erce-amazon-s3"
+              value: "ecommerce-node-microservices"
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
