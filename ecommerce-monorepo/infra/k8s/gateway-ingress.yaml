@@ -6,7 +6,6 @@ metadata:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/limit-rps: "10"
-    # Essential for Next.js to handle large payloads or file uploads if needed
     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
 spec:
   ingressClassName: nginx 
@@ -18,8 +17,6 @@ spec:
   - host: rohit-ecommerce-microservice.dedyn.io
     http:
       paths:
-      # 🚨 RULE 1: Backend API Traffic
-      # Any request starting with /api goes to the Backend Gateway
       - path: /api
         pathType: Prefix
         backend:
@@ -28,7 +25,6 @@ spec:
             port:
               number: 4000
       
-      # 🚨 RULE 2: Frontend Traffic (The Catch-All)
       - path: /
         pathType: Prefix
         backend:
