@@ -146,7 +146,7 @@ export default function ProductListClient({
       const nextPage = pagination.page + 1;
       params.set("page", String(nextPage));
 
-      const response = await fetch(`/api/products?${params.toString()}`);
+      const response = await fetch(`/web-api/products?${params.toString()}`);
 
       if (!response.ok) {
         throw new Error("Failed to fetch products");

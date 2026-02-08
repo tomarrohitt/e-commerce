@@ -1,8 +1,8 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL;
+const API_URL = process.env.INTERNAL_API_URL;
+const APP_URL = process.env.NEXT_PUBLIC_ORIGIN_URL;
 
 type SmartBody = BodyInit | Record<string, any> | null | undefined;
 
