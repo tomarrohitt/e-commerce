@@ -22,8 +22,8 @@ The Identity Service is responsible for managing users, addresses, and authentic
 #### API Endpoints
 
 - **Authentication**
-  - `POST /api/auth/register`: Register a new user.
-  - `POST /api/auth/login`: Log in a user.
+  - `POST /api/auth/sign-up/email`: Register a new user.
+  - `POST /api/auth/sign-in/email`: Log in a user.
   - `POST /api/auth/logout`: Log out a user.
   - `POST /api/auth/refresh-token`: Refresh an authentication token.
 - **User Profile**
@@ -136,7 +136,7 @@ To run the application locally, you will need to have Docker and Docker Compose 
 
 1.  **Clone the repository:**
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/tomarrohitt/e-commerce
     ```
 2.  **Install dependencies:**
     ```bash
