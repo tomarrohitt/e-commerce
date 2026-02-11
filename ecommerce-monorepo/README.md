@@ -1,139 +1,166 @@
-# E-commerce Monorepo
+# E-Commerce Monorepo
 
-This repository contains the source code for a modern e-commerce platform, structured as a monorepo using pnpm workspaces and Turbo.
+This is a monorepo for a microservices-based e-commerce application. It includes services for identity management, product catalog, shopping cart, orders, invoicing, and email notifications. The project is built with TypeScript, Node.js, and Express.js, and it uses a variety of technologies including Prisma, PostgreSQL, Redis, RabbitMQ, Docker, and Kubernetes.
 
-## Monorepo Structure
+## Project Structure
 
-The repository is organized into two main directories: `apps` and `packages`.
+The monorepo is organized into two main directories: `apps` and `packages`.
 
-- `apps`: Contains the different applications that make up the e-commerce platform.
-- `packages`: Contains shared code, configurations, and utilities used by the applications.
+- **`/apps`**: This directory contains the individual microservices. Each service is a standalone application with its own `package.json` and `Dockerfile`.
+- **`/packages`**: This directory contains shared code that is used by multiple services. This includes common utilities, configurations, and types.
 
-This structure is defined in the `pnpm-workspace.yaml` file:
+## Services
 
-```yaml
-packages:
-  - "apps/*"
-  - "packages/*"
+### API Gateway (`api-gateway`)
+
+The API Gateway is the single entry point for all client requests. It is responsible for routing requests to the appropriate downstream service, as well as handling cross-cutting concerns such as authentication, rate limiting, and logging.
+
+### Identity Service (`identity`)
+
+The Identity Service is responsible for managing users, addresses, and authentication.
+
+#### API Endpoints
+
+- **Authentication**
+  - `POST /api/auth/register`: Register a new user.
+  - `POST /api/auth/login`: Log in a user.
+  - `POST /api/auth/logout`: Log out a user.
+  - `POST /api/auth/refresh-token`: Refresh an authentication token.
+- **User Profile**
+  - `GET /api/user/profile`: Get the current user's profile.
+  - `PATCH /api/user/profile`: Update the current user's profile.
+  - `POST /api/user/get-upload-url`: Get a pre-signed URL to upload a profile picture.
+  - `POST /api/user/confirm-upload`: Confirm the upload of a profile picture.
+- **Addresses**
+  - `POST /api/addresses`: Create a new address.
+  - `GET /api/addresses`: List all addresses for the current user.
+  - `GET /api/addresses/default`: Get the default address for the current user.
+  - `GET /api/addresses/:id`: Get a specific address.
+  - `PATCH /api/addresses/:id`: Update an address.
+  - `DELETE /api/addresses/:id`: Delete an address.
+  - `PATCH /api/addresses/:id/default`: Set an address as the default.
+- **Admin**
+  - `GET /api/admin/users`: List all users.
+  - `GET /api/admin/users/:id`: Get a specific user.
+  - `PATCH /api/admin/users/:id`: Update a user.
+  - `DELETE /api/admin/users/:id`: Delete a user.
+  - `GET /api/admin/addresses`: List all addresses.
+  - `GET /api/admin/addresses/:id`: Get a specific address.
+  - `DELETE /api/admin/addresses/:id`: Delete an address.
+
+### Catalog Service (`catalog`)
+
+The Catalog Service is responsible for managing products, categories, and reviews.
+
+#### API Endpoints
+
+- **Products**
+  - `GET /api/products`: List all products.
+  - `GET /api/products/:id`: Get a specific product.
+  - `POST /api/products`: Create a new product (Admin only).
+  - `PATCH /api/products/:id`: Update a product (Admin only).
+  - `DELETE /api/products/:id`: Delete a product (Admin only).
+- **Categories**
+  - `GET /api/categories`: List all categories.
+  - `GET /api/categories/:id`: Get a specific category.
+  - `POST /api/categories`: Create a new category (Admin only).
+  - `PATCH /api/categories/:id`: Update a category (Admin only).
+  - `DELETE /api/categories/:id`: Delete a category (Admin only).
+- **Reviews**
+  - `GET /api/reviews`: List all reviews for a product.
+  - `POST /api/reviews`: Create a new review.
+  - `PATCH /api/reviews/:id`: Update a review.
+  - `DELETE /api/reviews/:id`: Delete a review.
+
+### Cart Service (`cart`)
+
+The Cart Service is responsible for managing shopping carts.
+
+#### API Endpoints
+
+- `GET /api/cart`: Get the current user's cart.
+- `POST /api/cart`: Add an item to the cart.
+- `PATCH /api/cart/:productId`: Update the quantity of an item in the cart.
+- `DELETE /api/cart/:productId`: Remove an item from the cart.
+- `DELETE /api/cart`: Clear the cart.
+
+### Orders Service (`orders`)
+
+The Orders Service is responsible for managing orders and payments.
+
+#### API Endpoints
+
+- **Customer**
+  - `GET /api/orders`: List all orders for the current user.
+  - `GET /api/orders/:id`: Get a specific order.
+  - `POST /api/orders`: Create a new order.
+  - `POST /api/orders/:id/cancel`: Cancel an order.
+- **Admin**
+  - `GET /api/admin/orders`: List all orders.
+  - `PATCH /api/admin/orders/:id/status`: Update the status of an order.
+- **Webhook**
+  - `POST /api/orders/webhook`: Handle Stripe webhooks.
+
+### Invoice Service (`invoice`)
+
+The Invoice Service is responsible for generating and storing invoices.
+
+#### API Endpoints
+
+- `GET /api/invoice/download/:orderId`: Download the invoice for a specific order.
+
+### Email Service (`email`)
+
+The Email Service is a worker service that is responsible for sending emails. It does not have any API endpoints other than a health check. It consumes events from the event bus and sends emails accordingly (e.g., when a user registers or an order is placed).
+
+## Shared Packages
+
+### Common (`@ecommerce/common`)
+
+This package contains a rich set of reusable components that are shared across all microservices. This includes:
+
+- **Custom Errors:** A set of custom error classes for consistent error handling.
+- **Middlewares:** Express middlewares for handling errors and authenticating users.
+- **Services:** Common services for logging, Redis, circuit breaking, and event bus communication (RabbitMQ).
+- **Outbox Processor:** A reliable way to publish events in a distributed system.
+- **Utilities:** A variety of utility functions.
+- **Types:** Shared TypeScript types.
+
+### Storage Service (`@ecommerce/storage-service`)
+
+This package provides a high-level abstraction for managing file uploads to a cloud storage service (e.g., AWS S3). It is used by the `identity` and `catalog` services to handle profile pictures and product images.
+
+## Local Development
+
+To run the application locally, you will need to have Docker and Docker Compose installed.
+
+1.  **Clone the repository:**
+    ```bash
+    git clone <repository-url>
+    ```
+2.  **Install dependencies:**
+    ```bash
+    pnpm install
+    ```
+3.  **Set up the environment:**
+    - Create a `.env` file for each service in the `apps` directory, based on the `.env.example` files.
+4.  **Start the application:**
+    ```bash
+    docker-compose up -d
+    ```
+
+This will start all the services, as well as the required infrastructure (PostgreSQL, Redis, and RabbitMQ).
+
+## Deployment
+
+The application is designed to be deployed to a Kubernetes cluster. The `/infra/k8s` directory contains the Kubernetes manifests for all the services and infrastructure.
+
+The project uses [Skaffold](https://skaffold.dev/) for a streamlined development and deployment experience on Kubernetes. The `skaffold.yaml` file defines the build and deployment pipeline.
+
+To deploy the application to a Kubernetes cluster, you can use the following command:
+
+```bash
+skaffold run
 ```
 
-### Applications
-
-- **api-gateway**: The main entry point for all incoming API requests. It routes requests to the appropriate microservice.
-- **catalog**: Manages the product catalog.
-- **identity**: Handles user authentication, authorization, and user-related information.
-- **orders**: Manages customer orders.
-
-### Packages
-
-- **common**: A shared package containing common code such as error handlers, middlewares, types, and utility functions.
-- **database-config**: Contains shared database configurations.
-- **tsconfig**: Contains the base TypeScript configuration for the entire monorepo.
-
-## Build System
-
-This monorepo uses [Turborepo](https://turbo.build/) to manage the build process. The build pipeline is defined in `turbo.json`. The main scripts are:
-
-- `pnpm build`: Builds all the applications and packages.
-- `pnpm dev`: Runs all the applications in development mode.
-- `pnpm lint`: Lints the codebase.
-
-```json
-{
-  "$schema": "https://turbo.build/schema.json",
-  "pipeline": {
-    "build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
-    },
-    "dev": {
-      "cache": false,
-      "persistent": true
-    },
-    "lint": {}
-  }
-}
-```
-
-## TypeScript Configuration
-
-The project uses TypeScript for type safety. The configuration is split into a base configuration and application-specific configurations.
-
-### Base Configuration
-
-The base TypeScript configuration is located at `packages/tsconfig/base.json`. It provides a solid foundation for all the other `tsconfig.json` files in the monorepo.
-
-```json
-{
-  "compilerOptions": {
-    "target": "ES2020",
-    "module": "commonjs",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "declaration": true,
-    "composite": true
-  }
-}
-```
-
-### Application Configurations
-
-Each application and package has its own `tsconfig.json` file that extends the base configuration. This allows for specific configurations for each part of the monorepo.
-
-#### `apps/api-gateway/tsconfig.json`
-
-```json
-{
-  "extends": "../../packages/tsconfig/base.json",
-  "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "typeRoots": ["./node_modules/@types", "../../packages/common/src/types"]
-  },
-  "include": ["src/**/*"]
-}
-```
-
-This configuration specifies that the output directory is `dist`, the root directory for source files is `src`, and it includes custom type definitions from the `common` package.
-
-#### `apps/identity/tsconfig.json`
-
-```json
-{
-  "extends": "../../packages/tsconfig/base.json",
-  "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "typeRoots": [
-      "./node_modules/@types",
-      "../../packages/common/src/types",
-      "./src/types"
-    ]
-  },
-  "include": ["src/**/*"]
-}
-```
-
-Similar to the `api-gateway`, this configuration sets the output and root directories. It also includes type definitions from the `common` package and its own `src/types` directory.
-
-#### `packages/common/tsconfig.json`
-
-```json
-{
-  "extends": "../../packages/tsconfig/base.json",
-  "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src"
-  },
-  "include": ["src/**/*"]
-}
-```
-
-This is a straightforward extension of the base configuration, setting the output and root directories for the `common` package.
-
-uploads/user-profile/j4rKZSmvgc3gCaQpHJrTenVdHBlKtL4Y/1768734514868-36205.webp
-uploads/user-profile/j4rKZSmvgc3gCaQpHJrTenVdHBlKtL4Y/1768734662943-64598.webp
+This will build the Docker images, push them to a registry, and deploy the application to the cluster.
