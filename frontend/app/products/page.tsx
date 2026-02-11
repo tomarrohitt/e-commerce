@@ -1,6 +1,8 @@
 import { getCategories, getProducts } from "@/lib/services/product-cached";
 import { ProductWrapper } from "./_components/products-wrapper";
 import ProductListClient from "./_components/product-list-client";
+import ProductsNotFound from "./_components/products-not-found";
+
 import { Category } from "@/types";
 
 type Props = {
@@ -35,7 +37,12 @@ export default async function ProductsPage(props: Props) {
     maxPrice,
   });
 
-  if (!products.length) return <div>Not Found</div>;
+  if (!products.length)
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <ProductsNotFound />
+      </div>
+    );
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-orange-50 to-slate-100">

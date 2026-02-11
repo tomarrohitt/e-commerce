@@ -42,7 +42,6 @@ export const createOrder = async (data: CreateOrderInput) => {
     const json = await res.json();
     const user = await getUserFromSession();
 
-    revalidateTag(`cart-count-${user!.id}`);
     revalidateTag(`orders-summary-${user!.id}`);
     orderId = json.data.orderId;
   } catch (error) {
