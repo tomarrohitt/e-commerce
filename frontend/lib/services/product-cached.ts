@@ -23,24 +23,14 @@ export async function getProducts(params?: {
   sortOrder?: "desc" | "asc" | undefined;
 }): Promise<PaginatedProducts> {
   const q = buildQuery(params);
-  const res = await baseApi<ProductsListResponse>(`/products${q}`, {
-    cache: "force-cache",
-    next: {
-      tags: ["products"],
-    },
-  });
+  const res = await baseApi<ProductsListResponse>(`/products${q}`);
 
   const json = await res.json();
   return json.data;
 }
 
 export async function getProduct(id: string): Promise<Product> {
-  const res = await baseApi<{ data: Product }>(`/products/${id}`, {
-    cache: "force-cache",
-    next: {
-      tags: [`product-${id}`],
-    },
-  });
+  const res = await baseApi<{ data: Product }>(`/products/${id}`);
   const json = await res.json();
   return json.data;
 }

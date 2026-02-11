@@ -16,10 +16,7 @@ export async function getCart(): Promise<Cart> {
 }
 
 export const getCartCount = cache(async () => {
-  const res = await api("/cart/count", {
-    cache: "force-cache",
-    next: { tags: [`cart-count-${(await getUserFromSession())!.id}`] },
-  });
+  const res = await api("/cart/count");
 
   if (!res.ok) {
     const err = await res.json();

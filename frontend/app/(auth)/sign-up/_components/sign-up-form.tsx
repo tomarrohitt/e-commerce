@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { register } from "@/actions/auth";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Loader2 } from "lucide-react";
 
 const initialState = {
   success: false,
@@ -90,7 +91,14 @@ export const SignUpForm = () => {
         disabled={pending}
         className="w-full bg-blue-500 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 disabled:opacity-70 flex items-center justify-center"
       >
-        {pending ? "Creating account…" : "Create account"}
+        {pending ? (
+          <>
+            <Loader2 className="size-5 animate-spin" />
+            Creating account…
+          </>
+        ) : (
+          "Create account"
+        )}
       </button>
     </form>
   );
