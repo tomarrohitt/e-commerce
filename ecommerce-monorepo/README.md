@@ -1,36 +1,63 @@
-Getting Started
-Follow these steps to set up and run the application locally.
+Here’s your setup guide rewritten so a developer can follow it without squinting or guessing.
 
-1. Clone the Repository
-Bash
+🚀 Local Setup Guide
 
+This project is a microservices-based e-commerce system. You will:
+
+Clone the repo
+
+Configure environment variables
+
+Start infrastructure (DB, cache, broker)
+
+Run the unified setup script
+
+If you skip steps or half-configure secrets, things will break. Follow the order.
+
+1️⃣ Clone the Repository
 git clone https://github.com/tomarrohitt/e-commerce ecommerce-microservice
 cd ecommerce-microservice
-2. Environment Configuration
-You need to set up the environment variables for each service. You can rename the example files in one shot using the following command:
 
-Bash
+2️⃣ Configure Environment Variables
 
-# Linux/macOS
-for dir in apps/*; do
-  if [ -f "$dir/.env.example" ]; then
-    cp "$dir/.env.example" "$dir/.env"
-  fi
+Each service has its own .env file.
+
+Instead of manually copying them one by one, run:
+
+# Linux / macOS
+
+for dir in apps/\*; do
+if [ -f "$dir/.env.example" ]; then
+cp "$dir/.env.example" "$dir/.env"
+fi
 done
-Required Secrets
-For full functionality (image uploads, emails, payments), you must populate the following secrets in the .env files for the Identity, Catalog, Invoice, and Email services.
 
-AWS (S3 for Image Uploads)
+Now edit the .env files and fill in the required secrets.
 
-Bash
+If you leave required secrets empty, related features will fail.
+
+🔐 Required Secrets
+
+These are mandatory for full functionality.
+
+AWS S3 (Image Uploads)
+
+Used by: Identity, Catalog, Invoice services.
 
 AWS_REGION=your_region
 AWS_BUCKET_NAME=your_bucket_name
 AWS_ACCESS_KEY_ID=your_access_key
 AWS_SECRET_ACCESS_KEY=your_secret_key
+
+Without this:
+
+Profile image upload will fail
+
+Product image upload will fail
+
 SMTP (Email Service)
 
-Bash
+Used by: Email service.
 
 SMTP_HOST=smtp-relay.brevo.com
 SMTP_SECURE=false
@@ -38,62 +65,158 @@ SMTP_PORT=587
 SMTP_USER=your_smtp_user
 SMTP_PASS=your_smtp_password
 SMTP_FROM=your_verified_sender_email
+
+Without this:
+
+Registration emails won’t send
+
+Order confirmation emails won’t send
+
 Stripe (Payments)
 
-Bash
+Used by: Orders service.
 
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-STRIPE_PUBLISHABLE_KEY=pk_test_...
-3. Start Infrastructure
-Spin up the required infrastructure (PostgreSQL, Redis, RabbitMQ) using Docker Compose. This command does not start the application services, only the backing services.
+STRIPE*SECRET_KEY=sk_test*...
+STRIPE*WEBHOOK_SECRET=whsec*...
+STRIPE*PUBLISHABLE_KEY=pk_test*...
 
-Bash
+Without this:
 
-# Run from the root of the monorepo
+Checkout won’t work
+
+Webhooks will fail
+
+Orders won’t confirm properly
+
+3️⃣ Start Infrastructure
+
+This project depends on:
+
+PostgreSQL
+
+Redis
+
+RabbitMQ
+
+Start them with Docker:
+
 docker compose up -d postgres redis rabbitmq
-Note: You can also configure the services to point to your own managed database/broker instances by updating the .env files.
 
-4. Install & Run
-We use a unified setup script to install dependencies, generate Prisma clients, deploy database migrations, build shared packages, and start the application.
+Important:
 
-Bash
+This does NOT start application services.
+
+It only starts infrastructure.
+
+You can point services to managed cloud instances instead by editing .env.
+
+4️⃣ Install and Run Everything
+
+Run the unified setup script from the project root:
 
 pnpm run setup
-The services will start on ports 4000 through 4005 and 5000.
 
-API Documentation
-API Gateway (api-gateway)
-The single entry point for all client requests.
+This script will:
 
-Identity Service (identity)
-Auth: /api/auth/sign-up/email, /api/auth/sign-in/email, /api/auth/logout, /api/auth/refresh-token
+Install all dependencies
 
-Profile: /api/user/profile (GET/PATCH), /api/user/get-upload-url (S3)
+Generate Prisma clients
 
-Addresses: /api/addresses (CRUD), /api/addresses/:id/default
+Run database migrations
 
-Admin: /api/admin/users (CRUD)
+Build shared packages
 
-Catalog Service (catalog)
-Products: /api/products (CRUD)
+Start all services
 
-Categories: /api/categories (CRUD)
+If this fails, don’t retry blindly. Read the error. It’s almost always:
 
-Reviews: /api/reviews (CRUD)
+Missing env variable
 
-Cart Service (cart)
-Cart: /api/cart (GET/POST/DELETE), /api/cart/:productId (PATCH/DELETE)
+Database not running
 
-Orders Service (orders)
-Orders: /api/orders (Create/List/Cancel)
+Port conflict
 
-Admin: /api/admin/orders (List/Status Update)
+🌐 Service Ports
 
-Webhooks: /api/orders/webhook (Stripe)
+After successful startup, services will run on:
 
-Invoice Service (invoice)
-Download: /api/invoice/download/:orderId
+4000 – 4005
+5000
 
-Email Service (email)
-A worker service that consumes events (User Registered, Order Placed) from RabbitMQ to send emails.
+📚 API Overview
+API Gateway
+
+Single entry point for all client requests.
+
+Identity Service
+
+Auth:
+
+POST /api/auth/sign-up/email
+POST /api/auth/sign-in/email
+POST /api/auth/logout
+POST /api/auth/refresh-token
+
+Profile:
+
+GET /api/user/profile
+PATCH /api/user/profile
+GET /api/user/get-upload-url
+
+Addresses:
+
+CRUD /api/addresses
+PATCH /api/addresses/:id/default
+
+Admin:
+
+CRUD /api/admin/users
+
+Catalog Service
+CRUD /api/products
+CRUD /api/categories
+CRUD /api/reviews
+
+Cart Service
+GET /api/cart
+POST /api/cart
+DELETE /api/cart
+PATCH /api/cart/:productId
+DELETE /api/cart/:productId
+
+Orders Service
+POST /api/orders
+GET /api/orders
+POST /api/orders/cancel
+GET /api/admin/orders
+PATCH /api/admin/orders
+POST /api/orders/webhook (Stripe)
+
+Invoice Service
+GET /api/invoice/download/:orderId
+
+Email Service
+
+Background worker consuming RabbitMQ events:
+
+User Registered
+
+Order Placed
+
+No public HTTP API.
+
+✅ Final Checklist Before Running
+
+Docker running
+
+All .env files populated
+
+Stripe keys valid
+
+AWS bucket exists
+
+SMTP credentials verified
+
+Ports 4000–4005 and 5000 free
+
+If all that’s correct, the system will boot cleanly.
