@@ -56,23 +56,20 @@ cd ecommerce-microservice
 
 The backend services run in Docker containers and are managed via `docker-compose`.
 
-````bash
+```bash
 # Navigate to the backend monorepo
 cd ecommerce-monorepo
 
 # Copy the example environment file. You may need to do this for each service in apps/*
 # For example:
-```bash
 # cp apps/api-gateway/.env.example apps/api-gateway/.env
 # cp apps/cart/.env.example apps/cart/.env
 # cp apps/catalog/.env.example apps/catalog/.env
-````
 
 # ... and so on for all services.
 
-# Instead of manually copying them one by one, run:
+Instead of manually copying them one by one, run:
 
-```bash
 # Linux / macOS
 for dir in apps/*; do
   if [ -f "$dir/.env.example" ]; then
