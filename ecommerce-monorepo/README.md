@@ -1,6 +1,6 @@
 Here’s your setup guide rewritten so a developer can follow it without squinting or guessing.
 
-🚀 Local Setup Guide
+Local Setup Guide
 
 This project is a microservices-based e-commerce system. You will:
 
@@ -15,8 +15,9 @@ Run the unified setup script
 If you skip steps or half-configure secrets, things will break. Follow the order.
 
 1️⃣ Clone the Repository
-git clone https://github.com/tomarrohitt/e-commerce ecommerce-microservice
-cd ecommerce-microservice
+
+````git clone https://github.com/tomarrohitt/e-commerce ecommerce-microservice
+cd ecommerce-microservice```
 
 2️⃣ Configure Environment Variables
 
@@ -220,3 +221,4 @@ SMTP credentials verified
 Ports 4000–4005 and 5000 free
 
 If all that’s correct, the system will boot cleanly.
+````
