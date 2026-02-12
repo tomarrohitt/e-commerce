@@ -19,7 +19,7 @@ async function start() {
 
     app.get("/api/email/health", healthCheck);
     app.listen(PORT, () => {
-      console.log(`📧 Email Service running on ${PORT}`);
+      console.log(`Email Service running on ${PORT}`);
     });
   } catch (error) {
     console.error("Email Service failed to start:", error);
