@@ -68,7 +68,7 @@ cd ecommerce-monorepo
 
 # ... and so on for all services.
 
-Instead of manually copying them one by one, run:
+# Instead of manually copying them one by one, run:
 
 # Linux / macOS
 for dir in apps/*; do
