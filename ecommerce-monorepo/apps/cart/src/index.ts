@@ -42,9 +42,7 @@ async function start() {
       app.use(errorHandler);
 
       app.listen(PORT, () => {
-        console.log(
-          `🚀 SKAFFOLD IS WORKING! 🛒 Cart API running on port ${PORT}`,
-        );
+        console.log(`Cart API running on port ${PORT}`);
       });
     }
   } catch (err) {

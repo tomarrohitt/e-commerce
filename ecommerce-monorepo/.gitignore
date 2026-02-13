@@ -4,6 +4,5 @@ build/
 .out/
 .turbo/
 .env
-.env.*
 .prisma/
 generated/

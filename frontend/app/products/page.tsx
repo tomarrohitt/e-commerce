@@ -4,6 +4,7 @@ import ProductListClient from "./_components/product-list-client";
 import ProductsNotFound from "./_components/products-not-found";
 
 import { Category } from "@/types";
+import ProductsNotFound from "./_components/products-not-found";
 
 type Props = {
   searchParams: Promise<{
