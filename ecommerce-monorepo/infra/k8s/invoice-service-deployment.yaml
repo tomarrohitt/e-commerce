@@ -23,14 +23,6 @@ spec:
     spec:
       imagePullSecrets:
         - name: ocir-secret
-      initContainers:
-        - name: prisma-migrate
-          image: iad.ocir.io/idgxrtixsdtd/ecommerce:invoice
-          imagePullPolicy: Always
-          command: ["npx", "prisma", "migrate", "deploy"]
-          env:
-            - name: DATABASE_URL
-              value: "postgresql://postgres:password@postgres-service:5432/invoice"
       containers:
         - name: invoice-service
           image: iad.ocir.io/idgxrtixsdtd/ecommerce:invoice

@@ -1,4 +1,5 @@
 apiVersion: networking.k8s.io/v1
+
 kind: Ingress
 metadata:
   name: ecommerce-ingress
@@ -10,27 +11,27 @@ metadata:
     nginx.ingress.kubernetes.io/use-gzip: "true"
     nginx.ingress.kubernetes.io/gzip-types: "application/javascript text/css application/json application/xml text/plain"
 spec:
-  ingressClassName: nginx 
+  ingressClassName: nginx
   tls:
-  - hosts:
-    - rohit-ecommerce-microservice.dedyn.io
-    secretName: ecommerce-tls-prod
+    - hosts:
+        - rohit-ecommerce-microservice.dedyn.io
+      secretName: ecommerce-tls-prod
   rules:
-  - host: rohit-ecommerce-microservice.dedyn.io
-    http:
-      paths:
-      - path: /api
-        pathType: Prefix
-        backend:
-          service:
-            name: api-gateway
-            port:
-              number: 4000
-      
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: frontend
-            port:
-              number: 80
+    - host: rohit-ecommerce-microservice.dedyn.io
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 4000
+
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80
