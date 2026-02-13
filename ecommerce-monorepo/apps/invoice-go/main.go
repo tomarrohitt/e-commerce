@@ -85,7 +85,25 @@ func main() {
 	handler := invoice.NewHandler(invoiceRepo, outboxRepo, s3Service)
 
 	mux := http.NewServeMux()
+
 	mux.HandleFunc("/api/invoice/download/", handler.DownloadInvoice)
+
+	mux.HandleFunc("/api/invoice/health", func(w http.ResponseWriter, r *http.Request) {
+		if err := db.Ping(r.Context()); err != nil {
+			log.Printf("[Health] Postgres ping failed: %v", err)
+			http.Error(w, "Database down", http.StatusServiceUnavailable)
+			return
+		}
+
+		if !bus.IsHealthy() {
+			log.Printf("[Health] RabbitMQ connection is closed")
+			http.Error(w, "RabbitMQ down", http.StatusServiceUnavailable)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
 
 	server := &http.Server{
 		Addr:    ":" + strconv.Itoa(cfg.Port),

@@ -118,3 +118,7 @@ func (e *EventBus) Close() {
 	}
 	log.Println("[RabbitMQ] Connection closed")
 }
+
+func (e *EventBus) IsHealthy() bool {
+	return e.conn != nil && !e.conn.IsClosed()
+}
