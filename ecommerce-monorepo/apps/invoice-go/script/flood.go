@@ -34,7 +34,7 @@ func main() {
 
 	log.Printf("Flooding exchange '%s' with 10000 '%s' events...", exchange, routingKey)
 
-	for i := 1; i <= 10000; i++ {
+	for i := 1; i <= 1000; i++ {
 		orderID := uuid.New().String()
 
 		event := events.OrderPaidEvent{
@@ -98,7 +98,7 @@ func main() {
 		}
 
 		// Print every 1000 to keep the terminal clean
-		if i%1000 == 0 {
+		if i%100 == 0 {
 			log.Printf("Published %d events...", i)
 		}
 	}
