@@ -1,6 +1,7 @@
 import { Cart } from "@/types";
 import { cache } from "react";
 import { api } from "@/lib/clients/server";
+import { getUserFromSession } from "@/actions/session";
 
 export async function getCart(): Promise<Cart> {
   const res = await api("/cart");
@@ -15,7 +16,10 @@ export async function getCart(): Promise<Cart> {
 }
 
 export const getCartCount = cache(async () => {
-  const res = await api("/cart/count");
+  const res = await api("/cart/count", {
+    cache: "force-cache",
+    next: { tags: [`cart-count-${(await getUserFromSession())!.id}`] },
+  });
 
   if (!res.ok) {
     const err = await res.json();

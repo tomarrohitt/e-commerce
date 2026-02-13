@@ -55,7 +55,7 @@ spec:
             - name: RABBITMQ_URL
               value: "amqp://rabbitmq:password@rabbitmq-service:5672"
             - name: AWS_REGION
-              value: "eu-north-1"
+              value: "ap-south-1"
             - name: AWS_BUCKET_NAME
               value: "ecommerce-node-microservices"
             - name: AWS_ACCESS_KEY_ID
