@@ -2,7 +2,6 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 const API_URL = process.env.INTERNAL_API_URL;
-const APP_URL = process.env.NEXT_PUBLIC_ORIGIN_URL;
 
 type SmartBody = BodyInit | Record<string, any> | null | undefined;
 
@@ -51,14 +50,13 @@ export async function api(endpoint: string, options: NextFetchOptions = {}) {
   const headersList = await headers();
   const incomingOrigin = headersList.get("origin");
 
-  const origin =
-    incomingOrigin || process.env.NEXT_PUBLIC_APP_URL || DEFAULT_ORIGIN;
+  const origin = incomingOrigin || process.env.NEXT_PUBLIC_ORIGIN_URL;
 
   if (origin) {
     finalHeaders["Origin"] = origin;
   }
 
-  const fullUrl = `${BASE_URL}${endpoint}`;
+  const fullUrl = `${API_URL}${endpoint}`;
 
   const res = await fetch(fullUrl, {
     ...rest,

@@ -1,14 +1,10 @@
 import { betterAuth } from "better-auth/minimal";
-import { openAPI } from "better-auth/plugins";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 import { authHooks } from "../middleware/validation-middleware";
 import { UserEventType } from "@ecommerce/common";
 import { dispatchUserEvent } from "../service/outbox-dispatcher";
 import { env } from "./env";
-
-
-console.log({url:env.CLIENT_URL})
 
 const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -91,7 +87,6 @@ const auth = betterAuth({
       },
     },
   },
-
 });
 
 export default auth;

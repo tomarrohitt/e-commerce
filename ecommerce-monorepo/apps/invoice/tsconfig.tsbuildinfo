@@ -1,1 +1,0 @@
-{"root":["./src/index.ts","./src/config/env.ts","./src/config/event-bus.ts","./src/config/prisma.ts","./src/controller/health-controller.ts","./src/controller/invoice-controller.ts","./src/events/invoice-consumer.ts","./src/router/invoice-router.ts","./src/services/pdf-generator.ts","./src/services/s3-service.ts"],"version":"5.9.3"}

@@ -17,8 +17,11 @@ export async function getCart(): Promise<Cart> {
 export const getCartCount = cache(async () => {
   const res = await api("/cart/count");
 
+  console.log({ res });
+
   if (!res.ok) {
     const err = await res.json();
+    console.log({ err });
     throw err;
   }
 
