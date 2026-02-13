@@ -48,6 +48,8 @@ spec:
           env:
             - name: PORT
               value: "4004"
+            - name: TAX_RATE
+              value: "0.18"
             - name: NODE_ENV
               value: "production"
             - name: DATABASE_URL

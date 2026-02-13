@@ -1,5 +1,6 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.INTERNAL_API_URL;
 const ORIGIN_URL = process.env.NEXT_PUBLIC_ORIGIN_URL;
+
 
 type SmartBody = BodyInit | Record<string, any> | null | undefined;
 
@@ -50,7 +51,7 @@ export async function baseApi<T>(
     body: normalized.body,
     headers: {
       ...normalized.headers,
-      Origin: ORIGIN_URL ?? "http://localhost:3000",
+      Origin: ORIGIN_URL ?? "https://rohit-ecommerce-microservice.dedyn.io",
     },
   });
 

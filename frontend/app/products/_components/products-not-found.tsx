@@ -39,3 +39,4 @@ const IconContainer = () => (
 );
 
 export default ProductsNotFound;
+

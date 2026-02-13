@@ -139,7 +139,7 @@ export async function logout() {
       method: "POST",
       body: {},
       headers: {
-        Origin: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+        Origin: process.env.NEXT_PUBLIC_ORIGIN_URL || "http://localhost:3000",
       },
     });
   } catch (error) {}

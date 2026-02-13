@@ -7,6 +7,9 @@ import { UserEventType } from "@ecommerce/common";
 import { dispatchUserEvent } from "../service/outbox-dispatcher";
 import { env } from "./env";
 
+
+console.log({url:env.CLIENT_URL})
+
 const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
@@ -89,7 +92,6 @@ const auth = betterAuth({
     },
   },
 
-  plugins: [openAPI()],
 });
 
 export default auth;

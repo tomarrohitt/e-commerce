@@ -1,4 +1,4 @@
-const API_URL = process.env.SERVER_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type SmartBody = BodyInit | Record<string, any> | null | undefined;
 

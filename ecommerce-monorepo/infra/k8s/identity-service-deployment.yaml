@@ -59,9 +59,9 @@ spec:
             - name: BASE_URL
               value: "http://api-gateway:4000"
             - name: CLIENT_URL
-              value: "https://rohit-ecommerce-microservice.vercel.app"
+              value: "https://rohit-ecommerce-microservice.dedyn.io"
             - name: AWS_REGION
-              value: "eu-north-1"
+              value: "ap-south-1"
             - name: AWS_BUCKET_NAME
               value: "ecommerce-node-microservices"
             - name: INTERNAL_SERVICE_SECRET

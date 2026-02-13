@@ -1,6 +1,8 @@
 import { getCategories, getProducts } from "@/lib/services/product-cached";
 import { ProductWrapper } from "./_components/products-wrapper";
 import ProductListClient from "./_components/product-list-client";
+import ProductsNotFound from "./_components/products-not-found";
+
 import { Category } from "@/types";
 import ProductsNotFound from "./_components/products-not-found";
 

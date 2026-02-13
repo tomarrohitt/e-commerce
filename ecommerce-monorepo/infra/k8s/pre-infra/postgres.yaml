@@ -18,7 +18,7 @@ kind: Deployment
 metadata:
   name: postgres
 spec:
-  replicas: 1 # Databases usually run as singletons unless using StatefulSets
+  replicas: 1 
   selector:
     matchLabels:
       app: postgres
@@ -48,13 +48,13 @@ spec:
             - name: init-script
               mountPath: /docker-entrypoint-initdb.d
             - name: storage
-              mountPath: /var/lib/postgresql/data # 👈 Maps disk to DB data
+              mountPath: /var/lib/postgresql/data 
       volumes:
         - name: init-script
           configMap:
             name: postgres-init-script
         - name: storage
-          persistentVolumeClaim: # 👈 Connects to the PVC above
+          persistentVolumeClaim: 
             claimName: postgres-pvc
 
 ---

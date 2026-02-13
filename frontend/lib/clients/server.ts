@@ -1,10 +1,8 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
-
-const DEFAULT_ORIGIN =
-  process.env.NEXT_PUBLIC_ORIGIN_URL || "http://localhost:3000";
+const API_URL = process.env.INTERNAL_API_URL;
+const APP_URL = process.env.NEXT_PUBLIC_ORIGIN_URL;
 
 type SmartBody = BodyInit | Record<string, any> | null | undefined;
 

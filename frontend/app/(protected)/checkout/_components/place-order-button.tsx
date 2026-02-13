@@ -7,6 +7,7 @@ import { useCheckout } from "@/contexts/checkout-context";
 import { useTransition } from "react";
 import { createOrder } from "@/actions/order";
 import { toast } from "sonner";
+import { clearCart } from "@/actions/cart";
 
 export const PlaceOrderButton = ({
   cart,
@@ -53,6 +54,7 @@ export const PlaceOrderButton = ({
         totalAmount: cart.totalAmount,
       };
 
+      await clearCart();
       await createOrder(orderData);
     });
   };
