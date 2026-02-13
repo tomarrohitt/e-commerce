@@ -3,7 +3,6 @@ import {
   ProductEventType,
   StockChangedEvent,
 } from "@ecommerce/common";
-import { env } from "../config/env";
 import { redis } from "../config/redis";
 
 export class InventorySyncConsumer {

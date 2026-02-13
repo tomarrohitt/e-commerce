@@ -1,0 +1,29 @@
+# Binaries
+/bin/
+/build/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go build artifacts
+*.test
+*.out
+
+# Dependency directories (if ever used)
+vendor/
+
+# IDE files
+.vscode/
+.idea/
+
+# OS junk
+.DS_Store
+
+# Environment files
+.env
+.env.*
+
+# Logs
+*.log

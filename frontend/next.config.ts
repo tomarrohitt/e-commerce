@@ -1,8 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  compress: false,
   output: "standalone",
+  compress: false,
   images: {
     remotePatterns: [
       {

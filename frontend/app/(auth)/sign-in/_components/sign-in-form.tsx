@@ -91,7 +91,7 @@ export const SignInForm = () => {
       >
         {pending ? (
           <>
-                        <Loader2 className="size-5 animate-spin" />
+            <Loader2 className="size-5 animate-spin mr-2" />
 
             Signing in…
           </>

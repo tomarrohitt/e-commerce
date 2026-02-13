@@ -57,7 +57,6 @@ class OrderController {
     return sendSuccess(res, result);
   }
 
-  // POST /api/orders/:id/cancel
   async cancelOrder(req: Request, res: Response) {
     const updatedOrder = await orderService.cancelOrder(
       req.params.id,
@@ -113,6 +112,8 @@ class OrderController {
                     userEmail: order.userEmail,
                     userName: order.userName,
                     totalAmount: Number(order.totalAmount),
+                    subtotal: Number(order.subtotal),
+                    taxedAmount: Number(order.tax),
                     paymentId: paymentId,
                     items: order.items.map((item) => ({
                       productId: item.productId,

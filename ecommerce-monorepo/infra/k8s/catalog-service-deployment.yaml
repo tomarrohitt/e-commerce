@@ -61,11 +61,11 @@ spec:
             - name: BASE_URL
               value: "http://api-gateway:4000"
             - name: CLIENT_URL
-              value: "http://localhost:3000"
+              value: "https://rohit-ecommerce-microservice.vercel.app"
             - name: BETTER_AUTH_URL
               value: "http://identity-service:4001/api/v1/auth"
             - name: AWS_REGION
-              value: "eu-north-1"
+              value: "ap-south-1"
             - name: AWS_BUCKET_NAME
               value: "ecommerce-node-microservices"
             - name: AWS_ACCESS_KEY_ID

@@ -1,10 +1,5 @@
 import express from "express";
-import {
-  errorHandler,
-  EventBusService,
-  OutboxProcessor,
-  sendSuccess,
-} from "@ecommerce/common";
+import { errorHandler, OutboxProcessor } from "@ecommerce/common";
 import { env } from "./config/env";
 import { InvoiceConsumer } from "./events/invoice-consumer";
 import { prisma } from "./config/prisma";

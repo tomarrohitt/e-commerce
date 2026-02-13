@@ -51,13 +51,16 @@ export async function api(endpoint: string, options: NextFetchOptions = {}) {
   const headersList = await headers();
   const incomingOrigin = headersList.get("origin");
 
-  const origin = incomingOrigin || APP_URL;
+  const origin =
+    incomingOrigin || process.env.NEXT_PUBLIC_APP_URL || DEFAULT_ORIGIN;
 
   if (origin) {
     finalHeaders["Origin"] = origin;
   }
 
-  const res = await fetch(`${API_URL}${endpoint}`, {
+  const fullUrl = `${BASE_URL}${endpoint}`;
+
+  const res = await fetch(fullUrl, {
     ...rest,
     headers: finalHeaders,
     body: finalBody,
