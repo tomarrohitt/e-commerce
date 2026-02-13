@@ -30,8 +30,6 @@ export class OutboxProcessor implements IOutboxProcessor {
     this.logger = LoggerFactory.create("OutboxProcessor");
   }
 
-  // ... start/stop/isRunning methods remain the same ...
-
   async start(): Promise<void> {
     if (this.running) {
       this.logger.warn("Outbox processor already running");

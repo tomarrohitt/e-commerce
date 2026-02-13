@@ -280,14 +280,11 @@ class OrderRepository {
   }
   async updateInvoiceUrl(id: string, invoiceUrl: string) {
     return await safeQuery(
-      async () => {
-        return await prisma.$transaction(async (tx) => {
-          const order = await tx.order.update({
-            where: { id },
-            data: { invoiceUrl },
-          });
-        });
-      },
+      () =>
+        prisma.order.update({
+          where: { id },
+          data: { invoiceUrl },
+        }),
       { model: "Order", operation: "updateStatus" },
     );
   }

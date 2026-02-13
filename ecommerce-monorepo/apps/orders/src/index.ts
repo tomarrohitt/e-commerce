@@ -2,13 +2,7 @@ import "dotenv/config";
 import "express-async-errors";
 
 import express from "express";
-import {
-  currentUser,
-  errorHandler,
-  EventBusService,
-  OutboxProcessor,
-  sendSuccess,
-} from "@ecommerce/common";
+import { currentUser, errorHandler, OutboxProcessor } from "@ecommerce/common";
 import { prisma } from "./config/prisma";
 import { env } from "./config/env";
 import orderRouter from "./router/order-router";
