@@ -12,43 +12,15 @@ const prisma = new PrismaClient({ adapter });
 
 const users = [
   {
-    name: "Alice Admin",
-    email: "alice.admin@fermiro.com",
-    password: "Tomarrohit@12",
+    name: "Admin",
+    email: "admin@rohit.com",
+    password: "Tomarrohit@241",
     role: "admin",
-  },
-  {
-    name: "Bob Admin",
-    email: "bob.admin@fermiro.com",
-    password: "Tomarrohit@12",
-    role: "admin",
-  },
-  {
-    name: "Charlie User",
-    email: "charlie.user@fermiro.com",
-    password: "Tomarrohit@12",
-    role: "user",
-  },
-  {
-    name: "Dave User",
-    email: "dave.user@fermiro.com",
-    password: "Tomarrohit@12",
-    role: "user",
-  },
-  {
-    name: "Eve User",
-    email: "eve.user@fermiro.com",
-    password: "Tomarrohit@12",
-    role: "user",
+    emailVerified: true,
   },
 ];
 
-const addressTypes = ["shipping", "billing"];
-
 async function main() {
-  await prisma.user.deleteMany();
-  await prisma.address.deleteMany();
-
   console.log("🌱 Starting User & Address Seeding via Gateway...");
 
   for (const user of users) {

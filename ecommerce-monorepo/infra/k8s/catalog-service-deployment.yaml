@@ -65,7 +65,7 @@ spec:
             - name: BETTER_AUTH_URL
               value: "http://identity-service:4001/api/v1/auth"
             - name: AWS_REGION
-              value: "eu-north-1"
+              value: "ap-south-1"
             - name: AWS_BUCKET_NAME
               value: "ecommerce-node-microservices"
             - name: AWS_ACCESS_KEY_ID

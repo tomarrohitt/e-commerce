@@ -39,17 +39,16 @@ export const createOrder = async (data: CreateOrderInput) => {
       throw err;
     }
 
-    const json = await res.json();
     const user = await getUserFromSession();
 
-    revalidateTag(`cart-count-${user!.id}`);
     revalidateTag(`orders-summary-${user!.id}`);
+    const json = await res.json();
+
     orderId = json.data.orderId;
   } catch (error) {
     console.error("Error creating order:", error);
     throw error;
   }
-
   redirect(`/orders/${orderId}`);
 };
 
