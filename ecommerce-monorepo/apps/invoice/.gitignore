@@ -23,7 +23,6 @@ vendor/
 
 # Environment files
 .env
-.env.*
 
 # Logs
 *.log

@@ -101,17 +101,15 @@ func (r *Repository) CreateWithEvent(ctx context.Context, inv Invoice, outboxRep
 	}
 
 	eventPayload := map[string]any{
-		"invoiceId": inv.ID,
-		"orderId":   inv.OrderID,
-		"userId":    inv.UserID,
-		"amount":    inv.Amount,
+		"invoiceUrl": inv.PDFURL,
+		"orderId":    inv.OrderID,
 	}
 
 	err = outboxRepo.InsertEvent(
 		ctx,
 		tx,
 		inv.ID,
-		"INVOICE_CREATED",
+		"invoice.generated",
 		eventPayload,
 	)
 

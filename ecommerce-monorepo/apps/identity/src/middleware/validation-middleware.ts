@@ -10,9 +10,6 @@ export const authHooks: BetterAuthOptions["hooks"] = {
     if (ctx.path === "/sign-in/email") schema = loginSchema;
     if (!schema) return;
 
-  console.log({ctx});
-  
-
     const result = schema.safeParse(ctx.body);
 
     if (!result.success) {
