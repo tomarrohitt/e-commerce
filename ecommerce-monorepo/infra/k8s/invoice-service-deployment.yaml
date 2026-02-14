@@ -93,7 +93,7 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: invoice-service
-  minReplicas: 1s
+  minReplicas: 1
   maxReplicas: 2
   metrics:
     - type: Resource
