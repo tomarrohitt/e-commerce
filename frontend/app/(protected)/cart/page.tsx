@@ -12,7 +12,7 @@ import { entranceAnim } from "@/lib/constants/enter-animation";
 export default async function CartPage() {
   const cart = await getCart();
 
-  if (!cart.items || cart.items.length === 0) {
+  if (cart.items.length === 0) {
     return <EmptyCartState />;
   }
 
