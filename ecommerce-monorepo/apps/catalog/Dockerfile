@@ -1,5 +1,6 @@
 
-FROM node:22-slim AS base
+FROM node:22-slim@sha256:7af03b14a13c8cdd38e45058fd957bf00a72bbe17feac43b1c15a689c029c732 AS base
+
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
