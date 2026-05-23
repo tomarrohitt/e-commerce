@@ -65,7 +65,14 @@ jobs:
           username: ubuntu
           key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
           script: |
-            kubectl load docker-image ecommerce-frontend:latest
+            # Save the fresh Docker image layers to a temporary tar file
+            docker save ecommerce-frontend:latest -o /tmp/ecommerce-frontend.tar
+
+            # Import that tar file directly into K3s's internal containerd cache
+            sudo k3s image import /tmp/ecommerce-frontend.tar
+
+            # Clean up the temporary file from the disk
+            rm /tmp/ecommerce-frontend.tar
 
       - name: 4. Apply Manifest & Force K3s Rollout
         uses: appleboy/ssh-action@master
