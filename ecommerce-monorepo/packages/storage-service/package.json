@@ -12,7 +12,7 @@
   },
   "scripts": {
     "dev": "tsc -b tsconfig.json --watch",
-    "build": "npx tsc --build --force",
+    "build": "pnpm exec tsc --build --force",
     "clean": "rm -rf dist"
   },
   "dependencies": {

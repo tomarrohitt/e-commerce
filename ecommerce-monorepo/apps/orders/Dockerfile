@@ -8,7 +8,6 @@ ENV NPM_CONFIG_UPDATE_NOTIFIER=false
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 RUN corepack enable && corepack prepare pnpm@10.0.0 --activate
 
-
 FROM base AS builder
 WORKDIR /app
 
@@ -32,6 +31,8 @@ RUN pnpm exec prisma generate --schema=./prisma/schema.prisma
 
 WORKDIR /app
 RUN pnpm --filter orders-service build
+
+RUN pnpm install --frozen-lockfile --prod
 
 
 FROM base AS runner
