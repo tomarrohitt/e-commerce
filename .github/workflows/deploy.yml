@@ -61,6 +61,10 @@ jobs:
           EOF
           chmod 600 ~/.kube/config
 
+          # Systematically inspect the structure without leaking sensitive credentials
+          echo "=== Kubeconfig Structure Check ==="
+          grep -E "apiVersion|kind|current-context|clusters|contexts|users|^[[:space:]]*name:" ~/.kube/config
+
       - name: Deploy to Kubernetes
         run: |
           kubectl rollout restart deployment/frontend
