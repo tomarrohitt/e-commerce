@@ -27,8 +27,6 @@ export async function login(redirectTo: string, _: any, formData: FormData) {
   const data = Object.fromEntries(formData) as LoginInput;
   const result = loginSchema.safeParse(data);
 
-  console.log({ result });
-
   if (!result.success) {
     const formattedErrors = z.treeifyError(result.error);
 
