@@ -58,18 +58,15 @@ jobs:
           RAW_KUBECONFIG: ${{ secrets.KUBECONFIG }}
         run: |
           mkdir -p ~/.kube
-
-          # Decode the single-line safe secret directly to disk with zero shell interference
           echo "$RAW_KUBECONFIG" | base64 --decode > ~/.kube/config
-
           chmod 600 ~/.kube/config
 
-          echo "=== DIAGNOSTIC: Key Indentation Count ==="
-          awk '{print length($0) - length($1), $1}' ~/.kube/config | grep -E "apiVersion|kind|current-context|clusters|contexts|users|- name"
-
       - name: Deploy to Kubernetes
+        env:
+          CLUSTER_HOST_IP: ${{ secrets.SERVER_IP }}
         run: |
-          kubectl rollout restart deployment/frontend
+          # Override the local loopback target with your actual reachable host IP address
+          kubectl rollout restart deployment/frontend --server="https://$CLUSTER_HOST_IP:6443" --insecure-skip-tls-verify=true
 
   deploy-api-gateway:
     needs: detect-changes
