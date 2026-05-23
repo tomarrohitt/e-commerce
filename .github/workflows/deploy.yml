@@ -61,11 +61,9 @@ jobs:
           echo "$RAW_KUBECONFIG" > ~/.kube/config
           chmod 600 ~/.kube/config
 
-          echo "=== DIAGNOSTIC: Current Context ==="
-          grep "current-context" ~/.kube/config
-
-          echo "=== DIAGNOSTIC: Available Context Names ==="
-          grep -A 2 "contexts:" ~/.kube/config || grep -E "\- name:" ~/.kube/config
+          echo "=== DIAGNOSTIC: Key Indentation Count ==="
+          # This counts the exact space prefixes for the core structural keys
+          awk '{print length($0) - length($1), $1}' ~/.kube/config | grep -E "apiVersion|kind|current-context|clusters|contexts|users|- name"
 
       - name: Deploy to Kubernetes
         run: |
