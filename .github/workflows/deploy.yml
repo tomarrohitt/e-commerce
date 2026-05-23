@@ -1,0 +1,241 @@
+name: Production Auto-Deploy
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      api-gateway: ${{ steps.filter.outputs.api-gateway }}
+      identity: ${{ steps.filter.outputs.identity }}
+      catalog: ${{ steps.filter.outputs.catalog }}
+      cart: ${{ steps.filter.outputs.cart }}
+      orders: ${{ steps.filter.outputs.orders }}
+      invoice: ${{ steps.filter.outputs.invoice }}
+      email: ${{ steps.filter.outputs.email }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend: 'frontend/**'
+            api-gateway: 'ecommerce-monorepo/apps/api-gateway/**'
+            cart: 'ecommerce-monorepo/apps/cart/**'
+            catalog: 'ecommerce-monorepo/apps/catalog/**'
+            email: 'ecommerce-monorepo/apps/email/**'
+            identity: 'ecommerce-monorepo/apps/identity/**'
+            invoice: 'ecommerce-monorepo/apps/invoice/**'
+            orders: 'ecommerce-monorepo/apps/orders/**'
+
+  deploy-frontend:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.frontend == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to OCIR
+        uses: docker/login-action@v3
+        with:
+          registry: iad.ocir.io
+          username: ${{ secrets.OCIR_USERNAME }}
+          password: ${{ secrets.OCIR_TOKEN }}
+
+      - name: Build & Push
+        run: |
+          cd frontend
+          docker build -t iad.ocir.io/idgxrtixsdtd/ecommerce:frontend .
+          docker push iad.ocir.io/idgxrtixsdtd/ecommerce:frontend
+
+      - name: Restart K8s Pods
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+          kubectl rollout restart deployment/frontend
+
+  deploy-api-gateway:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.api-gateway == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to OCIR
+        uses: docker/login-action@v3
+        with:
+          registry: iad.ocir.io
+          username: ${{ secrets.OCIR_USERNAME }}
+          password: ${{ secrets.OCIR_TOKEN }}
+
+      - name: Build & Push
+        run: |
+          cd ecommerce-monorepo
+          docker build -f apps/api-gateway/Dockerfile -t iad.ocir.io/idgxrtixsdtd/ecommerce:api-gateway .
+          docker push iad.ocir.io/idgxrtixsdtd/ecommerce:api-gateway
+      - name: K8s Rollout Restart
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+          kubectl rollout restart deployment/api-gateway
+
+  deploy-identity:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.identity == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to OCIR
+        uses: docker/login-action@v3
+        with:
+          registry: iad.ocir.io
+          username: ${{ secrets.OCIR_USERNAME }}
+          password: ${{ secrets.OCIR_TOKEN }}
+
+      - name: Build & Push
+        run: |
+          cd ecommerce-monorepo
+          docker build -f apps/identity/Dockerfile -t iad.ocir.io/idgxrtixsdtd/ecommerce:identity .
+          docker push iad.ocir.io/idgxrtixsdtd/ecommerce:identity
+      - name: K8s Rollout Restart
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+          kubectl rollout restart deployment/identity-service
+
+  deploy-catalog:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.catalog == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to OCIR
+        uses: docker/login-action@v3
+        with:
+          registry: iad.ocir.io
+          username: ${{ secrets.OCIR_USERNAME }}
+          password: ${{ secrets.OCIR_TOKEN }}
+
+      - name: Build & Push
+        run: |
+          cd ecommerce-monorepo
+          docker build -f apps/catalog/Dockerfile -t iad.ocir.io/idgxrtixsdtd/ecommerce:catalog .
+          docker push iad.ocir.io/idgxrtixsdtd/ecommerce:catalog
+      - name: K8s Rollout Restart
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+          kubectl rollout restart deployment/catalog-service
+
+  deploy-cart:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.cart == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to OCIR
+        uses: docker/login-action@v3
+        with:
+          registry: iad.ocir.io
+          username: ${{ secrets.OCIR_USERNAME }}
+          password: ${{ secrets.OCIR_TOKEN }}
+
+      - name: Build & Push
+        run: |
+          cd ecommerce-monorepo
+          docker build -f apps/cart/Dockerfile -t iad.ocir.io/idgxrtixsdtd/ecommerce:cart .
+          docker push iad.ocir.io/idgxrtixsdtd/ecommerce:cart
+      - name: K8s Rollout Restart
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+          kubectl rollout restart deployment/cart-service
+
+  deploy-orders:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.orders == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to OCIR
+        uses: docker/login-action@v3
+        with:
+          registry: iad.ocir.io
+          username: ${{ secrets.OCIR_USERNAME }}
+          password: ${{ secrets.OCIR_TOKEN }}
+
+      - name: Build & Push
+        run: |
+          cd ecommerce-monorepo
+          docker build -f apps/orders/Dockerfile -t iad.ocir.io/idgxrtixsdtd/ecommerce:orders .
+          docker push iad.ocir.io/idgxrtixsdtd/ecommerce:orders
+      - name: K8s Rollout Restart
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+          kubectl rollout restart deployment/orders-service
+
+  deploy-email:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.email == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to OCIR
+        uses: docker/login-action@v3
+        with:
+          registry: iad.ocir.io
+          username: ${{ secrets.OCIR_USERNAME }}
+          password: ${{ secrets.OCIR_TOKEN }}
+
+      - name: Build & Push
+        run: |
+          cd ecommerce-monorepo
+          docker build -f apps/email/Dockerfile -t iad.ocir.io/idgxrtixsdtd/ecommerce:email .
+          docker push iad.ocir.io/idgxrtixsdtd/ecommerce:email
+      - name: K8s Rollout Restart
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+          kubectl rollout restart deployment/email-service
+
+  deploy-invoice:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.invoice == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to OCIR
+        uses: docker/login-action@v3
+        with:
+          registry: iad.ocir.io
+          username: ${{ secrets.OCIR_USERNAME }}
+          password: ${{ secrets.OCIR_TOKEN }}
+
+      - name: Build & Push
+        run: |
+          cd ecommerce-monorepo
+          docker build -f apps/invoice/Dockerfile -t iad.ocir.io/idgxrtixsdtd/ecommerce:invoice .
+          docker push iad.ocir.io/idgxrtixsdtd/ecommerce:invoice
+      - name: K8s Rollout Restart
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+          kubectl rollout restart deployment/invoice-service
