@@ -56,8 +56,9 @@ jobs:
       - name: Setup Kubeconfig
         run: |
           mkdir -p ~/.kube
-          # Decode the base64 secret into a valid YAML file structure
-          echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+          cat << 'EOF' > ~/.kube/config
+          ${{ secrets.KUBECONFIG }}
+          EOF
           chmod 600 ~/.kube/config
 
       - name: Deploy to Kubernetes
