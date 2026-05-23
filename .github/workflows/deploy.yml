@@ -58,16 +58,15 @@ jobs:
           RAW_KUBECONFIG: ${{ secrets.KUBECONFIG }}
         run: |
           mkdir -p ~/.kube
-          
+
           # Read the variable securely from the safe environment context
           cat << 'EOF' > ~/.kube/config
           $RAW_KUBECONFIG
           EOF
-          
+
           chmod 600 ~/.kube/config
-          
+
           echo "=== Kubeconfig Structure Check ==="
-          # Verify that it actually wrote text to disk now
           ls -la ~/.kube/config
           head -n 5 ~/.kube/config | grep -v "data"
 
