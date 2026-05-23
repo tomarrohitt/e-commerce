@@ -41,7 +41,7 @@ export const createOrder = async (data: CreateOrderInput) => {
 
     const user = await getUserFromSession();
 
-    revalidateTag(`orders-summary-${user!.id}`);
+    revalidateTag(`orders-summary-${user!.id}`, "max");
     const json = await res.json();
 
     orderId = json.data.orderId;

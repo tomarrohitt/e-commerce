@@ -29,8 +29,8 @@ export const createReviewAction = async (_: any, formData: FormData) => {
 
   try {
     await createReview(result.data);
-    revalidateTag(`product-${productId}`);
-    revalidateTag(`reviews-${productId}`);
+    revalidateTag(`product-${productId}`, "max");
+    revalidateTag(`reviews-${productId}`, "max");
     return {
       success: true,
       message: "Review Posted",
@@ -106,8 +106,8 @@ export const updateReviewAction = async (
 
   try {
     await updateReview({ ...data, id });
-    revalidateTag(`product-${productId}`);
-    revalidateTag(`reviews-${productId}`);
+    revalidateTag(`product-${productId}`, "max");
+    revalidateTag(`reviews-${productId}`, "max");
     return {
       success: true,
       message: "Review Posted",

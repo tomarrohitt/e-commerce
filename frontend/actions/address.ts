@@ -39,8 +39,8 @@ export async function createAddress(_: any, formData: FormData) {
 
     const userId = (await getUserFromSession())!.id;
 
-    revalidateTag(`addresses-${userId}`);
-    revalidateTag(`address-count-${userId}`);
+    revalidateTag(`addresses-${userId}`, "max");
+    revalidateTag(`address-count-${userId}`, "max");
     return {
       success: true,
       errors: {
@@ -97,7 +97,7 @@ export async function updateAddress(id: string, _: any, formData: FormData) {
       const err = await res.json();
       throw err;
     }
-    revalidateTag(`addresses-${(await getUserFromSession())!.id}`);
+    revalidateTag(`addresses-${(await getUserFromSession())!.id}`, "max");
     return {
       success: true,
       message: "",
@@ -142,8 +142,8 @@ export async function deleteAddress(id: string) {
 
     const userId = (await getUserFromSession())!.id;
 
-    revalidateTag(`addresses-${userId}`);
-    revalidateTag(`address-count-${userId}`);
+    revalidateTag(`addresses-${userId}`, "max");
+    revalidateTag(`address-count-${userId}`, "max");
   } catch (error) {
     console.error("Error deleting address:", error);
   }
@@ -157,7 +157,7 @@ export async function setDefaultAddress(id: string) {
       const err = await res.json();
       throw err;
     }
-    revalidateTag(`addresses-${(await getUserFromSession())!.id}`);
+    revalidateTag(`addresses-${(await getUserFromSession())!.id}`, "max");
   } catch (error) {
     console.error("Error setting default address:", error);
   }
