@@ -4,15 +4,18 @@ import { Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTransition } from "react";
 import { clearCart } from "@/actions/cart";
+import { useRouter } from "next/navigation";
 
 const entranceAnim =
   "animate-in fade-in slide-in-from-bottom-4 duration-600 ease-out fill-mode-both";
 
 export const ClearCartButton = () => {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const handleClearCart = () => {
     startTransition(async () => {
       await clearCart();
+      router.refresh();
     });
   };
   return (

@@ -20,8 +20,8 @@ import {
   resetPasswordSchema,
 } from "@/types";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import z from "zod";
+import { redirect } from "next/navigation";
 
 export async function login(redirectTo: string, _: any, formData: FormData) {
   const data = Object.fromEntries(formData) as LoginInput;
