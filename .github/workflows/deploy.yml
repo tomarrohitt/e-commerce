@@ -61,12 +61,11 @@ jobs:
           echo "$RAW_KUBECONFIG" > ~/.kube/config
           chmod 600 ~/.kube/config
 
-          # DIAGNOSTIC ONLY: Print raw file type and exact raw text layout
-          echo "=== DEBUG: File Type ==="
-          file ~/.kube/config
+          echo "=== DIAGNOSTIC: Current Context ==="
+          grep "current-context" ~/.kube/config
 
-          echo "=== DEBUG: Raw First 5 Lines ==="
-          head -n 5 ~/.kube/config
+          echo "=== DIAGNOSTIC: Available Context Names ==="
+          grep -A 2 "contexts:" ~/.kube/config || grep -E "\- name:" ~/.kube/config
 
       - name: Deploy to Kubernetes
         run: |
