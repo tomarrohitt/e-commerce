@@ -62,11 +62,9 @@ jobs:
           chmod 600 ~/.kube/config
 
       - name: Deploy to Kubernetes
-        env:
-          CLUSTER_HOST_IP: ${{ secrets.SERVER_IP }}
         run: |
-          # Override the local loopback target with your actual reachable host IP address
-          kubectl rollout restart deployment/frontend --server="https://$CLUSTER_HOST_IP:6443" --insecure-skip-tls-verify=true
+          # Route directly across the internet to your cluster's hosting server
+          kubectl rollout restart deployment/frontend --server="https://157.151.245.174:6443" --insecure-skip-tls-verify=true --request-timeout="15s"
 
   deploy-api-gateway:
     needs: detect-changes
