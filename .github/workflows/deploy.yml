@@ -35,7 +35,7 @@ jobs:
 
   deploy-frontend:
     needs: detect-changes
-    # if: ${{ needs.detect-changes.outputs.frontend == 'true' }}
+    if: ${{ needs.detect-changes.outputs.frontend == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -46,12 +46,9 @@ jobs:
           registry: iad.ocir.io
           username: ${{ secrets.OCIR_USERNAME }}
           password: ${{ secrets.OCIR_TOKEN }}
-
-      # Sets up hardware emulation so the Intel runner can compile ARM64 binaries natively
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
-      # Initializes the advanced Docker Buildx engine required for cross-platform packaging
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 

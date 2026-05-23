@@ -1,44 +1,41 @@
-FROM node:22-slim@sha256:7af03b14a13c8cdd38e45058fd957bf00a72bbe17feac43b1c15a689c029c732 AS base
+FROM node@sha256:24dc26ef1e3c3690f27ebc4136c9c186c3133b25563ae4d7f0692e4d1fe5db0e AS base
 
-
-# 1. Install Dependencies
 FROM base AS deps
 WORKDIR /app
-COPY package.json ./
-RUN npm install --legacy-peer-deps
+COPY package.json package-lock.json ./
+RUN npm ci --legacy-peer-deps
 
-# 2. Build the App
 FROM base AS builder
 WORKDIR /app
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 ARG NEXT_PUBLIC_API_URL
-ARG INTERNAL_API_URL
 ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 ARG NEXT_PUBLIC_ORIGIN_URL
 ARG NEXT_PUBLIC_AWS_REGION
 ARG NEXT_PUBLIC_AWS_BUCKET_NAME
+ARG INTERNAL_API_URL
 
-ENV NEXT_PUBLIC_API_URL=https://rohit-ecommerce-microservice.dedyn.io/api
-ENV INTERNAL_API_URL=
-ENV NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_51SRYEnA4Mr7wN5Jm8hotlYOkMdTjvnJIEVvTj5KQMkpxdEF2BvmgW00ZKHIQHh6gGoexgMIL0d48gExR9ibCfk4U00z0tzHmNB
-ENV NEXT_PUBLIC_ORIGIN_URL=https://rohit-ecommerce-microservice.dedyn.io
-ENV NEXT_PUBLIC_AWS_REGION=ap-south-1
-ENV NEXT_PUBLIC_AWS_BUCKET_NAME=ecommerce-node-microservices
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY \
+    NEXT_PUBLIC_ORIGIN_URL=$NEXT_PUBLIC_ORIGIN_URL \
+    NEXT_PUBLIC_AWS_REGION=$NEXT_PUBLIC_AWS_REGION \
+    NEXT_PUBLIC_AWS_BUCKET_NAME=$NEXT_PUBLIC_AWS_BUCKET_NAME \
+    INTERNAL_API_URL=$INTERNAL_API_URL
 
 RUN npm run build
 
-# 3. Production Server
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV=production
-ENV PORT=3000
-ENV HOSTNAME=0.0.0.0
+ENV NODE_ENV=production \
+    PORT=3000 \
+    HOSTNAME=0.0.0.0
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 --ingroup nodejs nextjs
 
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
