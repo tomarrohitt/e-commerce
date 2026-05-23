@@ -33,238 +33,104 @@ jobs:
             invoice: 'ecommerce-monorepo/apps/invoice/**'
             orders: 'ecommerce-monorepo/apps/orders/**'
 
-  deploy-frontend:
+  deploy:
     needs: detect-changes
-    # if: ${{ needs.detect-changes.outputs.frontend == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - name: 1. Pull Latest Code on VM
+      - name: Process Monorepo Deployments Natively via SSH
         uses: appleboy/ssh-action@master
         with:
           host: 157.151.245.174
           username: ubuntu
           key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
           script: |
-            cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo
-            git pull origin main
+            # --- 1. FRONTEND SERVICE ---
+            if [ "${{ needs.detect-changes.outputs.frontend }}" = "true" ]; then
+              echo ">>> Deploying Frontend..."
+              cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && git pull origin main
+              cd /home/ubuntu/home/apps/e-commerce/frontend
+              docker build -t ecommerce-frontend:latest .
+              docker save ecommerce-frontend:latest -o /tmp/ecommerce-frontend.tar
+              sudo k3s image import /tmp/ecommerce-frontend.tar
+              rm /tmp/ecommerce-frontend.tar
+              cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo
+              kubectl apply -f infra/k8s/frontend-service-deployment.yaml
+              kubectl rollout restart deployment/frontend
+            fi
 
-      - name: 2. Native ARM64 Docker Build
-        uses: appleboy/ssh-action@master
-        with:
-          host: 157.151.245.174
-          username: ubuntu
-          key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
-          script: |
-            cd /home/ubuntu/home/apps/e-commerce/frontend
-            docker build -t ecommerce-frontend:latest .
+            # --- 2. API GATEWAY ---
+            if [ "${{ needs.detect-changes.outputs.api-gateway }}" = "true" ]; then
+              echo ">>> Deploying API Gateway..."
+              cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && git pull origin main
+              docker build -f apps/api-gateway/Dockerfile -t ecommerce-api-gateway:latest .
+              docker save ecommerce-api-gateway:latest -o /tmp/ecommerce-api-gateway.tar
+              sudo k3s image import /tmp/ecommerce-api-gateway.tar
+              rm /tmp/ecommerce-api-gateway.tar
+              kubectl rollout restart deployment/api-gateway
+            fi
 
-      - name: 3. Load Image Layers into K3s
-        uses: appleboy/ssh-action@master
-        with:
-          host: 157.151.245.174
-          username: ubuntu
-          key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
-          script: |
-            # Save the fresh Docker image layers to a temporary tar file
-            docker save ecommerce-frontend:latest -o /tmp/ecommerce-frontend.tar
+            # --- 3. IDENTITY SERVICE ---
+            if [ "${{ needs.detect-changes.outputs.identity }}" = "true" ]; then
+              echo ">>> Deploying Identity Service..."
+              cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && git pull origin main
+              docker build -f apps/identity/Dockerfile -t ecommerce-identity:latest .
+              docker save ecommerce-identity:latest -o /tmp/ecommerce-identity.tar
+              sudo k3s image import /tmp/ecommerce-identity.tar
+              rm /tmp/ecommerce-identity.tar
+              kubectl rollout restart deployment/identity-service
+            fi
 
-            # Import that tar file directly into K3s's internal containerd cache
-            sudo k3s image import /tmp/ecommerce-frontend.tar
+            # --- 4. CATALOG SERVICE ---
+            if [ "${{ needs.detect-changes.outputs.catalog }}" = "true" ]; then
+              echo ">>> Deploying Catalog Service..."
+              cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && git pull origin main
+              docker build -f apps/catalog/Dockerfile -t ecommerce-catalog:latest .
+              docker save ecommerce-catalog:latest -o /tmp/ecommerce-catalog.tar
+              sudo k3s image import /tmp/ecommerce-catalog.tar
+              rm /tmp/ecommerce-catalog.tar
+              kubectl rollout restart deployment/catalog-service
+            fi
 
-            # Clean up the temporary file from the disk
-            rm /tmp/ecommerce-frontend.tar
+            # --- 5. CART SERVICE ---
+            if [ "${{ needs.detect-changes.outputs.cart }}" = "true" ]; then
+              echo ">>> Deploying Cart Service..."
+              cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && git pull origin main
+              docker build -f apps/cart/Dockerfile -t ecommerce-cart:latest .
+              docker save ecommerce-cart:latest -o /tmp/ecommerce-cart.tar
+              sudo k3s image import /tmp/ecommerce-cart.tar
+              rm /tmp/ecommerce-cart.tar
+              kubectl rollout restart deployment/cart-service
+            fi
 
-      - name: 4. Apply Manifest & Force K3s Rollout
-        uses: appleboy/ssh-action@master
-        with:
-          host: 157.151.245.174
-          username: ubuntu
-          key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
-          script: |
-            cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo
-            kubectl apply -f infra/k8s/frontend-service-deployment.yaml
+            # --- 6. ORDERS SERVICE ---
+            if [ "${{ needs.detect-changes.outputs.orders }}" = "true" ]; then
+              echo ">>> Deploying Orders Service..."
+              cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && git pull origin main
+              docker build -f apps/orders/Dockerfile -t ecommerce-orders:latest .
+              docker save ecommerce-orders:latest -o /tmp/ecommerce-orders.tar
+              sudo k3s image import /tmp/ecommerce-orders.tar
+              rm /tmp/ecommerce-orders.tar
+              kubectl rollout restart deployment/orders-service
+            fi
 
-            kubectl rollout restart deployment/frontend
-            kubectl get pods -l app=frontend
+            # --- 7. EMAIL SERVICE ---
+            if [ "${{ needs.detect-changes.outputs.email }}" = "true" ]; then
+              echo ">>> Deploying Email Service..."
+              cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && git pull origin main
+              docker build -f apps/email/Dockerfile -t ecommerce-email:latest .
+              docker save ecommerce-email:latest -o /tmp/ecommerce-email.tar
+              sudo k3s image import /tmp/ecommerce-email.tar
+              rm /tmp/ecommerce-email.tar
+              kubectl rollout restart deployment/email-service
+            fi
 
-  deploy-api-gateway:
-    needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.api-gateway == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Login to OCIR
-        uses: docker/login-action@v3
-        with:
-          registry: iad.ocir.io
-          username: ${{ secrets.OCIR_USERNAME }}
-          password: ${{ secrets.OCIR_TOKEN }}
-
-      - name: Build & Push
-        run: |
-          cd ecommerce-monorepo
-          docker build -f apps/api-gateway/Dockerfile -t iad.ocir.io/idgxrtixsdtd/ecommerce:api-gateway .
-          docker push iad.ocir.io/idgxrtixsdtd/ecommerce:api-gateway
-      - name: K8s Rollout Restart
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
-          chmod 600 ~/.kube/config
-          kubectl rollout restart deployment/api-gateway
-
-  deploy-identity:
-    needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.identity == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Login to OCIR
-        uses: docker/login-action@v3
-        with:
-          registry: iad.ocir.io
-          username: ${{ secrets.OCIR_USERNAME }}
-          password: ${{ secrets.OCIR_TOKEN }}
-
-      - name: Build & Push
-        run: |
-          cd ecommerce-monorepo
-          docker build -f apps/identity/Dockerfile -t iad.ocir.io/idgxrtixsdtd/ecommerce:identity .
-          docker push iad.ocir.io/idgxrtixsdtd/ecommerce:identity
-      - name: K8s Rollout Restart
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
-          chmod 600 ~/.kube/config
-          kubectl rollout restart deployment/identity-service
-
-  deploy-catalog:
-    needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.catalog == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Login to OCIR
-        uses: docker/login-action@v3
-        with:
-          registry: iad.ocir.io
-          username: ${{ secrets.OCIR_USERNAME }}
-          password: ${{ secrets.OCIR_TOKEN }}
-
-      - name: Build & Push
-        run: |
-          cd ecommerce-monorepo
-          docker build -f apps/catalog/Dockerfile -t iad.ocir.io/idgxrtixsdtd/ecommerce:catalog .
-          docker push iad.ocir.io/idgxrtixsdtd/ecommerce:catalog
-      - name: K8s Rollout Restart
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
-          chmod 600 ~/.kube/config
-          kubectl rollout restart deployment/catalog-service
-
-  deploy-cart:
-    needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.cart == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Login to OCIR
-        uses: docker/login-action@v3
-        with:
-          registry: iad.ocir.io
-          username: ${{ secrets.OCIR_USERNAME }}
-          password: ${{ secrets.OCIR_TOKEN }}
-
-      - name: Build & Push
-        run: |
-          cd ecommerce-monorepo
-          docker build -f apps/cart/Dockerfile -t iad.ocir.io/idgxrtixsdtd/ecommerce:cart .
-          docker push iad.ocir.io/idgxrtixsdtd/ecommerce:cart
-      - name: K8s Rollout Restart
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
-          chmod 600 ~/.kube/config
-          kubectl rollout restart deployment/cart-service
-
-  deploy-orders:
-    needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.orders == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Login to OCIR
-        uses: docker/login-action@v3
-        with:
-          registry: iad.ocir.io
-          username: ${{ secrets.OCIR_USERNAME }}
-          password: ${{ secrets.OCIR_TOKEN }}
-
-      - name: Build & Push
-        run: |
-          cd ecommerce-monorepo
-          docker build -f apps/orders/Dockerfile -t iad.ocir.io/idgxrtixsdtd/ecommerce:orders .
-          docker push iad.ocir.io/idgxrtixsdtd/ecommerce:orders
-      - name: K8s Rollout Restart
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
-          chmod 600 ~/.kube/config
-          kubectl rollout restart deployment/orders-service
-
-  deploy-email:
-    needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.email == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Login to OCIR
-        uses: docker/login-action@v3
-        with:
-          registry: iad.ocir.io
-          username: ${{ secrets.OCIR_USERNAME }}
-          password: ${{ secrets.OCIR_TOKEN }}
-
-      - name: Build & Push
-        run: |
-          cd ecommerce-monorepo
-          docker build -f apps/email/Dockerfile -t iad.ocir.io/idgxrtixsdtd/ecommerce:email .
-          docker push iad.ocir.io/idgxrtixsdtd/ecommerce:email
-      - name: K8s Rollout Restart
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
-          chmod 600 ~/.kube/config
-          kubectl rollout restart deployment/email-service
-
-  deploy-invoice:
-    needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.invoice == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Login to OCIR
-        uses: docker/login-action@v3
-        with:
-          registry: iad.ocir.io
-          username: ${{ secrets.OCIR_USERNAME }}
-          password: ${{ secrets.OCIR_TOKEN }}
-
-      - name: Build & Push
-        run: |
-          cd ecommerce-monorepo
-          docker build -f apps/invoice/Dockerfile -t iad.ocir.io/idgxrtixsdtd/ecommerce:invoice .
-          docker push iad.ocir.io/idgxrtixsdtd/ecommerce:invoice
-      - name: K8s Rollout Restart
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
-          chmod 600 ~/.kube/config
-          kubectl rollout restart deployment/invoice-service
+            # --- 8. INVOICE SERVICE ---
+            if [ "${{ needs.detect-changes.outputs.invoice }}" = "true" ]; then
+              echo ">>> Deploying Invoice Service..."
+              cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && git pull origin main
+              docker build -f apps/invoice/Dockerfile -t ecommerce-invoice:latest .
+              docker save ecommerce-invoice:latest -o /tmp/ecommerce-invoice.tar
+              sudo k3s image import /tmp/ecommerce-invoice.tar
+              rm /tmp/ecommerce-invoice.tar
+              kubectl rollout restart deployment/invoice-service
+            fi
