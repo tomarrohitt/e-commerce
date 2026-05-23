@@ -2,7 +2,7 @@
   "name": "cart-service",
   "scripts": {
     "dev": "nodemon --exec tsx src/index.ts",
-    "build": "npx tsc --build --force",
+    "build": "pnpm exec tsc --build --force",
     "start": "node -r dotenv/config dist/index.js",
     "prisma:generate": "prisma generate --schema=prisma/schema.prisma",
     "prisma:migrate": "prisma migrate deploy",

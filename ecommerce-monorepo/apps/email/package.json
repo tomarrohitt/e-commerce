@@ -2,7 +2,7 @@
   "name": "email-service",
   "scripts": {
     "dev": "nodemon --exec tsx src/index.ts",
-    "build": "npx tsc --build --force",
+    "build": "pnpm exec tsc --build --force",
     "start": "node -r dotenv/config dist/index.js"
   },
   "private": true,
