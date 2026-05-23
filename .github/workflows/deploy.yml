@@ -54,16 +54,22 @@ jobs:
       #     docker push iad.ocir.io/idgxrtixsdtd/ecommerce:frontend
 
       - name: Setup Kubeconfig
+        env:
+          RAW_KUBECONFIG: ${{ secrets.KUBECONFIG }}
         run: |
           mkdir -p ~/.kube
+          
+          # Read the variable securely from the safe environment context
           cat << 'EOF' > ~/.kube/config
-          ${{ secrets.KUBECONFIG }}
+          $RAW_KUBECONFIG
           EOF
+          
           chmod 600 ~/.kube/config
-
-          # Systematically inspect the structure without leaking sensitive credentials
+          
           echo "=== Kubeconfig Structure Check ==="
-          grep -E "apiVersion|kind|current-context|clusters|contexts|users|^[[:space:]]*name:" ~/.kube/config
+          # Verify that it actually wrote text to disk now
+          ls -la ~/.kube/config
+          head -n 5 ~/.kube/config | grep -v "data"
 
       - name: Deploy to Kubernetes
         run: |
