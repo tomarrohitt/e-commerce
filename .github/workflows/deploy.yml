@@ -58,14 +58,16 @@ jobs:
           RAW_KUBECONFIG: ${{ secrets.KUBECONFIG }}
         run: |
           mkdir -p ~/.kube
-
-          # Force the shell to print the literal multi-line block with newlines intact
           echo "$RAW_KUBECONFIG" > ~/.kube/config
-
           chmod 600 ~/.kube/config
 
-          echo "=== Kubeconfig Structure Check ==="
-          head -n 4 ~/.kube/config
+          # DIAGNOSTIC ONLY: Print raw file type and exact raw text layout
+          echo "=== DEBUG: File Type ==="
+          file ~/.kube/config
+
+          echo "=== DEBUG: Raw First 5 Lines ==="
+          head -n 5 ~/.kube/config
+
       - name: Deploy to Kubernetes
         run: |
           kubectl rollout restart deployment/frontend
