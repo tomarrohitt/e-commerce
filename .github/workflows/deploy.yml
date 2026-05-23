@@ -53,11 +53,15 @@ jobs:
           docker build -t iad.ocir.io/idgxrtixsdtd/ecommerce:frontend .
           docker push iad.ocir.io/idgxrtixsdtd/ecommerce:frontend
 
-      - name: Restart K8s Pods
+      - name: Setup Kubeconfig
         run: |
           mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+          # Decode the base64 secret into a valid YAML file structure
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
+
+      - name: Deploy to Kubernetes
+        run: |
           kubectl rollout restart deployment/frontend
 
   deploy-api-gateway:
