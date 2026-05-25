@@ -1,6 +1,4 @@
-
 FROM node@sha256:24dc26ef1e3c3690f27ebc4136c9c186c3133b25563ae4d7f0692e4d1fe5db0e AS base
-
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -12,9 +10,7 @@ WORKDIR /app
 
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json .npmrc ./
 COPY packages/tsconfig ./packages/tsconfig
-
 COPY packages/common/package.json packages/common/tsconfig.json ./packages/common/
-
 COPY apps/cart/package.json apps/cart/tsconfig.json ./apps/cart/
 
 RUN pnpm install --frozen-lockfile
@@ -22,42 +18,34 @@ RUN pnpm install --frozen-lockfile
 COPY packages/common/src ./packages/common/src
 COPY apps/cart/src ./apps/cart/src
 COPY apps/cart/prisma ./apps/cart/prisma
-
-COPY apps/cart/prisma.config.ts ./apps/cart/prisma.config.ts 
+COPY apps/cart/prisma.config.ts ./apps/cart/prisma.config.ts
 
 RUN pnpm --filter @ecommerce/common build
 
 WORKDIR /app/apps/cart
-ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public"
-
-RUN pnpm prisma generate --schema=./prisma/schema.prisma
+RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public" \
+    pnpm prisma generate --schema=./prisma/schema.prisma
 
 WORKDIR /app
 RUN pnpm --filter cart-service build
 
-
-FROM base AS runner
+FROM node:22-alpine AS runner
 
 ENV NODE_ENV=production
-
 WORKDIR /app
 
-COPY --from=builder /app/node_modules ./node_modules
+RUN apk add --no-cache openssl libc6-compat
 
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
-
 COPY --from=builder /app/packages/common/dist ./packages/common/dist
 COPY --from=builder /app/packages/common/package.json ./packages/common/package.json
-
 COPY --from=builder /app/apps/cart/node_modules ./apps/cart/node_modules
 COPY --from=builder /app/apps/cart/dist ./apps/cart/dist
 COPY --from=builder /app/apps/cart/package.json ./apps/cart/package.json
 COPY --from=builder /app/apps/cart/prisma ./apps/cart/prisma
-COPY --from=builder /app/apps/cart/prisma.config.ts ./apps/cart/prisma.config.ts
 
 WORKDIR /app/apps/cart
-
 EXPOSE 4003
-
 CMD ["node", "dist/index.js"]
