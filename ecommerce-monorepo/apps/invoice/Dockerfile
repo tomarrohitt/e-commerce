@@ -4,10 +4,10 @@ WORKDIR /app
 
 RUN apk add --no-cache ca-certificates
 
-COPY go.mod go.sum ./
+COPY apps/invoice/go.mod apps/invoice/go.sum ./
 RUN go mod download
 
-COPY . .
+COPY apps/invoice/ .
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o invoice-service .
 
