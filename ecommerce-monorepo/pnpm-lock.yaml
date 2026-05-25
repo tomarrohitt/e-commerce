@@ -103,6 +103,9 @@ importers:
       pg:
         specifier: ^8.16.3
         version: 8.18.0
+      prisma:
+        specifier: 7.3.0
+        version: 7.3.0(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
       zod:
         specifier: ^4.1.12
         version: 4.3.6
@@ -119,9 +122,6 @@ importers:
       nodemon:
         specifier: ^3.1.1
         version: 3.1.11
-      prisma:
-        specifier: 7.3.0
-        version: 7.3.0(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
 
   apps/catalog:
     dependencies:
