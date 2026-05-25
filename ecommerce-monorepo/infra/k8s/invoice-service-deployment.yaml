@@ -43,7 +43,7 @@ spec:
             - name: NODE_ENV
               value: "production"
             - name: DATABASE_URL
-              value: "postgresql://postgres:password@postgres-service:5432/invoice"
+              value: "postgresql://postgres:password@postgres-service:5432/invoice?sslmode=disable"
             - name: RABBITMQ_URL
               value: "amqp://rabbitmq:password@rabbitmq-service:5672"
             - name: AWS_REGION
