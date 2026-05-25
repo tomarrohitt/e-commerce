@@ -1,11 +1,7 @@
 packages:
   - "apps/*"
   - "packages/*"
-
-overrides:
-  some-package: "1.0.0"
-
-packageExtensions:
-  some-package:
-    dependencies:
-      missing-dep: "*"
+allowBuilds:
+  '@prisma/engines': true
+  esbuild: true
+  prisma: true
