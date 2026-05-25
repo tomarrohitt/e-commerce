@@ -25,8 +25,8 @@ spec:
         - name: ocir-secret
       containers:
         - name: invoice-service
-          image: iad.ocir.io/idgxrtixsdtd/ecommerce:invoice
-          imagePullPolicy: Always
+          image: ecommerce-invoice:latest
+          imagePullPolicy: Never
           resources:
             requests:
               memory: "256Mi"
