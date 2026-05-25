@@ -29,23 +29,16 @@ RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public" \
 WORKDIR /app
 RUN pnpm --filter cart-service build
 
-FROM node:22-alpine AS runner
+RUN pnpm --filter cart-service deploy --prod --legacy /app/prod
+
+FROM node@sha256:2bdb65ed1dab192432bc31c95f94155ca5ad7fc1392fb7eb7526ab682fa5bf14 AS runner
 
 ENV NODE_ENV=production
 WORKDIR /app
 
 RUN apk add --no-cache openssl libc6-compat
 
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
-COPY --from=builder /app/packages/common/dist ./packages/common/dist
-COPY --from=builder /app/packages/common/package.json ./packages/common/package.json
-COPY --from=builder /app/apps/cart/node_modules ./apps/cart/node_modules
-COPY --from=builder /app/apps/cart/dist ./apps/cart/dist
-COPY --from=builder /app/apps/cart/package.json ./apps/cart/package.json
-COPY --from=builder /app/apps/cart/prisma ./apps/cart/prisma
+COPY --from=builder /app/prod .
 
-WORKDIR /app/apps/cart
 EXPOSE 4003
 CMD ["node", "dist/index.js"]
