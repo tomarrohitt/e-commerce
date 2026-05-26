@@ -1,5 +1,4 @@
 apiVersion: apps/v1
-
 kind: Deployment
 metadata:
   name: identity-service
@@ -7,7 +6,7 @@ metadata:
     app: identity
     tier: core
 spec:
-  replicas: 2
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -26,9 +25,11 @@ spec:
         - name: ocir-secret
       initContainers:
         - name: prisma-migrate
-          image: iad.ocir.io/idgxrtixsdtd/ecommerce:identity
-          imagePullPolicy: Always
-          command: ["npx", "prisma", "migrate", "deploy"]
+          image: ecommerce-identity:latest
+          imagePullPolicy: Never
+          command: ["/bin/sh", "-c"]
+          args:
+            - ./node_modules/.bin/prisma migrate deploy --schema=./prisma/schema.prisma
           env:
             - name: DATABASE_URL
               value: "postgresql://postgres:password@postgres-service:5432/identity"
@@ -118,8 +119,8 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: identity-service
-  minReplicas: 2
-  maxReplicas: 3
+  minReplicas: 1
+  maxReplicas: 2
   metrics:
     - type: Resource
       resource:

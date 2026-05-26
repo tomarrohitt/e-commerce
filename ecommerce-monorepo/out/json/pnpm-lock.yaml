@@ -21,7 +21,7 @@ importers:
       typescript:
         specifier: ^5.0.0
         version: 5.9.3
-  apps/cart:
+  apps/orders:
     dependencies:
       '@ecommerce/common':
         specifier: workspace:*
@@ -44,11 +44,11 @@ importers:
       pg:
         specifier: ^8.16.3
         version: 8.18.0
-      prisma:
-        specifier: 7.3.0
-        version: 7.3.0(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
+      stripe:
+        specifier: ^20.0.0
+        version: 20.3.0(@types/node@24.10.9)
       zod:
-        specifier: ^4.1.12
+        specifier: ^4.3.6
         version: 4.3.6
     devDependencies:
       '@types/express':
@@ -63,6 +63,9 @@ importers:
       nodemon:
         specifier: ^3.1.1
         version: 3.1.11
+      prisma:
+        specifier: 7.3.0
+        version: 7.3.0(@types/react@19.2.10)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
   packages/common:
     dependencies:
       '@ecommerce/tsconfig':
@@ -1476,6 +1479,16 @@ packages:
       integrity: sha512-vavAMRXOgBVNF6nyEEmL3DBK19iRpDcoIwW+swQ+CbGiu7lju6t+JklA1MHweoWtadgt4ISVUsXLyDq34ddcwA==
     engines:
       node: '>=4'
+  stripe@20.3.0:
+    resolution:
+      integrity: sha512-DYzcmV1MfYhycr1GwjCjeQVYk9Gu8dpxyTlu7qeDCsuguug7oUTxPsUQuZeSf/OPzK7pofqobvOKVqAwlpgf/Q==
+    engines:
+      node: '>=16'
+    peerDependencies:
+      '@types/node': '>=16'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
   supports-color@5.5.0:
     resolution:
       integrity: sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==
@@ -2445,6 +2458,9 @@ snapshots:
     dependencies:
       safe-buffer: 5.2.1
   strip-bom@3.0.0: {}
+  stripe@20.3.0(@types/node@24.10.9):
+    optionalDependencies:
+      '@types/node': 24.10.9
   supports-color@5.5.0:
     dependencies:
       has-flag: 3.0.0

@@ -1,5 +1,4 @@
 apiVersion: apps/v1
-
 kind: Deployment
 metadata:
   name: catalog-service
@@ -7,7 +6,7 @@ metadata:
     app: catalog
     tier: core
 spec:
-  replicas: 2
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -30,7 +29,7 @@ spec:
           imagePullPolicy: Never
           command: ["/bin/sh", "-c"]
           args:
-            - echo "DATABASE_URL=$DATABASE_URL" > .env && npx prisma migrate deploy
+            - ./node_modules/.bin/prisma migrate deploy --schema=./prisma/schema.prisma
           env:
             - name: DATABASE_URL
               value: "postgresql://postgres:password@postgres-service:5432/catalog"
@@ -112,8 +111,8 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: catalog-service
-  minReplicas: 2
-  maxReplicas: 3
+  minReplicas: 1
+  maxReplicas: 2
   metrics:
     - type: Resource
       resource:

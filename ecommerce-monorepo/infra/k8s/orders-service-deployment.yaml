@@ -1,5 +1,4 @@
 apiVersion: apps/v1
-
 kind: Deployment
 metadata:
   name: orders-service
@@ -7,7 +6,7 @@ metadata:
     app: orders
     tier: core
 spec:
-  replicas: 2
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -27,8 +26,10 @@ spec:
       initContainers:
         - name: prisma-migrate
           image: ecommerce-orders:latest
-          imagePullPolicy: Always
-          command: ["npx", "prisma", "migrate", "deploy"]
+          imagePullPolicy: Never
+          command: ["/bin/sh", "-c"]
+          args:
+            - ./node_modules/.bin/prisma migrate deploy --schema=./prisma/schema.prisma
           env:
             - name: DATABASE_URL
               value: "postgresql://postgres:password@postgres-service:5432/orders"
@@ -107,8 +108,8 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: orders-service
-  minReplicas: 2
-  maxReplicas: 3
+  minReplicas: 1
+  maxReplicas: 2
   metrics:
     - type: Resource
       resource:

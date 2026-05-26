@@ -77,7 +77,7 @@ const auth = betterAuth({
     },
   },
 
-  trustedOrigins: [env.CLIENT_URL],
+  trustedOrigins: [env.CLIENT_URL, env.BASE_URL],
   databaseHooks: {
     user: {
       create: {
