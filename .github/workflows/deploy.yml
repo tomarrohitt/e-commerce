@@ -53,9 +53,7 @@ jobs:
               git checkout . && git pull origin main && \
               cd /home/ubuntu/home/apps/e-commerce/frontend && \
               docker build -t ecommerce-frontend:latest . && \
-              docker save ecommerce-frontend:latest -o /tmp/ecommerce-frontend.tar && \
-              sudo k3s ctr -n k8s.io images import /tmp/ecommerce-frontend.tar && \
-              rm /tmp/ecommerce-frontend.tar && \
+              docker save ecommerce-frontend:latest | sudo k3s ctr images import - \
               cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
               kubectl apply -f infra/k8s/frontend-service-deployment.yaml && \
               kubectl rollout restart deployment/frontend || exit 1
@@ -67,9 +65,7 @@ jobs:
               cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
               git checkout . && git pull origin main && \
               docker build -f apps/api-gateway/Dockerfile -t ecommerce-api-gateway:latest . && \
-              docker save ecommerce-api-gateway:latest -o /tmp/ecommerce-api-gateway.tar && \
-              sudo k3s ctr -n k8s.io images import /tmp/ecommerce-api-gateway.tar && \
-              rm /tmp/ecommerce-api-gateway.tar && \
+              docker save ecommerce-api-gateway:latest | sudo k3s ctr images import - \
               kubectl rollout restart deployment/api-gateway || exit 1
             fi
 
@@ -79,9 +75,7 @@ jobs:
               cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
               git checkout . && git pull origin main && \
               docker build -f apps/identity/Dockerfile -t ecommerce-identity:latest . && \
-              docker save ecommerce-identity:latest -o /tmp/ecommerce-identity.tar && \
-              sudo k3s ctr -n k8s.io images import /tmp/ecommerce-identity.tar && \
-              rm /tmp/ecommerce-identity.tar && \
+              docker save ecommerce-identity:latest | sudo k3s ctr images import - \
               kubectl rollout restart deployment/identity-service || exit 1
             fi
 
@@ -91,9 +85,7 @@ jobs:
               cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
               git checkout . && git pull origin main && \
               docker build -f apps/catalog/Dockerfile -t ecommerce-catalog:latest . && \
-              docker save ecommerce-catalog:latest -o /tmp/ecommerce-catalog.tar && \
-              sudo k3s ctr -n k8s.io images import /tmp/ecommerce-catalog.tar && \
-              rm /tmp/ecommerce-catalog.tar && \
+              docker save ecommerce-catalog:latest | sudo k3s ctr images import - \
               kubectl rollout restart deployment/catalog-service || exit 1
             fi
 
@@ -103,9 +95,7 @@ jobs:
               cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
               git checkout . && git pull origin main && \
               docker build -f apps/cart/Dockerfile -t ecommerce-cart:latest . && \
-              docker save ecommerce-cart:latest -o /tmp/ecommerce-cart.tar && \
-              sudo k3s ctr -n k8s.io images import /tmp/ecommerce-cart.tar && \
-              rm /tmp/ecommerce-cart.tar && \
+              docker save ecommerce-cart:latest | sudo k3s ctr images import - \
               kubectl rollout restart deployment/cart-service || exit 1
             fi
 
@@ -115,9 +105,7 @@ jobs:
               cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
               git checkout . && git pull origin main && \
               docker build -f apps/orders/Dockerfile -t ecommerce-orders:latest . && \
-              docker save ecommerce-orders:latest -o /tmp/ecommerce-orders.tar && \
-              sudo k3s ctr -n k8s.io images import /tmp/ecommerce-orders.tar && \
-              rm /tmp/ecommerce-orders.tar && \
+              docker save ecommerce-orders:latest | sudo k3s ctr images import - \
               kubectl rollout restart deployment/orders-service || exit 1
             fi
 
@@ -127,9 +115,7 @@ jobs:
               cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
               git checkout . && git pull origin main && \
               docker build -f apps/email/Dockerfile -t ecommerce-email:latest . && \
-              docker save ecommerce-email:latest -o /tmp/ecommerce-email.tar && \
-              sudo k3s ctr -n k8s.io images import /tmp/ecommerce-email.tar && \
-              rm /tmp/ecommerce-email.tar && \
+              docker save ecommerce-email:latest | sudo k3s ctr images import - \
               kubectl rollout restart deployment/email-service || exit 1
             fi
 
@@ -139,8 +125,7 @@ jobs:
               cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
               git checkout . && git pull origin main && \
               docker build -f apps/invoice/Dockerfile -t ecommerce-invoice:latest . && \
-              docker save ecommerce-invoice:latest -o /tmp/ecommerce-invoice.tar && \
-              sudo k3s ctr -n k8s.io images import /tmp/ecommerce-invoice.tar && \
-              rm /tmp/ecommerce-invoice.tar && \
+              docker save ecommerce-invoice:latest | sudo k3s ctr images import - \
               kubectl rollout restart deployment/invoice-service || exit 1
             fi
+
