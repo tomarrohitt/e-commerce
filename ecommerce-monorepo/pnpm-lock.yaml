@@ -345,6 +345,9 @@ importers:
       '@ecommerce/common':
         specifier: workspace:*
         version: link:../common
+      '@ecommerce/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
