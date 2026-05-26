@@ -21,16 +21,17 @@ COPY out/full/ .
 
 RUN pnpm --filter @ecommerce/common build
 
-# ✅ Generate from root — client goes into root node_modules/.prisma
 RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public" \
     pnpm --filter cart-service exec prisma generate --schema=./prisma/schema.prisma
 
 RUN pnpm --filter cart-service build
 
-FROM base AS runner
+FROM node@sha256:242549cd46785b480c832479a730f4f2a20865d61ea2e404fdb2a5c3d3b73ecf AS runner
 
 ENV NODE_ENV=production
 WORKDIR /app
+
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app .
 
