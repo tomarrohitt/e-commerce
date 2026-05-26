@@ -1,4 +1,3 @@
-import "dotenv/config";
 import { z, ZodType } from "zod";
 import { LoggerFactory } from "../services/logger-service";
 
