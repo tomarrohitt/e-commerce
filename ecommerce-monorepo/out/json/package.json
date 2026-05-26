@@ -1,0 +1,26 @@
+{
+  "name": "ecommerce-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "setup": "pnpm install && pnpm prisma:generate && pnpm prisma:migrate && pnpm build && pnpm run start",
+    "build": "pnpm -r build",
+    "start": "pnpm -r --parallel --filter './apps/*' start",
+    "build:apps": "pnpm -r --filter './apps/*' build",
+    "build:packages": "pnpm -r --filter './packages/*' build",
+    "prisma:generate": "pnpm -r --filter './apps/*' --if-present run prisma:generate",
+    "prisma:migrate": "pnpm -r --filter './apps/*' --if-present run prisma:migrate",
+    "prisma:push": "pnpm -r --filter './apps/*' --if-present run prisma:push",
+    "dev": "turbo run dev"
+  },
+  "devDependencies": {
+    "prettier": "latest",
+    "tsx": "^4.21.0",
+    "turbo": "^2.6.1",
+    "typescript": "^5.0.0"
+  },
+  "packageManager": "pnpm@11.3.0",
+  "dependencies": {
+    "tsconfig-paths": "^4.2.0"
+  }
+}
