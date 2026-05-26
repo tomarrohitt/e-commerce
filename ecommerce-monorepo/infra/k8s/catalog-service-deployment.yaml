@@ -26,8 +26,8 @@ spec:
         - name: ocir-secret
       initContainers:
         - name: prisma-migrate
-          image: iad.ocir.io/idgxrtixsdtd/ecommerce:catalog
-          imagePullPolicy: Always
+          image: ecommerce-catalog:latest
+          imagePullPolicy: Never
           command: ["/bin/sh", "-c"]
           args:
             - echo "DATABASE_URL=$DATABASE_URL" > .env && npx prisma migrate deploy
@@ -36,8 +36,8 @@ spec:
               value: "postgresql://postgres:password@postgres-service:5432/catalog"
       containers:
         - name: catalog-service
-          image: iad.ocir.io/idgxrtixsdtd/ecommerce:catalog
-          imagePullPolicy: Always
+          image: ecommerce-catalog:latest
+          imagePullPolicy: Never
           resources:
             requests:
               memory: "256Mi"

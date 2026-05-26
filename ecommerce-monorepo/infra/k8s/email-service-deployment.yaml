@@ -26,8 +26,8 @@ spec:
         - name: ocir-secret
       containers:
         - name: email-service
-          image: iad.ocir.io/idgxrtixsdtd/ecommerce:email
-          imagePullPolicy: Always
+          image: ecommerce-email:latest
+          imagePullPolicy: Never
           resources:
             requests:
               memory: "128Mi"

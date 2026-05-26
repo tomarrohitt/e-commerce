@@ -26,8 +26,8 @@ spec:
         - name: ocir-secret
       containers:
         - name: api-gateway
-          image: iad.ocir.io/idgxrtixsdtd/ecommerce:api-gateway
-          imagePullPolicy: Always
+          image: ecommerce-api-gateway:latest
+          imagePullPolicy: Never
           resources:
             requests:
               memory: "256Mi"
