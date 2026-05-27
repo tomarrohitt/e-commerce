@@ -3,7 +3,8 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
-    "types": ["node", "express"]
+    "types": ["node", "express"],
+    "moduleResolution": "bundler"
   },
   "references": [{ "path": "../../packages/common" }],
   "include": ["src/**/*"]

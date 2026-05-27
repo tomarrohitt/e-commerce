@@ -2,7 +2,8 @@
   "extends": "../../packages/tsconfig/base.json",
   "compilerOptions": {
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    "moduleResolution": "bundler"
   },
   "references": [{ "path": "../../packages/common" }],
   "include": ["src/**/*"]

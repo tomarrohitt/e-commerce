@@ -3,6 +3,7 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
+    "moduleResolution": "bundler"
   },
   "references": [{ "path": "../../packages/common" }],
   "include": ["src/**/*"]

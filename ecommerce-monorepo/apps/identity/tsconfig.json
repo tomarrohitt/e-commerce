@@ -2,8 +2,12 @@
   "extends": "../../packages/tsconfig/base.json",
   "compilerOptions": {
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    "types": ["node", "express"],
+    "moduleResolution": "bundler"
   },
-  "references": [{ "path": "../../packages/common" }],
+  "references": [
+    { "path": ["../../packages/common", "../../packages/storage-service"] }
+  ],
   "include": ["src/**/*"]
 }
