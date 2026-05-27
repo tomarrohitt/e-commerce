@@ -21,7 +21,6 @@
   },
   "dependencies": {
     "@ecommerce/tsconfig": "workspace:*",
-    "@prisma/adapter-pg": "^6.5.0",
     "@prisma/client": "^6.5.0",
     "amqplib": "^0.10.9",
     "axios": "^1.13.2",

@@ -14,7 +14,6 @@
   "dependencies": {
     "@ecommerce/common": "workspace:*",
     "@ecommerce/storage-service": "workspace:*",
-    "@prisma/adapter-pg": "6.5.0",
     "@prisma/client": "6.5.0",
     "dotenv": "^17.2.3",
     "express": "^4.22.1",
