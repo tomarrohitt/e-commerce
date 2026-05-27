@@ -6,7 +6,7 @@ class StripeService {
 
   constructor() {
     this.stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-      apiVersion: "2026-01-28.clover",
+      apiVersion: "2026-02-25.clover",
       typescript: true,
     });
   }
