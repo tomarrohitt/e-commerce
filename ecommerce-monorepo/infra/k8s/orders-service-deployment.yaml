@@ -27,9 +27,10 @@ spec:
         - name: prisma-migrate
           image: ecommerce-orders:latest
           imagePullPolicy: Never
+          workingDir: /prod/orders
           command: ["/bin/sh", "-c"]
           args:
-            - ./node_modules/.bin/prisma migrate deploy --schema=./prisma/schema.prisma
+            - node_modules/.bin/prisma migrate deploy --schema=./prisma/schema.prisma
           env:
             - name: DATABASE_URL
               value: "postgresql://postgres:password@postgres-service:5432/orders"
@@ -123,3 +124,4 @@ spec:
         target:
           type: Utilization
           averageUtilization: 80
+
