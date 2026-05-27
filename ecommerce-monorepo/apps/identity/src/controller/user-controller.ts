@@ -8,7 +8,7 @@ import {
 } from "@ecommerce/common";
 import { env } from "../config/env";
 import { dispatchUserEvent } from "../service/outbox-dispatcher";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "generated";
 import { redis } from "../config/redis";
 
 const logger = LoggerFactory.create("IdentityService");

@@ -4,7 +4,7 @@ import {
   CreateAddressInput,
   UpdateAddressInput,
 } from "../lib/address-validation-schema";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "generated";
 
 class AddressService {
   async create(userId: string, data: CreateAddressInput) {

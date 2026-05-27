@@ -1,8 +1,8 @@
 import { EventBusService, ProductEventType, Event } from "@ecommerce/common";
 import { orderRepository } from "../repository/order-repository";
 import { stripeService } from "../services/stripe-service";
-import { OrderStatus } from "@prisma/client";
 import { prisma } from "../config/prisma";
+import { OrderStatus } from "generated";
 
 export class StockConsumer {
   constructor(private eventBus: EventBusService) {}

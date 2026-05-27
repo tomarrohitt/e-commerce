@@ -1,6 +1,3 @@
-// src/utils/http-client.ts
-
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from "axios";
 import { CircuitBreaker } from "../services/circuit-breaker-service";
 import { HTTP_DEFAULTS } from "../constants";
 import { ILogger, LoggerFactory } from "../services/logger-service";
@@ -20,11 +17,18 @@ export interface HttpClientConfig {
 export interface HttpResponse<T> {
   data: T;
   status: number;
-  headers: Record<string, any>;
+  headers: Record<string, string>;
+}
+
+interface RequestConfig {
+  headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export class HttpClient {
-  private readonly client: AxiosInstance;
+  private readonly baseURL: string;
+  private readonly defaultHeaders: Record<string, string>;
+  private readonly timeout: number;
   private readonly breaker: CircuitBreaker;
   private readonly logger: ILogger;
   private readonly serviceName: string;
@@ -32,15 +36,12 @@ export class HttpClient {
   constructor(config: HttpClientConfig) {
     this.serviceName = config.serviceName;
     this.logger = LoggerFactory.create(`HttpClient:${this.serviceName}`);
-
-    this.client = axios.create({
-      baseURL: config.baseURL,
-      timeout: config.timeout ?? HTTP_DEFAULTS.TIMEOUT,
-      headers: config.headers,
-      maxRedirects: HTTP_DEFAULTS.MAX_REDIRECTS,
-    });
-
-    this.setupInterceptors();
+    this.baseURL = config.baseURL;
+    this.timeout = config.timeout ?? HTTP_DEFAULTS.TIMEOUT;
+    this.defaultHeaders = {
+      "Content-Type": "application/json",
+      ...config.headers,
+    };
 
     this.breaker = new CircuitBreaker({
       name: `CircuitBreaker:${this.serviceName}`,
@@ -56,124 +57,144 @@ export class HttpClient {
     });
   }
 
-  private setupInterceptors(): void {
-    // Request interceptor
-    this.client.interceptors.request.use(
-      (config) => {
-        this.logger.debug("HTTP request", {
-          method: config.method?.toUpperCase(),
-          url: config.url,
-        });
-        return config;
-      },
-      (error) => {
-        this.logger.error("Request interceptor error", error);
-        return Promise.reject(error);
-      }
-    );
-
-    this.client.interceptors.response.use(
-      (response) => {
-        this.logger.debug("HTTP response", {
-          status: response.status,
-          url: response.config.url,
-        });
-        return response;
-      },
-      (error: AxiosError) => {
-        this.logger.error("HTTP error", error, {
-          status: error.response?.status,
-          url: error.config?.url,
-        });
-        return Promise.reject(error);
-      }
-    );
+  private mergeHeaders(config?: RequestConfig): Record<string, string> {
+    return { ...this.defaultHeaders, ...config?.headers };
   }
 
-  async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+  private async fetchWithTimeout(
+    url: string,
+    options: RequestInit,
+  ): Promise<Response> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), this.timeout);
+
+    const fullURL = `${this.baseURL}${url}`;
+
+    this.logger.debug("HTTP request", {
+      method: (options.method ?? "GET").toUpperCase(),
+      url,
+    });
+
+    try {
+      const response = await fetch(fullURL, {
+        ...options,
+        signal: controller.signal,
+      });
+
+      this.logger.debug("HTTP response", { status: response.status, url });
+      return response;
+    } catch (error) {
+      this.logger.error("HTTP error", error, { url });
+      throw error;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  private async parseResponse<T>(response: Response): Promise<T> {
+    const text = await response.text();
+    try {
+      return text ? JSON.parse(text) : (undefined as T);
+    } catch {
+      throw new Error(`Failed to parse response body: ${text}`);
+    }
+  }
+
+  async get<T>(url: string, config?: RequestConfig): Promise<T> {
     return this.breaker.execute(async () => {
-      const response = await this.client.get<T>(url, config);
-      return response.data;
+      const response = await this.fetchWithTimeout(url, {
+        method: "GET",
+        headers: this.mergeHeaders(config),
+      });
+      return this.parseResponse<T>(response);
     });
   }
 
   async post<T, D = any>(
     url: string,
     data?: D,
-    config?: AxiosRequestConfig
+    config?: RequestConfig,
   ): Promise<T> {
     return this.breaker.execute(async () => {
-      const response = await this.client.post<T>(url, data, config);
-      return response.data;
+      const response = await this.fetchWithTimeout(url, {
+        method: "POST",
+        headers: this.mergeHeaders(config),
+        body: JSON.stringify(data),
+      });
+      return this.parseResponse<T>(response);
     });
   }
 
   async put<T, D = any>(
     url: string,
     data?: D,
-    config?: AxiosRequestConfig
+    config?: RequestConfig,
   ): Promise<T> {
     return this.breaker.execute(async () => {
-      const response = await this.client.put<T>(url, data, config);
-      return response.data;
+      const response = await this.fetchWithTimeout(url, {
+        method: "PUT",
+        headers: this.mergeHeaders(config),
+        body: JSON.stringify(data),
+      });
+      return this.parseResponse<T>(response);
     });
   }
 
   async patch<T, D = any>(
     url: string,
     data?: D,
-    config?: AxiosRequestConfig
+    config?: RequestConfig,
   ): Promise<T> {
     return this.breaker.execute(async () => {
-      const response = await this.client.patch<T>(url, data, config);
-      return response.data;
+      const response = await this.fetchWithTimeout(url, {
+        method: "PATCH",
+        headers: this.mergeHeaders(config),
+        body: JSON.stringify(data),
+      });
+      return this.parseResponse<T>(response);
     });
   }
 
-  async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+  async delete<T>(url: string, config?: RequestConfig): Promise<T> {
     return this.breaker.execute(async () => {
-      const response = await this.client.delete<T>(url, config);
-      return response.data;
+      const response = await this.fetchWithTimeout(url, {
+        method: "DELETE",
+        headers: this.mergeHeaders(config),
+      });
+      return this.parseResponse<T>(response);
     });
   }
 
-  // Get full response with headers and status
   async getWithResponse<T>(
     url: string,
-    config?: AxiosRequestConfig
+    config?: RequestConfig,
   ): Promise<HttpResponse<T>> {
     return this.breaker.execute(async () => {
-      const response = await this.client.get<T>(url, config);
+      const response = await this.fetchWithTimeout(url, {
+        method: "GET",
+        headers: this.mergeHeaders(config),
+      });
       return {
-        data: response.data,
+        data: await this.parseResponse<T>(response),
         status: response.status,
-        headers: response.headers,
+        headers: Object.fromEntries(response.headers.entries()),
       };
     });
   }
 
-  // Set default headers
   setHeader(key: string, value: string): void {
-    this.client.defaults.headers.common[key] = value;
+    this.defaultHeaders[key] = value;
   }
 
-  // Remove default header
   removeHeader(key: string): void {
-    delete this.client.defaults.headers.common[key];
+    delete this.defaultHeaders[key];
   }
 
-  // Get circuit breaker metrics
   getMetrics() {
     return this.breaker.getMetrics();
   }
 
-  // Reset circuit breaker
   resetCircuitBreaker(): void {
     this.breaker.reset();
-  }
-
-  // Get underlying axios instance (for advanced use)
-  getAxiosInstance(): AxiosInstance {
-    return this.client;
   }
 }

@@ -4,7 +4,8 @@
     "rootDir": "src",
     "outDir": "dist",
     "types": ["node", "express"],
-    "moduleResolution": "bundler"
+    "moduleResolution": "nodenext",
+    "module": "nodenext"
   },
   "references": [{ "path": "../../packages/common" }],
   "include": ["src/**/*"]

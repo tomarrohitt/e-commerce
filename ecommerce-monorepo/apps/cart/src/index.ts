@@ -30,7 +30,6 @@ async function start() {
     await eventBus.connect();
 
     if (SERVICE_MODE === "WORKER" || SERVICE_MODE === "ALL") {
-      console.log("👷 Cart Worker: Starting Event Consumer...");
       await productConsumer.start();
       await orderCreatedConsumer.start();
     }

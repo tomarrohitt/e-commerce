@@ -1,5 +1,4 @@
-import { CartItem, RedisService } from "@ecommerce/common";
-import { env } from "../config/env";
+import { CartItem } from "@ecommerce/common";
 import { redis } from "../config/redis";
 
 class CartRepository {

@@ -8,7 +8,6 @@ export function validateEnv<T>(schema: ZodType<T>): T {
 
   if (parsed.error) {
     logger.error("Invalid environment variables:");
-    console.log({ errors: parsed.error });
     process.exit(1);
   }
 

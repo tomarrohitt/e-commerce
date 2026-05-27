@@ -1,6 +1,6 @@
 import { prisma } from "../config/prisma";
 import { safeQuery, OrderEventType } from "@ecommerce/common";
-import { OrderStatus, Prisma } from "@prisma/client";
+import { OrderStatus, Prisma } from "generated";
 import { CreateOrderInput } from "../lib/order-validation-schema";
 
 class OrderRepository {

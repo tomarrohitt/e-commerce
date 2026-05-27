@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import axios from "axios";
 import {
   extractToken,
   UserContext,
@@ -57,10 +56,7 @@ async function validateWithIdentityService(
       throw new DatabaseOpError("Login temporarily unavailable");
     }
 
-    if (axios.isAxiosError(error)) {
-      if (error.response?.status === 401) {
-        throw new NotAuthorizedError();
-      }
+    if (error instanceof TypeError) {
       console.error("Identity service error:", error.message);
     }
 

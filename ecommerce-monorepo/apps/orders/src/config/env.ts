@@ -5,6 +5,7 @@ import {
   stripeEnv,
   taxRateEnv,
 } from "@ecommerce/common";
+import "dotenv/config";
 
 const schema = z.object({
   ...commonEnv,

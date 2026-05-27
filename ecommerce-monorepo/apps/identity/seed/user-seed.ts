@@ -1,14 +1,8 @@
-import axios from "axios";
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "generated";
 
 const GATEWAY_URL = "http://localhost:4000";
 
-const connectionString =
-  "postgresql://postgres:password@localhost:5432/identity";
-
-const adapter = new PrismaPg({ connectionString });
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient();
 
 const users = [
   {
@@ -27,77 +21,59 @@ async function main() {
     try {
       console.log(`\n👤 Creating User: ${user.name}...`);
 
-      const signUpResponse = await axios.post(
+      const signUpResponse = await fetch(
         `${GATEWAY_URL}/api/auth/sign-up/email`,
         {
-          name: user.name,
-          email: user.email,
-          password: user.password,
-        },
-        {
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
             Origin: "http://localhost:4000",
           },
+          body: JSON.stringify({
+            name: user.name,
+            email: user.email,
+            password: user.password,
+          }),
         },
       );
 
-      const cookies = signUpResponse.headers["set-cookie"];
+      if (!signUpResponse.ok) {
+        const data = await signUpResponse.json().catch(() => ({}));
+        throw Object.assign(new Error("Sign-up failed"), {
+          response: { status: signUpResponse.status, data },
+        });
+      }
+
+      const cookies = signUpResponse.headers.get("set-cookie");
       if (!cookies) throw new Error("No cookies returned from Sign Up");
 
-      const cookieHeader = cookies.find((c) =>
-        c.includes("better-auth.session_token"),
-      );
+      const cookieHeader = cookies
+        .split(",")
+        .find((c) => c.includes("better-auth.session_token"));
 
-      if (!cookieHeader) {
-        throw new Error("Session token missing in response");
-      }
+      if (!cookieHeader) throw new Error("Session token missing in response");
+
       console.log(`   📍 Adding 5 addresses for ${user.name}...`);
-
-      for (let i = 0; i < 5; i++) {
-        const randomZip = Math.floor(10000 + Math.random() * 90000).toString();
-        const streetNum = Math.floor(Math.random() * 900) + 100;
-
-        await axios.post(
-          `${GATEWAY_URL}/api/addresses`,
-          {
-            name: addressTypes[i],
-            street: `${streetNum} ${user.name.split(" ")[0]} Street`,
-            city: "New York",
-            state: "NY",
-            zipCode: randomZip,
-            country: "USA",
-            phoneNumber: `+1555${Math.floor(1000 + Math.random() * 9000)}`,
-            isDefault: i === 0,
-          },
-          {
-            headers: {
-              Cookie: cookieHeader,
-              Origin: "http://localhost:4000",
-            },
-          },
-        );
-      }
 
       if (user.role === "admin") {
         await prisma.user.update({
           where: { email: user.email },
           data: { role: "admin" },
         });
-        console.log(`👑 Promoted ${user.name} to ADMIN`);
+        console.log(`Promoted ${user.name} to ADMIN`);
       }
     } catch (error: any) {
       if (error.response) {
         console.error(
-          `   ❌ Failed: ${error.response.status} - ${JSON.stringify(error.response.data)}`,
+          `Failed: ${error.response.status} - ${JSON.stringify(error.response.data)}`,
         );
       } else {
-        console.error(`   ❌ Error: ${error.message}`);
+        console.error(`Error: ${error.message}`);
       }
     }
   }
 
-  console.log("\n✅ Seeding Complete!");
+  console.log("\nSeeding Complete!");
 }
 
 main().finally(async () => {

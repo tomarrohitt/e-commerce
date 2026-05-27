@@ -5,7 +5,9 @@
     "declarationMap": true,
     "rootDir": "src",
     "outDir": "dist",
-    "composite": true
+    "composite": true,
+    "moduleResolution": "nodenext",
+    "module": "nodenext"
   },
   "include": ["src"]
 }

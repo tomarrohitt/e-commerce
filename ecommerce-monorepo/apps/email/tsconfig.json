@@ -3,7 +3,8 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
-    "moduleResolution": "bundler"
+    "moduleResolution": "nodenext",
+    "module": "nodenext"
   },
   "references": [{ "path": "../../packages/common" }],
   "include": ["src/**/*"]

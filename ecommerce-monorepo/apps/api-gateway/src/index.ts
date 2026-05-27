@@ -33,7 +33,6 @@ app.use(errorHandler);
 const rawBodyRoutes = ["/api/orders/webhook"];
 
 app.use((req: Request, res: Response, next: NextFunction) => {
-  console.log({ req });
   if (rawBodyRoutes.includes(req.originalUrl)) {
     next();
   } else {

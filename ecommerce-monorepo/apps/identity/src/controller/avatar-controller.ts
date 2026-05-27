@@ -65,7 +65,7 @@ class ImageUploadController {
 
       sendCreated(res, { image: key }, "Profile image updated successfully.");
     } catch (error) {
-      console.log(error);
+      console.log({ error });
     }
   }
 }

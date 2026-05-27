@@ -1,4 +1,4 @@
-import { OrderStatus } from "@prisma/client";
+import { OrderStatus } from "generated";
 import { orderRepository } from "../repository/order-repository";
 import { stripeService } from "./stripe-service";
 import { NotFoundError, BadRequestError } from "@ecommerce/common";

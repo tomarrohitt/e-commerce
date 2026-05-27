@@ -1,5 +1,4 @@
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "generated";
 import {
   generateSlug,
   LoggerFactory,
@@ -14,8 +13,7 @@ const redis = new RedisService({
   retryDelay: 50,
 });
 
-const adapter = new PrismaPg({ connectionString: env.DATABASE_URL });
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient();
 const logger = LoggerFactory.create("CatalogService");
 
 const CATEGORY_SCHEMAS: Record<string, any[]> = {
