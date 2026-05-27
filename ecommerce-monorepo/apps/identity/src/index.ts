@@ -4,13 +4,7 @@ import cookieParser from "cookie-parser";
 import { toNodeHandler } from "better-auth/node";
 import auth from "./config/auth";
 import userRouter from "./router/user-router";
-import {
-  errorHandler,
-  currentUser,
-  OutboxProcessor,
-  EventBusService,
-  sendSuccess,
-} from "@ecommerce/common";
+import { errorHandler, currentUser, OutboxProcessor } from "@ecommerce/common";
 import { prisma } from "./config/prisma";
 import internalRouter from "./router/internal-router";
 import { addressRouter } from "./router/address-router";
@@ -41,6 +35,10 @@ app.post("/api/auth/resend-verification-email", async (req, res) => {
     },
   });
   res.status(200).json({ message: "Verification email sent" });
+});
+app.use((req, _res, next) => {
+  console.log({ req });
+  next();
 });
 
 app.all("/api/auth/*", toNodeHandler(auth));

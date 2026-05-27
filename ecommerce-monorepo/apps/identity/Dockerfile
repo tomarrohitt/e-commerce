@@ -34,7 +34,17 @@ WORKDIR /app
 
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /app .
+# Only copy what identity needs
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
+COPY --from=builder /app/packages/common/dist ./packages/common/dist
+COPY --from=builder /app/packages/common/package.json ./packages/common/package.json
+COPY --from=builder /app/packages/storage-service/dist ./packages/storage-service/dist
+COPY --from=builder /app/packages/storage-service/package.json ./packages/storage-service/package.json
+COPY --from=builder /app/apps/identity/dist ./apps/identity/dist
+COPY --from=builder /app/apps/identity/package.json ./apps/identity/package.json
+COPY --from=builder /app/apps/identity/prisma ./apps/identity/prisma
 
 WORKDIR /app/apps/identity
 EXPOSE 4001

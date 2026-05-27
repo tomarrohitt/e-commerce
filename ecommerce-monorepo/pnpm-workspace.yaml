@@ -1,7 +1,21 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+injectWorkspacePackages: true
+syncInjectedDepsAfterScripts:
+  - build
+
+overrides:
+  '@prisma/client': '6.5.0'
+  '@prisma/adapter-pg': '6.5.0'
+  'prisma': '6.5.0'
+  '@prisma/engines': '6.5.0'
+  '@prisma/debug': '6.5.0'
+  '@prisma/driver-adapter-utils': '6.5.0'
+
 allowBuilds:
   '@prisma/engines': true
+  '@prisma/client': true
   esbuild: true
   prisma: true

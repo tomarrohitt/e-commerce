@@ -16,11 +16,21 @@
   "devDependencies": {
     "prettier": "latest",
     "tsx": "^4.21.0",
-    "turbo": "^2.9.14",
+    "turbo": "^2.6.1",
     "typescript": "^5.0.0"
   },
   "packageManager": "pnpm@11.3.0",
   "dependencies": {
     "tsconfig-paths": "^4.2.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@prisma/client": "6.5.0",
+      "@prisma/adapter-pg": "6.5.0",
+      "prisma": "6.5.0",
+      "@prisma/engines": "6.5.0",
+      "@prisma/debug": "6.5.0",
+      "@prisma/driver-adapter-utils": "6.5.0"
+    }
   }
 }
