@@ -22,15 +22,6 @@
   "packageManager": "pnpm@11.3.0",
   "dependencies": {
     "tsconfig-paths": "^4.2.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "@prisma/client": "6.5.0",
-      "@prisma/adapter-pg": "6.5.0",
-      "prisma": "6.5.0",
-      "@prisma/engines": "6.5.0",
-      "@prisma/debug": "6.5.0",
-      "@prisma/driver-adapter-utils": "6.5.0"
-    }
   }
 }
+

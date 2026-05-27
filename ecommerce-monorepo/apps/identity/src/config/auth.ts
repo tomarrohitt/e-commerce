@@ -2,9 +2,10 @@ import { betterAuth } from "better-auth/minimal";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 import { authHooks } from "../middleware/validation-middleware";
-import { UserEventType } from "@ecommerce/common";
+import { UserContext, UserEventType } from "@ecommerce/common";
 import { dispatchUserEvent } from "../service/outbox-dispatcher";
 import { env } from "./env";
+import { User } from "better-auth/types";
 
 const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -55,7 +56,7 @@ const auth = betterAuth({
           { link: url },
         );
       },
-      sendChangeEmailVerification: async ({ user }) => {
+      sendChangeEmailVerification: async (user: UserContext) => {
         void dispatchUserEvent(UserEventType.VERIFIED, user);
       },
     },

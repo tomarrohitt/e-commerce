@@ -28,11 +28,13 @@ export const authHooks: BetterAuthOptions["hooks"] = {
   }),
 
   after: createAuthMiddleware(async (ctx) => {
-    const response = ctx.context.returned as APIError;
+    const response = ctx.context.returned as APIError & {
+      body: { code?: string; message?: string; status?: string };
+    };
     if (response && typeof response === "object" && "body" in response) {
       const body = response.body;
       if (body && body.code && body.message) {
-        throw new APIError(response.status, {
+        throw new APIError(body.status, {
           success: false,
           errors: [
             {
