@@ -10,12 +10,9 @@ WORKDIR /app
 
 COPY . .
 RUN pnpm install --no-frozen-lockfile
-
 RUN pnpm --filter @ecommerce/common build
-
 RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public" \
     pnpm --filter cart-service exec prisma generate --schema=./prisma/schema.prisma
-
 RUN pnpm --filter cart-service build
 RUN pnpm --filter cart-service deploy --prod /prod/cart
 
@@ -27,6 +24,11 @@ WORKDIR /prod/cart
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /prod/cart .
+
+# ✅ Create prisma symlink manually
+RUN mkdir -p /prod/cart/node_modules/.bin && \
+    ln -sf /prod/cart/node_modules/.pnpm/prisma@6.5.0_typescript@5.9.3/node_modules/prisma/build/index.js \
+    /prod/cart/node_modules/.bin/prisma
 
 EXPOSE 4003
 CMD ["node", "dist/index.js"]

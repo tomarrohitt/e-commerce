@@ -24,13 +24,14 @@ spec:
     spec:
       imagePullSecrets:
         - name: ocir-secret
-      initContainers:
+        initContainers:
         - name: prisma-migrate
           image: ecommerce-cart:latest
           imagePullPolicy: Never
+          workingDir: /prod/cart
           command: ["/bin/sh", "-c"]
           args:
-            - ./node_modules/.bin/prisma migrate deploy --schema=./prisma/schema.prisma
+            - node_modules/.bin/prisma migrate deploy --schema=./prisma/schema.prisma
           env:
             - name: DATABASE_URL
               value: "postgresql://postgres:password@postgres-service:5432/cart"
