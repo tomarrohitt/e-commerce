@@ -83,6 +83,7 @@ export const ProfilePicture = ({ user }: { user: User }) => {
               src={displayUrl}
               alt={user.name}
               fill
+              unoptimized
               key={displayUrl}
               className="rounded-full"
               sizes="128px"

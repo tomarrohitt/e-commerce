@@ -40,6 +40,8 @@ export async function createAddress(_: any, formData: FormData) {
     const userId = (await getUserFromSession())!.id;
 
     updateTag(`addresses-${userId}`);
+    updateTag(`address-count-${userId}`);
+
     return {
       success: true,
       errors: {
@@ -143,6 +145,7 @@ export async function deleteAddress(id: string) {
     const userId = (await getUserFromSession())!.id;
 
     updateTag(`addresses-${userId}`);
+    updateTag(`address-count-${userId}`);
   } catch (error) {
     console.error("Error deleting address:", error);
   }

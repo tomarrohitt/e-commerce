@@ -49,7 +49,7 @@ export default async function AddressesPage() {
 function NoAddresses() {
   return (
     <div className="text-center px-6 relative mt-6 flex justify-center items-center flex-col">
-      <div className="absolute flex justify-center items-center mb-24">
+      <div className="absolute flex justify-center items-center mb-24 -z-20">
         <LottieAnimation data={Address} className="size-180" />
       </div>
       <div className="size-80" />
