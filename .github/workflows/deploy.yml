@@ -49,11 +49,9 @@ jobs:
             # --- 1. FRONTEND SERVICE ---
             if [ "${{ needs.detect-changes.outputs.frontend }}" = "true" ]; then
               echo ">>> Deploying Frontend..."
-              cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
-              git checkout . && git pull origin main && \
               cd /home/ubuntu/home/apps/e-commerce/frontend && \
               docker buildx build --network=host -t ecommerce-frontend:latest -f Dockerfile . && \
-              docker save ecommerce-frontend:latest | sudo k3s ctr images import - \
+              docker save ecommerce-frontend:latest | sudo k3s ctr images import - && \
               cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
               kubectl apply -f infra/k8s/frontend-service-deployment.yaml && \
               kubectl rollout restart deployment/frontend || exit 1
@@ -63,9 +61,8 @@ jobs:
             if [ "${{ needs.detect-changes.outputs.api-gateway }}" = "true" ]; then
               echo ">>> Deploying API Gateway..."
               cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
-              git checkout . && git pull origin main && \
               docker buildx build --network=host -t ecommerce-api-gateway:latest -f apps/api-gateway/Dockerfile . && \
-              docker save ecommerce-api-gateway:latest | sudo k3s ctr images import - \
+              docker save ecommerce-api-gateway:latest | sudo k3s ctr images import - && \
               kubectl rollout restart deployment/api-gateway || exit 1
             fi
 
@@ -73,9 +70,8 @@ jobs:
             if [ "${{ needs.detect-changes.outputs.identity }}" = "true" ]; then
               echo ">>> Deploying Identity Service..."
               cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
-              git checkout . && git pull origin main && \
-             docker buildx build --network=host -t ecommerce-identity:latest -f apps/identity/Dockerfile . && \
-              docker save ecommerce-identity:latest | sudo k3s ctr images import - \
+              docker buildx build --network=host -t ecommerce-identity:latest -f apps/identity/Dockerfile . && \
+              docker save ecommerce-identity:latest | sudo k3s ctr images import - && \
               kubectl rollout restart deployment/identity-service || exit 1
             fi
 
@@ -83,9 +79,8 @@ jobs:
             if [ "${{ needs.detect-changes.outputs.catalog }}" = "true" ]; then
               echo ">>> Deploying Catalog Service..."
               cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
-              git checkout . && git pull origin main && \
               docker buildx build --network=host -t ecommerce-catalog:latest -f apps/catalog/Dockerfile . && \
-              docker save ecommerce-catalog:latest | sudo k3s ctr images import - \
+              docker save ecommerce-catalog:latest | sudo k3s ctr images import - && \
               kubectl rollout restart deployment/catalog-service || exit 1
             fi
 
@@ -93,9 +88,8 @@ jobs:
             if [ "${{ needs.detect-changes.outputs.cart }}" = "true" ]; then
               echo ">>> Deploying Cart Service..."
               cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
-              git checkout . && git pull origin main && \
               docker buildx build --network=host -t ecommerce-cart:latest -f apps/cart/Dockerfile . && \
-              docker save ecommerce-cart:latest | sudo k3s ctr images import - \
+              docker save ecommerce-cart:latest | sudo k3s ctr images import - && \
               kubectl rollout restart deployment/cart-service || exit 1
             fi
 
@@ -103,9 +97,8 @@ jobs:
             if [ "${{ needs.detect-changes.outputs.orders }}" = "true" ]; then
               echo ">>> Deploying Orders Service..."
               cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
-              git checkout . && git pull origin main && \
               docker buildx build --network=host -t ecommerce-orders:latest -f apps/orders/Dockerfile . && \
-              docker save ecommerce-orders:latest | sudo k3s ctr images import - \
+              docker save ecommerce-orders:latest | sudo k3s ctr images import - && \
               kubectl rollout restart deployment/orders-service || exit 1
             fi
 
@@ -113,9 +106,8 @@ jobs:
             if [ "${{ needs.detect-changes.outputs.email }}" = "true" ]; then
               echo ">>> Deploying Email Service..."
               cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
-              git checkout . && git pull origin main && \
               docker buildx build --network=host -t ecommerce-email:latest -f apps/email/Dockerfile . && \
-              docker save ecommerce-email:latest | sudo k3s ctr images import - \
+              docker save ecommerce-email:latest | sudo k3s ctr images import - && \
               kubectl rollout restart deployment/email-service || exit 1
             fi
 
@@ -123,8 +115,7 @@ jobs:
             if [ "${{ needs.detect-changes.outputs.invoice }}" = "true" ]; then
               echo ">>> Deploying Invoice Service..."
               cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
-              git checkout . && git pull origin main && \
               docker buildx build --network=host -t ecommerce-invoice:latest -f apps/invoice/Dockerfile . && \
-              docker save ecommerce-invoice:latest | sudo k3s ctr images import - \
+              docker save ecommerce-invoice:latest | sudo k3s ctr images import - && \
               kubectl rollout restart deployment/invoice-service || exit 1
             fi
