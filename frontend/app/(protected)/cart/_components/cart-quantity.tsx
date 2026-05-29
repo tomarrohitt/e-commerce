@@ -78,7 +78,6 @@ export const CartQuantity = ({ item }: { item: CartItemWithProduct }) => {
   );
 };
 
-// 2. Add the ': Variants' type annotation here
 const slideVariants: Variants = {
   enter: (direction: number) => ({
     y: direction > 0 ? 20 : -20,

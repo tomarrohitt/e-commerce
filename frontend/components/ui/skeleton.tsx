@@ -31,7 +31,6 @@ export function Skeleton({
   );
 }
 
-// ✅ Composable skeleton patterns
 export function SkeletonCard({ className }: { className?: string }) {
   return (
     <div

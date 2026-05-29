@@ -21,7 +21,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -41,61 +41,56 @@ export default function ProductListClient({
   categories: Category[];
   pagination: Pagination;
 }) {
+  return (
+    <ProductListInner
+      key={`${initialPagination.page}-${initialProducts[0]?.id ?? "empty"}`}
+      initialProducts={initialProducts}
+      categories={categories}
+      pagination={initialPagination}
+    />
+  );
+}
+
+function ProductListInner({
+  initialProducts,
+  categories,
+  pagination: initialPagination,
+}: {
+  initialProducts: ProductListProduct[];
+  categories: Category[];
+  pagination: Pagination;
+}) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const initialCategory = searchParams.get("category") ?? "all";
+  const initialSortByParam = searchParams.get("sortBy");
+  const initialSortOrderParam = searchParams.get("sortOrder");
+  const initialSortBy =
+    initialSortByParam && initialSortOrderParam
+      ? `${initialSortByParam}-${initialSortOrderParam}`
+      : "default";
+  const initialMinPrice = parseFloat(searchParams.get("minPrice") ?? "1");
+  const initialMaxPrice = parseFloat(searchParams.get("maxPrice") ?? "1000");
+
   const [products, setProducts] =
     useState<ProductListProduct[]>(initialProducts);
   const [pagination, setPagination] = useState<Pagination>(initialPagination);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [sortBy, setSortBy] = useState("default");
-  const [priceRange, setPriceRange] = useState([1, 1000]);
-  const [committedPriceRange, setCommittedPriceRange] = useState([1, 1000]);
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [sortBy, setSortBy] = useState(initialSortBy);
+  const [priceRange, setPriceRange] = useState([
+    initialMinPrice,
+    initialMaxPrice,
+  ]);
+  const [committedPriceRange, setCommittedPriceRange] = useState([
+    initialMinPrice,
+    initialMaxPrice,
+  ]);
+
   const [min, max] = committedPriceRange;
-
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
   const hasMore = pagination.page < pagination.totalPages;
 
-  const handleClearFilters = () => {
-    setPriceRange([1, 1000]);
-    setCommittedPriceRange([1, 1000]);
-    setSelectedCategory("all");
-    setSortBy("default");
-    setProducts(initialProducts);
-    setPagination(initialPagination);
-  };
-
-  useEffect(() => {
-    const category = searchParams.get("category");
-    const sortByParam = searchParams.get("sortBy");
-    const sortOrderParam = searchParams.get("sortOrder");
-    const minPriceParam = searchParams.get("minPrice");
-    const maxPriceParam = searchParams.get("maxPrice");
-
-    if (category) {
-      setSelectedCategory(category);
-    }
-
-    if (sortByParam && sortOrderParam) {
-      setSortBy(`${sortByParam}-${sortOrderParam}`);
-    }
-
-    if (minPriceParam || maxPriceParam) {
-      const min = minPriceParam ? parseFloat(minPriceParam) : 1;
-      const max = maxPriceParam ? parseFloat(maxPriceParam) : 1000;
-      setPriceRange([min, max]);
-      setCommittedPriceRange([min, max]);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (initialPagination.page === 1) {
-      setProducts(initialProducts);
-      setPagination(initialPagination);
-    }
-  }, [initialProducts, initialPagination]);
-
-  // Update URL when filters change - debounced
   useEffect(() => {
     const params = new URLSearchParams(searchParams.toString());
 
@@ -134,7 +129,16 @@ export default function ProductListClient({
     if (newUrl !== currentUrl) {
       router.replace(`?${newUrl}`, { scroll: false });
     }
-  }, [selectedCategory, sortBy, min, max]);
+  }, [selectedCategory, sortBy, min, max, searchParams, router]);
+
+  const handleClearFilters = () => {
+    setPriceRange([1, 1000]);
+    setCommittedPriceRange([1, 1000]);
+    setSelectedCategory("all");
+    setSortBy("default");
+    setProducts(initialProducts);
+    setPagination(initialPagination);
+  };
 
   const handleLoadMore = useCallback(async () => {
     if (isLoadingMore) return;
@@ -155,11 +159,9 @@ export default function ProductListClient({
       const data = await response.json();
 
       if (data.products && data.products.length > 0) {
-        // Use functional update and batch the state updates
         setProducts((prev) => [...prev, ...data.products]);
         setPagination(data.pagination);
 
-        // Update URL in next tick to not block rendering
         setTimeout(() => {
           router.replace(`?${params.toString()}`, { scroll: false });
         }, 0);
@@ -171,7 +173,6 @@ export default function ProductListClient({
     }
   }, [pagination.page, searchParams, isLoadingMore, router]);
 
-  // Memoize products to prevent unnecessary re-renders
   const memoizedProducts = useMemo(() => products, [products]);
 
   return (
@@ -189,7 +190,7 @@ export default function ProductListClient({
                   className={cn(
                     "rounded-full px-4 h-9 transition-all",
                     selectedCategory !== "all" &&
-                      " bg-slate-200 text-slate-800 hover:bg-slate-100",
+                      "bg-slate-200 text-slate-800 hover:bg-slate-100",
                   )}
                   onClick={() => setSelectedCategory("all")}
                 >
@@ -202,7 +203,7 @@ export default function ProductListClient({
                     className={cn(
                       "rounded-full px-4 h-9 transition-all",
                       selectedCategory !== category.slug &&
-                        " bg-slate-200 text-slate-800 hover:bg-slate-100",
+                        "bg-slate-200 text-slate-800 hover:bg-slate-100",
                     )}
                     onClick={() => setSelectedCategory(category.slug)}
                   >
@@ -278,8 +279,7 @@ export default function ProductListClient({
             <span className="font-bold text-slate-900">{products.length}</span>{" "}
             of{" "}
             <span className="font-bold text-slate-900">{pagination.total}</span>{" "}
-            product
-            {pagination.total !== 1 ? "s" : ""}
+            product{pagination.total !== 1 ? "s" : ""}
           </p>
         </div>
 

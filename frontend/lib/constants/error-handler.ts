@@ -1,6 +1,3 @@
-// ============================================
-// lib/utils/error-handler.ts
-// ============================================
 import type { ApiError } from "@/types";
 
 export function handleApiError(

@@ -129,7 +129,6 @@ export const ChangePasswordForm = () => {
               id="currentPassword"
               name="currentPassword"
               disabled={pending}
-              // Only set default value if it's NOT a success (keep typed data on error)
               defaultValue={
                 !state?.success ? state?.inputs.currentPassword : ""
               }

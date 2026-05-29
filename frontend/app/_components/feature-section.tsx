@@ -1,7 +1,6 @@
 "use client";
 
 import { Headphones, RotateCcw, Shield, Truck } from "lucide-react";
-// 1. Import Variants to ensure type safety
 import { motion, Variants } from "motion/react";
 
 export default function FeaturesSection() {
@@ -32,13 +31,12 @@ export default function FeaturesSection() {
     },
   ];
 
-  // 2. Define Variants
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.15, // Delay between each card appearing
+        staggerChildren: 0.15,
       },
     },
   };
@@ -73,19 +71,16 @@ export default function FeaturesSection() {
               <motion.div
                 key={feature.id}
                 variants={itemVariants}
-                whileHover={{ y: -8 }} // Lifts the card up
+                whileHover={{ y: -8 }}
                 className="group flex flex-col items-center text-center gap-4 p-8 rounded-2xl bg-white border border-transparent hover:border-blue-100 shadow-sm hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 cursor-default"
               >
-                {/* Icon Wrapper with Color Transition */}
                 <div className="relative">
                   <motion.div
                     className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-600 transition-colors duration-300"
                     whileHover={{ scale: 1.1 }}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
-                    {/* The Icon itself - Spins on hover */}
                     <motion.div
-                      // We use a separate motion div for the icon to rotate it independently
                       whileHover={{ rotate: 360 }}
                       transition={{ duration: 0.6, ease: "backOut" }}
                     >

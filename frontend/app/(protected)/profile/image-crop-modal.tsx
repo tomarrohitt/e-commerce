@@ -96,11 +96,11 @@ export function ImageCropModal({
         throw new Error("Failed to crop image");
       }
       const options = {
-        maxSizeMB: 1, // Maximum file size in MB
-        maxWidthOrHeight: 800, // Max width/height
-        useWebWorker: true, // Use web worker for compression
-        fileType: "image/webp", // Convert to WebP
-        initialQuality: 0.8, // 80% quality
+        maxSizeMB: 1,
+        maxWidthOrHeight: 800,
+        useWebWorker: true,
+        fileType: "image/webp",
+        initialQuality: 0.8,
       };
 
       const compressedBlob = await imageCompression(

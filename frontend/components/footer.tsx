@@ -8,7 +8,6 @@ import {
   ArrowRight,
   Mail,
 } from "lucide-react";
-import {} from "react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
 
 export default function Footer() {
@@ -42,7 +41,6 @@ export default function Footer() {
 
       <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-          {/* Brand Column */}
           <div className="space-y-6">
             <div className="flex items-center gap-2">
               <span className="text-2xl font-bold text-white tracking-tight">
@@ -65,7 +63,6 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Links Columns */}
           <div className="col-span-1 md:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-8">
             <FooterColumn title="Shop" links={footerLinks.shop} />
             <FooterColumn title="Company" links={footerLinks.company} />

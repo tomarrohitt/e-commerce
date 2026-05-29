@@ -22,13 +22,9 @@ type Particle = {
 };
 
 export default function HeroSection() {
-  // 1. Initialize as empty array (matches server-side empty state)
   const [particles, setParticles] = useState<Particle[]>([]);
 
   useEffect(() => {
-    // 2. Use a timeout of 0 to push this to the next event loop tick.
-    // This bypasses the "synchronous setState" linter error while still
-    // running almost immediately after mount.
     const timer = setTimeout(() => {
       const generatedParticles = [...Array(6)].map((_, i) => ({
         id: i,
@@ -278,7 +274,6 @@ export default function HeroSection() {
                 <motion.div
                   key={index}
                   whileHover={{ scale: 1.05, y: -5 }}
-                  // Changed items-start to items-center for better vertical alignment
                   className="flex items-center gap-4 p-4 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 cursor-default shadow-sm"
                 >
                   <div className="shrink-0 w-12 h-12 flex items-center justify-center bg-blue-400/20 rounded-xl">
@@ -301,35 +296,30 @@ export default function HeroSection() {
             <div className="absolute inset-0 bg-blue-400/30 blur-3xl rounded-full scale-110" />
 
             <div className="relative grid grid-cols-2 gap-4">
-              {/* Item 1: Large Left (Row Span 2) */}
               <ProductGridItem
                 product={products[0]}
                 variants={imageVariants}
                 className="col-span-1 row-span-2 min-h-80"
               />
 
-              {/* Item 2: Top Right */}
               <ProductGridItem
                 product={products[1]}
                 variants={imageVariants}
                 className="col-span-1 min-h-37.5"
               />
 
-              {/* Item 3: Middle Right */}
               <ProductGridItem
                 product={products[2]}
                 variants={imageVariants}
                 className="col-span-1 min-h-37.5"
               />
 
-              {/* Item 4: Bottom Left */}
               <ProductGridItem
                 product={products[3]}
                 variants={imageVariants}
                 className="col-span-1 min-h-37.5"
               />
 
-              {/* Item 5 & 6: Bottom Right (Split Column) */}
               <div className="col-span-1 grid grid-rows-2 gap-4">
                 <ProductGridItem
                   product={products[4]}

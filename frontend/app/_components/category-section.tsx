@@ -59,8 +59,6 @@ export default function CategoriesSection() {
     },
   };
 
-  // 3. Annotate itemVariants
-  // This tells TS that "spring" is a valid transition type, not just a random string
   const itemVariants: Variants = {
     hidden: { opacity: 0, y: 40, scale: 0.8 },
     visible: {
@@ -122,7 +120,6 @@ export default function CategoriesSection() {
                 className="relative flex flex-col items-center justify-center p-8 rounded-3xl bg-white border border-gray-100 shadow-sm transition-colors duration-300 group cursor-pointer"
               >
                 <div className="relative mb-4">
-                  {/* Icon Background Blob */}
                   <motion.div
                     className="absolute inset-0 bg-blue-100 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                     layoutId={`blob-${category.id}`}
@@ -138,7 +135,6 @@ export default function CategoriesSection() {
                   {category.name}
                 </span>
 
-                {/* Hover shine effect */}
                 <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
                   <div className="absolute inset-0 bg-linear-to-tr from-transparent via-white/40 to-transparent translate-x-full v transition-transform duration-700" />
                 </div>

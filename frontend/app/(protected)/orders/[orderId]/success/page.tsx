@@ -35,7 +35,6 @@ export default async function OrderSuccessPage({
 }: OrderDetailsPageProps) {
   const { orderId } = await params;
 
-  // --- Error State: Missing ID ---
   if (!orderId) {
     return (
       <div className="min-h-screen bg-linear-to-br from-green-50 via-white to-blue-50 flex items-center justify-center p-4">
@@ -59,7 +58,6 @@ export default async function OrderSuccessPage({
 
   const order = await getOrder(orderId);
 
-  // --- Error State: Not Found ---
   if (!order) {
     return (
       <div className="min-h-screen bg-linear-to-br from-green-50 via-white to-blue-50 flex items-center justify-center p-4">
@@ -83,7 +81,6 @@ export default async function OrderSuccessPage({
     );
   }
 
-  // Formatters
   const isPaid = order.status === "PAID";
   const formattedDate = new Date(order.createdAt).toLocaleDateString("en-US", {
     year: "numeric",
