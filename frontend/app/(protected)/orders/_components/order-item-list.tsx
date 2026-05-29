@@ -19,7 +19,7 @@ export function OrderItemsList({ orderItems, status }: OrderItemsListProps) {
         {orderItems.map((item, i) => (
           <div
             key={item.productId}
-            className={`relative flex items-center gap-4 p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all ${entranceAnim}`}
+            className={`relative flex items-center gap-4 p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all `}
             style={{ animationDelay: `${100 + i * 20}ms` }}
           >
             <Link
@@ -31,6 +31,7 @@ export function OrderItemsList({ orderItems, status }: OrderItemsListProps) {
                   src={item.thumbnail}
                   alt={item.name}
                   className="object-cover rounded-lg"
+                  sizes="64"
                   fill
                 />
               ) : (

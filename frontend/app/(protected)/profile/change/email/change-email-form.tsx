@@ -4,7 +4,6 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Mail, LockKeyhole, Info } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { entranceAnim } from "@/lib/constants/enter-animation";
 
 const changeEmailAction = async (prevState: any, formData: FormData) => {
   return prevState;
@@ -13,9 +12,7 @@ const changeEmailAction = async (prevState: any, formData: FormData) => {
 export const ChangeEmailForm = () => {
   return (
     <div className="space-y-8">
-      <Alert
-        className={`bg-amber-50 border-amber-200 ${entranceAnim} delay-200`}
-      >
+      <Alert className={`bg-amber-50 border-amber-200 delay-200`}>
         <Info className="h-5 w-5 text-amber-600" />
         <AlertDescription className="text-amber-900 text-sm">
           <strong className="font-semibold">Important:</strong> We&apos;ll send
@@ -27,7 +24,7 @@ export const ChangeEmailForm = () => {
       {/* Form */}
       <form className="space-y-6">
         {/* New Email */}
-        <Field className={`gap-2 ${entranceAnim} delay-300`}>
+        <Field className={`gap-2 delay-300`}>
           <FieldLabel
             className="text-sm font-semibold text-gray-900"
             htmlFor="newEmail"
@@ -49,7 +46,7 @@ export const ChangeEmailForm = () => {
         </Field>
 
         {/* Password Confirmation */}
-        <Field className={`gap-2 ${entranceAnim} delay-400`}>
+        <Field className={`gap-2 delay-400`}>
           <FieldLabel
             className="text-sm font-semibold text-gray-900"
             htmlFor="password"
@@ -70,7 +67,7 @@ export const ChangeEmailForm = () => {
           </div>
         </Field>
 
-        <div className={`pt-4 ${entranceAnim} delay-500`}>
+        <div className={`pt-4 delay-500`}>
           <button
             type="submit"
             className="w-full bg-linear-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 hover:shadow-xl hover:shadow-blue-600/40 hover:-translate-y-0.5 group"

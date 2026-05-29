@@ -8,7 +8,6 @@ import { OrderShippingCard } from "@/app/(protected)/orders/_components/order-sh
 import { OrderExtended } from "@/types";
 import { InvoiceDownloadButton } from "@/app/(protected)/orders/_components/invoice-download-button";
 import { notFound } from "next/navigation";
-import { entranceAnim } from "@/lib/constants/enter-animation";
 
 interface OrderDetailsPageProps {
   params: Promise<{
@@ -47,7 +46,7 @@ export default async function OrderDetailsPage({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div
-        className={`mb-8 ${entranceAnim}`}
+        className={`mb-8`}
         style={{
           animationDelay: "100ms",
         }}
@@ -84,12 +83,10 @@ export default async function OrderDetailsPage({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Order Items & Addresses */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Order Items */}
           <Card className="shadow-md pt-0">
             <CardHeader
-              className={`bg-gray-50 border-b pt-6 ${entranceAnim}`}
+              className={`bg-gray-50 border-b pt-6`}
               style={{
                 animationDelay: "150ms",
               }}
@@ -101,7 +98,7 @@ export default async function OrderDetailsPage({
                 {order.items.map((item, index) => (
                   <div
                     key={item.productId}
-                    className={`p-6 flex gap-4 ${entranceAnim}`}
+                    className={`p-6 flex gap-4`}
                     style={{ animationDelay: `${100 + index * 40}ms` }}
                   >
                     <Link
@@ -159,7 +156,7 @@ export default async function OrderDetailsPage({
         <div className="lg:col-span-1">
           <Card className="shadow-md sticky top-6 pt-0">
             <CardHeader
-              className={`bg-gray-50 border-b pt-6 ${entranceAnim}`}
+              className={`bg-gray-50 border-b pt-6`}
               style={{
                 animationDelay: "100ms",
               }}
@@ -169,7 +166,7 @@ export default async function OrderDetailsPage({
             <CardContent>
               <div className="space-y-3 text-sm">
                 <div
-                  className={`flex justify-between text-gray-500 ${entranceAnim}`}
+                  className={`flex justify-between text-gray-500`}
                   style={{
                     animationDelay: "130ms",
                   }}
@@ -178,7 +175,7 @@ export default async function OrderDetailsPage({
                   <span>${Number(order.subtotal).toFixed(2)}</span>
                 </div>
                 <div
-                  className={`flex justify-between text-gray-500 ${entranceAnim}`}
+                  className={`flex justify-between text-gray-500`}
                   style={{
                     animationDelay: "160ms",
                   }}
@@ -187,7 +184,7 @@ export default async function OrderDetailsPage({
                   <span>${Number(order.tax).toFixed(2)}</span>
                 </div>
                 <div
-                  className={`flex justify-between text-gray-500 ${entranceAnim}`}
+                  className={`flex justify-between text-gray-500`}
                   style={{
                     animationDelay: "190ms",
                   }}
@@ -196,7 +193,7 @@ export default async function OrderDetailsPage({
                   <span className="text-green-500 font-medium">Free</span>
                 </div>
                 <div
-                  className={`pt-3 border-t flex justify-between items-center ${entranceAnim}`}
+                  className={`pt-3 border-t flex justify-between items-center`}
                   style={{
                     animationDelay: "220ms",
                   }}
@@ -212,7 +209,7 @@ export default async function OrderDetailsPage({
 
               <div className="mt-6 pt-6 border-t">
                 <h3
-                  className={`text-sm font-semibold text-gray-900 mb-3 ${entranceAnim}`}
+                  className={`text-sm font-semibold text-gray-900 mb-3`}
                   style={{
                     animationDelay: "250ms",
                   }}
@@ -224,7 +221,7 @@ export default async function OrderDetailsPage({
 
               {order.invoiceUrl && (
                 <div
-                  className={`mt-6 block w-full text-center ${entranceAnim}`}
+                  className={`mt-6 block w-full text-center`}
                   style={{
                     animationDelay: "280ms",
                   }}
@@ -237,7 +234,7 @@ export default async function OrderDetailsPage({
               )}
 
               <div
-                className={`mt-6 text-center ${entranceAnim}`}
+                className={`mt-6 text-center`}
                 style={{
                   animationDelay: "300ms",
                 }}
@@ -274,7 +271,7 @@ function PaymentStatus({ order }: { order: OrderExtended }) {
     case "SUCCESS":
       return (
         <div
-          className={`${entranceAnim} bg-green-50 border border-green-100 rounded-lg p-4 flex items-center gap-3 `}
+          className={`bg-green-50 border border-green-100 rounded-lg p-4 flex items-center gap-3 `}
           style={{
             animationDelay: "270ms",
           }}
@@ -297,7 +294,7 @@ function PaymentStatus({ order }: { order: OrderExtended }) {
     case "REFUNDED":
       return (
         <div
-          className={`${entranceAnim} bg-red-50 border border-red-100 rounded-lg p-4 flex items-center gap-3`}
+          className={`bg-red-50 border border-red-100 rounded-lg p-4 flex items-center gap-3`}
           style={{ animationDelay: "270ms" }}
         >
           <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-500 shrink-0">
@@ -315,7 +312,7 @@ function PaymentStatus({ order }: { order: OrderExtended }) {
     case "CANCELLED":
       return (
         <div
-          className={`${entranceAnim} bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-center gap-3`}
+          className={`bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-center gap-3`}
           style={{
             animationDelay: "270ms",
           }}
@@ -335,7 +332,7 @@ function PaymentStatus({ order }: { order: OrderExtended }) {
     case "PENDING":
       return (
         <div
-          className={`${entranceAnim} bg-orange-50 border border-orange-100 rounded-lg p-4 `}
+          className={`bg-orange-50 border border-orange-100 rounded-lg p-4 `}
           style={{
             animationDelay: "270ms",
           }}

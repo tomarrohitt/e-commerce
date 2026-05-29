@@ -30,6 +30,7 @@ export function ProductImageGallery({
           src={images[selectedImage]}
           alt={`${productName} - Image ${selectedImage + 1}`}
           className="object-cover"
+          sizes="100%"
           fill
         />
 

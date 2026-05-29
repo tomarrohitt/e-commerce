@@ -1,7 +1,6 @@
 import { MapPin, Phone, User } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Address } from "@/types";
-import { entranceAnim } from "@/lib/constants/enter-animation";
 
 export const OrderShippingCard = ({
   label,
@@ -13,7 +12,7 @@ export const OrderShippingCard = ({
   return (
     <Card className="shadow-md pt-0">
       <CardHeader
-        className={`bg-gray-50 border-b pt-6 ${entranceAnim}`}
+        className={`bg-gray-50 border-b pt-6 `}
         style={{
           animationDelay: "140ms",
         }}
@@ -23,7 +22,7 @@ export const OrderShippingCard = ({
       <CardContent>
         <div className="space-y-3">
           <div
-            className={`flex items-center gap-2 ${entranceAnim}`}
+            className={`flex items-center gap-2 `}
             style={{
               animationDelay: "160ms",
             }}
@@ -32,7 +31,7 @@ export const OrderShippingCard = ({
             <span className="font-semibold text-gray-900">{address.name}</span>
           </div>
           <div
-            className={`flex items-start gap-2 ${entranceAnim}`}
+            className={`flex items-start gap-2 `}
             style={{
               animationDelay: "180ms",
             }}
@@ -45,7 +44,7 @@ export const OrderShippingCard = ({
           </div>
           {address.phoneNumber && (
             <div
-              className={`flex items-center gap-2 ${entranceAnim}`}
+              className={`flex items-center gap-2 `}
               style={{
                 animationDelay: "200ms",
               }}

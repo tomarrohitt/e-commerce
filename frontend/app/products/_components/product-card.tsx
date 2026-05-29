@@ -22,6 +22,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             <Image
               src={product.thumbnail}
               alt={product.name}
+              sizes="100%"
               fill
               className="object-cover transition-all duration-500 group-hover:scale-110 group-hover:rotate-2"
             />

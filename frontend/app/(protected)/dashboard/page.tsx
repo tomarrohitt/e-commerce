@@ -3,7 +3,6 @@ import { getTotalOrdersCount } from "@/lib/services/orders";
 import { getCartCount } from "@/lib/services/cart";
 import { getAddressCount } from "@/lib/services/addresses";
 import Link from "next/link";
-import { entranceAnim } from "@/lib/constants/enter-animation";
 
 export default async function DashboardPage() {
   const [user, cartCount, addressCount, ordersCount] = await Promise.all([
@@ -75,7 +74,7 @@ export default async function DashboardPage() {
         {stats.map((stat, i) => (
           <div
             key={stat.title}
-            className={`h-full ${entranceAnim}`}
+            className={`h-full `}
             style={{ animationDelay: `${100 + i * 100}ms` }}
           >
             <Link href={stat.href} className="block h-full group">
@@ -98,9 +97,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-        <h2
-          className={`text-xl font-bold text-gray-900 mb-6 ${entranceAnim} delay-300`}
-        >
+        <h2 className={`text-xl font-bold text-gray-900 mb-6 delay-300`}>
           Quick Actions
         </h2>
 
@@ -110,7 +107,7 @@ export default async function DashboardPage() {
             return (
               <Link key={action.title} href={action.href} className="group">
                 <div
-                  className={`flex items-center space-x-3 p-4 rounded-lg border-2 border-gray-100 hover:border-blue-500 hover:bg-blue-50/50 transition-all duration-300 cursor-pointer hover:-translate-y-0.5 hover:shadow-sm ${entranceAnim}`}
+                  className={`flex items-center space-x-3 p-4 rounded-lg border-2 border-gray-100 hover:border-blue-500 hover:bg-blue-50/50 transition-all duration-300 cursor-pointer hover:-translate-y-0.5 hover:shadow-sm `}
                   style={{ animationDelay: `${delay}ms` }}
                 >
                   <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-lg shrink-0 text-xl transition-transform duration-300 group-hover:scale-110">
@@ -131,9 +128,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <div
-        className={`bg-white rounded-xl shadow-md p-6 ${entranceAnim} delay-700`}
-      >
+      <div className={`bg-white rounded-xl shadow-md p-6 delay-700`}>
         <h2 className="text-xl font-bold text-gray-900 mb-6">
           Account Information
         </h2>

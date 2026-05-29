@@ -1,15 +1,12 @@
 import { Mail, Verified } from "lucide-react";
 import { ChangeEmailForm } from "./change-email-form";
-import { entranceAnim } from "@/lib/constants/enter-animation";
 
 export default function ChangeEmailPage() {
   return (
     <div className="space-y-8">
       {/* Page Header */}
       <div className="space-y-3">
-        <div
-          className={`flex items-center gap-3 mb-4 ${entranceAnim} delay-100`}
-        >
+        <div className={`flex items-center gap-3 mb-4 delay-100`}>
           <div className="p-3 bg-linear-to-br from-blue-600 to-blue-500 rounded-2xl shadow-lg shadow-blue-600/30">
             <Mail className="w-6 h-6 text-white" />
           </div>
@@ -24,7 +21,7 @@ export default function ChangeEmailPage() {
         </div>
 
         <div
-          className={`bg-green-50 rounded-lg px-4 py-3 border border-green-200 ${entranceAnim} delay-150`}
+          className={`bg-green-50 rounded-lg px-4 py-3 border border-green-200 delay-150`}
         >
           <div className="flex items-center gap-2 text-sm">
             <Verified className="w-4 h-4 text-green-600" />

@@ -7,7 +7,6 @@ import { getCart } from "@/lib/services/cart";
 import { getAddresses } from "@/lib/services/addresses-cached";
 import { ArrowLeft, Lock } from "lucide-react";
 import Link from "next/link";
-import { entranceAnim } from "@/lib/constants/enter-animation";
 
 export default async function CheckoutPage() {
   const [cart, { data: addresses }] = await Promise.all([
@@ -38,11 +37,11 @@ export default async function CheckoutPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
         <div className="mb-8">
           <h1
-            className={`text-2xl sm:text-3xl font-bold text-foreground tracking-tight ${entranceAnim} delay-100`}
+            className={`text-2xl sm:text-3xl font-bold text-foreground tracking-tight delay-100`}
           >
             Checkout
           </h1>
-          <p className={`text-muted-foreground mt-1 ${entranceAnim} delay-150`}>
+          <p className={`text-muted-foreground mt-1 delay-150`}>
             Complete your order in just a few steps
           </p>
         </div>

@@ -37,85 +37,110 @@ jobs:
     needs: detect-changes
     runs-on: ubuntu-latest
     steps:
-      - name: Process Monorepo Deployments Natively via SSH
+      - name: Deploy services via SSH
         uses: appleboy/ssh-action@master
+        env:
+          STRIPE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+          DEPLOY_FRONTEND: ${{ needs.detect-changes.outputs.frontend }}
+          DEPLOY_GATEWAY: ${{ needs.detect-changes.outputs.api-gateway }}
+          DEPLOY_IDENTITY: ${{ needs.detect-changes.outputs.identity }}
+          DEPLOY_CATALOG: ${{ needs.detect-changes.outputs.catalog }}
+          DEPLOY_CART: ${{ needs.detect-changes.outputs.cart }}
+          DEPLOY_ORDERS: ${{ needs.detect-changes.outputs.orders }}
+          DEPLOY_EMAIL: ${{ needs.detect-changes.outputs.email }}
+          DEPLOY_INVOICE: ${{ needs.detect-changes.outputs.invoice }}
         with:
           host: 157.151.245.174
           username: ubuntu
           key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
+          envs: STRIPE_KEY,DEPLOY_FRONTEND,DEPLOY_GATEWAY,DEPLOY_IDENTITY,DEPLOY_CATALOG,DEPLOY_CART,DEPLOY_ORDERS,DEPLOY_EMAIL,DEPLOY_INVOICE
           script: |
-            set -x
+            set -e
+
+            # Pull latest code first
+            cd /home/ubuntu/home/apps/e-commerce
+            git -C frontend pull origin main
+            git -C ecommerce-monorepo pull origin main
 
             # --- 1. FRONTEND SERVICE ---
-            if [ "${{ needs.detect-changes.outputs.frontend }}" = "true" ]; then
+            if [ "$DEPLOY_FRONTEND" = "true" ]; then
               echo ">>> Deploying Frontend..."
               cd /home/ubuntu/home/apps/e-commerce/frontend && \
-              docker buildx build --network=host -t ecommerce-frontend:latest -f Dockerfile . && \
+              docker buildx build \
+                --network=host \
+                --build-arg NEXT_PUBLIC_API_URL=https://rohit-ecommerce-microservice.dedyn.io/api \
+                --build-arg NEXT_PUBLIC_ORIGIN_URL=https://rohit-ecommerce-microservice.dedyn.io \
+                --build-arg NEXT_PUBLIC_AWS_REGION=ap-south-1 \
+                --build-arg NEXT_PUBLIC_AWS_BUCKET_NAME=ecommerce-node-microservices \
+                --build-arg NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$STRIPE_KEY \
+                --build-arg INTERNAL_API_URL=http://api-gateway:4000/api \
+                -t ecommerce-frontend:latest \
+                -f Dockerfile . && \
               docker save ecommerce-frontend:latest | sudo k3s ctr images import - && \
               cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
               kubectl apply -f infra/k8s/frontend-service-deployment.yaml && \
-              kubectl rollout restart deployment/frontend || exit 1
+              kubectl rollout restart deployment/frontend
             fi
 
             # --- 2. API GATEWAY ---
-            if [ "${{ needs.detect-changes.outputs.api-gateway }}" = "true" ]; then
+            if [ "$DEPLOY_GATEWAY" = "true" ]; then
               echo ">>> Deploying API Gateway..."
               cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
               docker buildx build --network=host -t ecommerce-api-gateway:latest -f apps/api-gateway/Dockerfile . && \
               docker save ecommerce-api-gateway:latest | sudo k3s ctr images import - && \
-              kubectl rollout restart deployment/api-gateway || exit 1
+              kubectl rollout restart deployment/api-gateway
             fi
 
             # --- 3. IDENTITY SERVICE ---
-            if [ "${{ needs.detect-changes.outputs.identity }}" = "true" ]; then
+            if [ "$DEPLOY_IDENTITY" = "true" ]; then
               echo ">>> Deploying Identity Service..."
               cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
               docker buildx build --network=host -t ecommerce-identity:latest -f apps/identity/Dockerfile . && \
               docker save ecommerce-identity:latest | sudo k3s ctr images import - && \
-              kubectl rollout restart deployment/identity-service || exit 1
+              kubectl rollout restart deployment/identity-service
             fi
 
             # --- 4. CATALOG SERVICE ---
-            if [ "${{ needs.detect-changes.outputs.catalog }}" = "true" ]; then
+            if [ "$DEPLOY_CATALOG" = "true" ]; then
               echo ">>> Deploying Catalog Service..."
               cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
               docker buildx build --network=host -t ecommerce-catalog:latest -f apps/catalog/Dockerfile . && \
               docker save ecommerce-catalog:latest | sudo k3s ctr images import - && \
-              kubectl rollout restart deployment/catalog-service || exit 1
+              kubectl rollout restart deployment/catalog-service
             fi
 
             # --- 5. CART SERVICE ---
-            if [ "${{ needs.detect-changes.outputs.cart }}" = "true" ]; then
+            if [ "$DEPLOY_CART" = "true" ]; then
               echo ">>> Deploying Cart Service..."
               cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
               docker buildx build --network=host -t ecommerce-cart:latest -f apps/cart/Dockerfile . && \
               docker save ecommerce-cart:latest | sudo k3s ctr images import - && \
-              kubectl rollout restart deployment/cart-service || exit 1
+              kubectl rollout restart deployment/cart-service
             fi
 
             # --- 6. ORDERS SERVICE ---
-            if [ "${{ needs.detect-changes.outputs.orders }}" = "true" ]; then
+            if [ "$DEPLOY_ORDERS" = "true" ]; then
               echo ">>> Deploying Orders Service..."
               cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
               docker buildx build --network=host -t ecommerce-orders:latest -f apps/orders/Dockerfile . && \
               docker save ecommerce-orders:latest | sudo k3s ctr images import - && \
-              kubectl rollout restart deployment/orders-service || exit 1
+              kubectl rollout restart deployment/orders-service
             fi
 
             # --- 7. EMAIL SERVICE ---
-            if [ "${{ needs.detect-changes.outputs.email }}" = "true" ]; then
+            if [ "$DEPLOY_EMAIL" = "true" ]; then
               echo ">>> Deploying Email Service..."
               cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
               docker buildx build --network=host -t ecommerce-email:latest -f apps/email/Dockerfile . && \
               docker save ecommerce-email:latest | sudo k3s ctr images import - && \
-              kubectl rollout restart deployment/email-service || exit 1
+              kubectl rollout restart deployment/email-service
             fi
 
             # --- 8. INVOICE SERVICE ---
-            if [ "${{ needs.detect-changes.outputs.invoice }}" = "true" ]; then
+            if [ "$DEPLOY_INVOICE" = "true" ]; then
               echo ">>> Deploying Invoice Service..."
               cd /home/ubuntu/home/apps/e-commerce/ecommerce-monorepo && \
               docker buildx build --network=host -t ecommerce-invoice:latest -f apps/invoice/Dockerfile . && \
               docker save ecommerce-invoice:latest | sudo k3s ctr images import - && \
-              kubectl rollout restart deployment/invoice-service || exit 1
+              kubectl rollout restart deployment/invoice-service
             fi

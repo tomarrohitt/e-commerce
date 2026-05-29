@@ -151,7 +151,6 @@ const IMAGE_POOLS: Record<string, string[]> = {
   ],
 };
 
-// --- Helper: Generate Dynamic Attributes ---
 function getRichProductData(categorySlug: string) {
   const images = IMAGE_POOLS[categorySlug] || IMAGE_POOLS.default;
   const randomImage = images[Math.floor(Math.random() * images.length)];
@@ -244,7 +243,6 @@ function getRichProductData(categorySlug: string) {
   };
 }
 
-// --- Data Definitions ---
 const categories = [
   { name: "Electronics" },
   { name: "Books" },
@@ -616,7 +614,6 @@ const productsData = {
   ],
 };
 
-// --- Redis Logic ---
 async function clearRedisStock() {
   console.log("🧹 Cleaning Redis 'stock:*' keys...");
   const client = redis.getClient();
@@ -638,12 +635,10 @@ async function clearRedisStock() {
 async function main() {
   console.log("🌱 Starting Seed...");
 
-  // await prisma.category.deleteMany();
-  // await prisma.user.deleteMany();
-  // await prisma.outboxEvent.deleteMany();
+  await prisma.category.deleteMany();
+  await prisma.user.deleteMany();
+  await prisma.outboxEvent.deleteMany();
   await clearRedisStock();
-
-  console.log("Creating dummy users...");
 
   for (const category of categories) {
     const slug = generateSlug(category.name);

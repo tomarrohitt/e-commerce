@@ -1,4 +1,3 @@
-import { entranceAnim } from "@/lib/constants/enter-animation";
 import { Truck, RefreshCw, Shield } from "lucide-react";
 
 const trustBadges = [
@@ -33,7 +32,7 @@ function TrustBadge({
 }) {
   return (
     <div
-      className={`bg-gray-50 rounded-xl p-4 text-center transition-transform hover:scale-105  ${entranceAnim}`}
+      className={`bg-gray-50 rounded-xl p-4 text-center transition-transform hover:scale-105  `}
       style={{ animationDelay: `${300 + index * 100}ms` }}
     >
       <Icon className="w-6 h-6 text-gray-600 mx-auto mb-2" />

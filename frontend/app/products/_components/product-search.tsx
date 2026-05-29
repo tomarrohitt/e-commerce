@@ -1,7 +1,7 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { entranceAnim } from "@/lib/constants/enter-animation";
+
 import { Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -29,7 +29,7 @@ export const ProductSearch = () => {
   return (
     <form
       onSubmit={onSubmit}
-      className={`relative max-w-2xl mx-auto ${entranceAnim} delay-200`}
+      className={`relative max-w-2xl mx-auto delay-200`}
     >
       <div className="relative group">
         <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 z-10" />

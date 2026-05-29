@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { ShoppingBag, Truck, ShieldCheck } from "lucide-react";
 import type { Cart, CartItemWithProduct } from "@/types";
 import Image from "next/image";
-import { entranceAnim } from "@/lib/constants/enter-animation";
 
 interface OrderSummaryProps {
   cart: Cart;
@@ -15,7 +14,7 @@ export function OrderSummary({ children, cart }: OrderSummaryProps) {
   return (
     <Card className="border-0 shadow-sm overflow-hidden sticky top-24">
       <CardHeader className="border-b bg-muted/30 py-5">
-        <div className={`flex items-center gap-3 ${entranceAnim} delay-300`}>
+        <div className={`flex items-center gap-3 delay-300`}>
           <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
             <ShoppingBag className="w-4 h-4 text-primary-foreground" />
           </div>
@@ -55,13 +54,14 @@ export function OrderSummary({ children, cart }: OrderSummaryProps) {
 
 function OrderItem({ item }: { item: CartItemWithProduct }) {
   return (
-    <div className={`flex gap-4 group ${entranceAnim} delay-400`}>
+    <div className={`flex gap-4 group delay-400`}>
       <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-muted ring-1 ring-border">
         {item.product.thumbnail ? (
           <Image
             src={item.product.thumbnail || "/placeholder.svg"}
             alt={item.product.name}
             fill
+            sizes="80px"
             className="object-cover transition-transform group-hover:scale-105"
           />
         ) : (
@@ -89,7 +89,7 @@ function OrderItem({ item }: { item: CartItemWithProduct }) {
 
 function PriceBreakdown({ cart }: { cart: Cart }) {
   return (
-    <div className={`space-y-3 mb-5 ${entranceAnim} delay-400`}>
+    <div className={`space-y-3 mb-5 delay-400`}>
       <div className="flex justify-between text-sm">
         <span className="text-muted-foreground">Subtotal</span>
         <span className="font-medium text-foreground">${cart.subtotal}</span>

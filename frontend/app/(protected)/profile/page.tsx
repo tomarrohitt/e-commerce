@@ -23,7 +23,6 @@ import {
 } from "@/lib/services/orders";
 import { getAddressCount } from "@/lib/services/addresses";
 import Link from "next/link";
-import { entranceAnim } from "@/lib/constants/enter-animation";
 
 export default async function ProfilePage() {
   const [user, totalSpend, ordersCount, addressCount] = await Promise.all([
@@ -46,7 +45,7 @@ export default async function ProfilePage() {
     <div className="min-h-screen bg-linear-to-br from-gray-50 via-blue-50/30 to-indigo-50/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
         {/* Header Section - No delay */}
-        <div className={`mb-8 lg:mb-12 ${entranceAnim}`}>
+        <div className={`mb-8 lg:mb-12 `}>
           <h1 className="text-4xl font-bold text-gray-900 tracking-tight">
             My Profile
           </h1>
@@ -57,7 +56,7 @@ export default async function ProfilePage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
           {/* Left Sidebar - Profile Card - Delay 100ms */}
-          <div className={`lg:col-span-4 space-y-6 ${entranceAnim} delay-100`}>
+          <div className={`lg:col-span-4 space-y-6 delay-100`}>
             <Card className="border-0 shadow-lg bg-white/80 backdrop-blur transition-all duration-300 hover:shadow-xl hover:bg-white/90">
               <CardContent className="pt-8 pb-8">
                 <div className="flex flex-col items-center group/profile">
@@ -95,7 +94,7 @@ export default async function ProfilePage() {
 
             {/* Stats Grid - Delay 200ms */}
             <Card
-              className={`border-0 shadow-lg bg-white/80 backdrop-blur ${entranceAnim} delay-200`}
+              className={`border-0 shadow-lg bg-white/80 backdrop-blur delay-200`}
             >
               <CardHeader className="pb-4">
                 <h3 className="text-lg font-bold text-gray-900">
@@ -189,7 +188,7 @@ export default async function ProfilePage() {
           <div className="lg:col-span-8 space-y-6">
             {/* Main Info Card - Delay 300ms */}
             <Card
-              className={`border-0 shadow-lg bg-white/80 backdrop-blur ${entranceAnim} delay-300`}
+              className={`border-0 shadow-lg bg-white/80 backdrop-blur delay-300`}
             >
               <CardHeader className="border-b border-gray-100 pb-4">
                 <h3 className="text-xl font-bold text-gray-900">
@@ -317,7 +316,7 @@ export default async function ProfilePage() {
 
             {/* Security Card - Delay 400ms */}
             <Card
-              className={`border-0 shadow-lg bg-white/80 backdrop-blur ${entranceAnim} delay-400`}
+              className={`border-0 shadow-lg bg-white/80 backdrop-blur delay-400`}
             >
               <CardHeader className="border-b border-gray-100 pb-4">
                 <h3 className="text-xl font-bold text-gray-900">

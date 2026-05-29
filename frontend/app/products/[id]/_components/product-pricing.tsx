@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { entranceAnim } from "@/lib/constants/enter-animation";
+
 import { Check } from "lucide-react";
 import React from "react";
 
@@ -15,7 +15,7 @@ export const ProductPricing = ({
   const originalPrice = Number(price) * (1 + discountPercentage / 100);
 
   return (
-    <div className={`space-y-4 ${entranceAnim} delay-150`}>
+    <div className={`space-y-4 delay-150`}>
       <div className="flex items-end gap-3">
         <span className="text-4xl font-bold text-gray-900">
           ${Number(price).toFixed(2)}

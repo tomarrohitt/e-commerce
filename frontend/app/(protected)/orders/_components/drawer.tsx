@@ -48,6 +48,7 @@ export function ReviewDrawer({ product }: ReviewDrawerProps) {
                 <Image
                   src={product.thumbnail}
                   alt={product.name}
+                  sizes="48px"
                   fill
                   className="object-cover"
                 />

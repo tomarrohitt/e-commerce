@@ -1,5 +1,5 @@
 const API_URL = process.env.INTERNAL_API_URL;
-const ORIGIN_URL = process.env.ORIGIN_URL; // ← only change, was NEXT_PUBLIC_ORIGIN_URL
+const ORIGIN_URL = process.env.ORIGIN_URL;
 
 type SmartBody = BodyInit | Record<string, any> | null | undefined;
 

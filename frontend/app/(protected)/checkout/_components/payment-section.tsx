@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { entranceAnim } from "@/lib/constants/enter-animation";
+
 import { CreditCard, Check, ShieldCheck } from "lucide-react";
 
 const paymentMethods = [
@@ -15,7 +15,7 @@ export function PaymentSection() {
   return (
     <Card className="border-0 shadow-sm overflow-hidden">
       <CardHeader className="border-b bg-muted/30 py-5">
-        <div className={`flex items-center gap-3 ${entranceAnim} delay-400`}>
+        <div className={`flex items-center gap-3 delay-400`}>
           <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-semibold">
             2
           </div>

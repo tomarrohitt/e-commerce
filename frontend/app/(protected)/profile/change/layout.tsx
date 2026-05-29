@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { Shield, ArrowLeft } from "lucide-react";
-import { entranceAnim } from "@/lib/constants/enter-animation";
 
 export default function SecurityLayout({ children }: { children: ReactNode }) {
   return (
@@ -26,7 +25,7 @@ export default function SecurityLayout({ children }: { children: ReactNode }) {
 
         <div className="grid lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-5 space-y-6">
-            <div className={`relative ${entranceAnim}`}>
+            <div className={`relative `}>
               <div className="absolute -top-4 -left-4 w-24 h-24 bg-linear-to-br from-blue-600 to-blue-400 rounded-2xl opacity-10 blur-xl" />
 
               <div className="relative bg-linear-to-br from-blue-600 to-blue-500 rounded-3xl p-8 text-white shadow-2xl shadow-blue-600/20">
@@ -67,7 +66,7 @@ export default function SecurityLayout({ children }: { children: ReactNode }) {
             </div>
 
             <div
-              className={`bg-white rounded-2xl p-6 shadow-sm border border-gray-100 ${entranceAnim} delay-100`}
+              className={`bg-white rounded-2xl p-6 shadow-sm border border-gray-100 delay-100`}
             >
               <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-blue-600 rounded-full " />

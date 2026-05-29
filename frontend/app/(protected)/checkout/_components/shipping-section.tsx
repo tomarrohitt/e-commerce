@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import type { Address } from "@/types";
 import { useCheckout } from "@/contexts/checkout-context";
 import { AddressDialog } from "@/components/address-modal";
-import { entranceAnim } from "@/lib/constants/enter-animation";
 
 interface ShippingSectionProps {
   addresses: Address[];
@@ -24,13 +23,11 @@ export function ShippingSection({ addresses }: ShippingSectionProps) {
       <Card className="border-0 shadow-sm">
         <CardContent className="flex flex-col items-center justify-center py-12">
           <div
-            className={`w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4 ${entranceAnim} delay-200`}
+            className={`w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4 delay-200`}
           >
             <MapPin className="w-8 h-8 text-muted-foreground" />
           </div>
-          <p
-            className={`text-muted-foreground mb-6 text-center ${entranceAnim} delay-300`}
-          >
+          <p className={`text-muted-foreground mb-6 text-center delay-300`}>
             You don&apos;t have any saved addresses yet
           </p>
 
@@ -42,9 +39,7 @@ export function ShippingSection({ addresses }: ShippingSectionProps) {
 
   return (
     <Card className="border-0 shadow-sm overflow-hidden">
-      <CardHeader
-        className={`border-b bg-muted/30 py-5 ${entranceAnim} delay-300`}
-      >
+      <CardHeader className={`border-b bg-muted/30 py-5 delay-300`}>
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-semibold">
@@ -92,7 +87,7 @@ function AddressCard({
         isSelected
           ? "bg-primary/5 ring-2 ring-primary shadow-sm"
           : "bg-muted/30 hover:bg-muted/50 ring-1 ring-transparent"
-      } ${entranceAnim}`}
+      } `}
       style={{ animationDelay: `${300 + index * 100}ms` }}
     >
       <div className="flex items-start gap-4">

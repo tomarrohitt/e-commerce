@@ -7,7 +7,6 @@ import { ShoppingBag, ArrowRight, Package } from "lucide-react";
 import { ClearCartButton } from "./_components/clear-cart-button";
 import { EmptyCartState } from "./_components/empty-cart-state";
 import { CartItemList } from "./_components/cart-item-list";
-import { entranceAnim } from "@/lib/constants/enter-animation";
 
 export default async function CartPage() {
   const cart = await getCart();
@@ -36,24 +35,22 @@ export default async function CartPage() {
         <div className="flex justify-between items-start">
           <div className="flex items-start gap-4">
             <div
-              className={`w-16 h-16 bg-linear-to-br from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform ${entranceAnim}`}
+              className={`w-16 h-16 bg-linear-to-br from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform`}
             >
               <ShoppingBag className="w-8 h-8 text-white" />
             </div>
             <div>
               <h1
-                className={`text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3 ${entranceAnim}`}
+                className={`text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3`}
               >
                 Shopping Cart
                 <span
-                  className={`text-sm font-normal px-3 py-1 bg-blue-500 text-white rounded-full shadow-sm ${entranceAnim}`}
+                  className={`text-sm font-normal px-3 py-1 bg-blue-500 text-white rounded-full shadow-sm`}
                 >
                   {cart.totalItems}
                 </span>
               </h1>
-              <p
-                className={`text-gray-500 flex items-center gap-2 ${entranceAnim} delay-75`}
-              >
+              <p className={`text-gray-500 flex items-center gap-2 delay-75`}>
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                 {cart.totalItems} {cart.totalItems === 1 ? "item" : "items"}{" "}
                 ready for checkout
@@ -67,7 +64,7 @@ export default async function CartPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <CartItemList items={cart.items} />
 
-        <div className={`lg:col-span-1 ${entranceAnim} delay-300`}>
+        <div className={`lg:col-span-1 delay-300`}>
           <Card className="sticky top-0 shadow-lg border-2 border-gray-100  pt-0">
             <CardHeader className="bg-linear-to-r from-blue-50 to-indigo-50  h-18 pt-6">
               <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">

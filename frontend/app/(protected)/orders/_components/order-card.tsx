@@ -3,7 +3,6 @@ import { OrderStatusBadge } from "./order-status-badge";
 import { OrderItemsList } from "./order-item-list";
 import { OrderActions } from "./order-actions";
 import { Order } from "@/types";
-import { entranceAnim } from "@/lib/constants/enter-animation";
 
 interface OrderCardProps {
   order: Order;
@@ -14,7 +13,7 @@ export function OrderCard({ order, index }: OrderCardProps) {
   return (
     <Card className="hover:shadow-lg transition-shadow pt-0">
       <CardHeader
-        className={`bg-gray-50 border-b pt-6 ${entranceAnim}`}
+        className={`bg-gray-50 border-b pt-6 `}
         style={{
           animationDelay: `${100 + index * 300}ms`,
         }}
@@ -49,7 +48,7 @@ export function OrderCard({ order, index }: OrderCardProps) {
         <OrderItemsList orderItems={order.items} status={order.status} />
 
         <div
-          className={`bg-gray-50 rounded-lg p-4 mb-4 ${entranceAnim}`}
+          className={`bg-gray-50 rounded-lg p-4 mb-4 `}
           style={{
             animationDelay: `${120 + index * 300}ms`,
           }}

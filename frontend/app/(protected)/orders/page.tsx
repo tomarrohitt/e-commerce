@@ -1,7 +1,7 @@
 import { OrderCard } from "./_components/order-card";
 import { Button } from "@/components/ui/button";
 import { getOrders } from "@/lib/services/orders";
-import { entranceAnim } from "@/lib/constants/enter-animation";
+
 import Link from "next/link";
 
 export default async function OrdersPage() {
@@ -9,13 +9,13 @@ export default async function OrdersPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className={`mb-8 ${entranceAnim}`}>
+      <div className={`mb-8 `}>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">My Orders</h1>
         <p className="text-gray-500">View and track all your orders</p>
       </div>
 
       <div
-        className={`space-y-6 ${entranceAnim}`}
+        className={`space-y-6 `}
         style={{
           animationDelay: "80ms",
         }}
@@ -35,7 +35,7 @@ export default async function OrdersPage() {
 function EmptyOrdersState() {
   return (
     <div
-      className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 ${entranceAnim}`}
+      className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 `}
       style={{
         animationDelay: "100ms",
       }}

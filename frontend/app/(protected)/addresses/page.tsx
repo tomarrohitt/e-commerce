@@ -3,7 +3,6 @@ import { Home } from "lucide-react";
 
 import { AddressDialog } from "@/components/address-modal";
 
-import { entranceAnim } from "@/lib/constants/enter-animation";
 import { AddressCard } from "./_components/address-card";
 
 import Address from "@/public/lottie/delivery.json";
@@ -21,12 +20,12 @@ export default async function AddressesPage() {
           <div className="flex justify-between items-center">
             <div>
               <h1
-                className={`text-3xl font-bold text-slate-900 flex items-center gap-3 ${entranceAnim}`}
+                className={`text-3xl font-bold text-slate-900 flex items-center gap-3`}
               >
                 <Home className="w-8 h-8 text-blue-500" />
                 My Addresses
               </h1>
-              <p className={`mt-2 text-slate-500 ${entranceAnim} delay-75`}>
+              <p className={`mt-2 text-slate-500 delay-75`}>
                 Manage your shipping and billing addresses
               </p>
             </div>
@@ -55,9 +54,7 @@ function NoAddresses() {
       </div>
       <div className="size-80" />
 
-      <p
-        className={`text-slate-500 mb-6 max-w-md mx-auto ${entranceAnim} delay-75`}
-      >
+      <p className={`text-slate-500 mb-6 max-w-md mx-auto delay-75`}>
         Add a shipping address to continue with checkout.
       </p>
       <div className="max-w-3xl">

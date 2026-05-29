@@ -16,6 +16,8 @@ export function UserDropdown({ user }: UserDropdownProps) {
 
   const imgUrl = getImageUrl(user.image);
 
+  console.log({ displayUrl: imgUrl });
+
   return (
     <div
       className="relative"

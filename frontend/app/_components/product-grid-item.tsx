@@ -22,6 +22,7 @@ export const ProductGridItem = ({
         <Image
           src={product.image}
           alt={product.alt}
+          sizes="100%"
           fill
           className="object-cover transition-transform duration-700 group-hover:scale-110"
         />

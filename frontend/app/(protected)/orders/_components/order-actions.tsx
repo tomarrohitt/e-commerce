@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { OrderCancelButton } from "./order-cancel-button";
 import { InvoiceDownloadButton } from "./invoice-download-button";
-import { entranceAnim } from "@/lib/constants/enter-animation";
 
 interface OrderActionsProps {
   orderId: string;
@@ -26,7 +25,7 @@ export function OrderActions({
 
   return (
     <div
-      className={`flex flex-wrap gap-3 mt-6 ${entranceAnim}`}
+      className={`flex flex-wrap gap-3 mt-6 `}
       style={{
         animationDelay: "160ms",
       }}

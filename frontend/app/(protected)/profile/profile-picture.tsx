@@ -5,7 +5,6 @@ import { User } from "@/types";
 import { ImageCropModal } from "./image-crop-modal";
 import { confirmUpload, getPreassignedUploadUrl } from "@/actions/user";
 import { getImageUrl } from "@/lib/constants/get-image-url";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 const getInitials = (name: string) => {
@@ -77,8 +76,8 @@ export const ProfilePicture = ({ user }: { user: User }) => {
 
   return (
     <>
-      <div className="relative">
-        <div className="w-32 h-32 rounded-full overflow-hidden bg-linear-to-br from-blue-400 to-indigo-500 flex items-center justify-center shadow-xl">
+      <div className="">
+        <div className="relative w-32 h-32 rounded-full overflow-hidden bg-linear-to-br from-blue-400 to-indigo-500 flex items-center justify-center shadow-xl">
           {displayUrl ? (
             <Image
               src={displayUrl}

@@ -3,7 +3,6 @@ import { DeleteAddressButton } from "./delete-address-button";
 import { SetToDefaultButton } from "./set-to-default-button";
 import { AddressDialog } from "@/components/address-modal";
 import { cn } from "@/lib/utils";
-import { entranceAnim } from "@/lib/constants/enter-animation";
 
 export const AddressCard = ({ address, i }: { address: any; i: number }) => {
   return (
@@ -11,7 +10,7 @@ export const AddressCard = ({ address, i }: { address: any; i: number }) => {
       key={address.id}
       style={{ animationDelay: `${100 + i * 100}ms` }}
       className={cn(
-        `relative bg-white rounded-xl border flex flex-col transition-shadow ${entranceAnim}`,
+        `relative bg-white rounded-xl border flex flex-col transition-shadow`,
         address.isDefault
           ? "border-blue-500 shadow-sm"
           : "border-slate-200 hover:shadow-md",
@@ -24,7 +23,6 @@ export const AddressCard = ({ address, i }: { address: any; i: number }) => {
       )}
 
       <div className="p-6 flex flex-col flex-1">
-        {/* Header */}
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="flex items-center gap-3 min-w-0">
             <div
@@ -58,7 +56,6 @@ export const AddressCard = ({ address, i }: { address: any; i: number }) => {
           <AddressDialog address={address} />
         </div>
 
-        {/* Address */}
         <div className="space-y-3 text-sm text-slate-700 flex-1">
           <div className="flex items-start gap-2">
             <MapPin className="w-4 h-4 mt-0.5 text-slate-400 shrink-0" />
@@ -77,7 +74,6 @@ export const AddressCard = ({ address, i }: { address: any; i: number }) => {
           </div>
         </div>
 
-        {/* Actions */}
         <div className="flex items-center gap-2 pt-4 mt-4 border-t border-slate-100">
           {!address.isDefault && <SetToDefaultButton addressId={address.id} />}
 

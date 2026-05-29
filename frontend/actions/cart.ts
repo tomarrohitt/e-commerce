@@ -1,6 +1,7 @@
 "use server";
 
 import { api } from "@/lib/clients/server";
+import { revalidatePath } from "next/cache";
 
 export async function removeFromCart(productId: string) {
   try {
@@ -10,6 +11,7 @@ export async function removeFromCart(productId: string) {
       const err = await res.json();
       throw err;
     }
+    revalidatePath("/cart");
   } catch (error) {
     console.error("Error removing item from cart:", error);
   }
@@ -26,6 +28,7 @@ export async function addToCart(productId: string, quantity: number) {
       const err = await res.json();
       throw err;
     }
+    revalidatePath("/cart");
   } catch (error) {
     console.error("Error adding item to cart:", error);
   }
@@ -43,6 +46,8 @@ export async function updateCartItem(productId: string, newQuantity: number) {
       throw err;
     }
     const data = await res.json();
+
+    revalidatePath("/cart");
 
     return {
       success: true,
@@ -63,6 +68,7 @@ export async function clearCart() {
       const err = await res.json();
       throw err;
     }
+    revalidatePath("/cart");
   } catch (error) {
     console.error("Error clearing the cart:", error);
   }

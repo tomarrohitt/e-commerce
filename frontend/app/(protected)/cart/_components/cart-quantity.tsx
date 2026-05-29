@@ -5,13 +5,10 @@ import { CartItemWithProduct } from "@/types";
 import { AnimatePresence, motion, Variants } from "motion/react";
 import { Loader2, Minus, Plus } from "lucide-react";
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 
 export const CartQuantity = ({ item }: { item: CartItemWithProduct }) => {
   const [pending, startTransition] = useTransition();
   const [direction, setDirection] = useState(1);
-
-  const router = useRouter();
 
   const handleQuantityChange = (delta: number) => {
     if (pending) return;
@@ -21,7 +18,6 @@ export const CartQuantity = ({ item }: { item: CartItemWithProduct }) => {
     startTransition(async () => {
       try {
         await updateCartItem(item.productId, item.quantity + delta);
-        router.refresh();
       } catch (error) {
         console.error("Error updating cart item:", error);
       }

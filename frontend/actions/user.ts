@@ -2,6 +2,7 @@
 
 import { api } from "@/lib/clients/server";
 import { refreshSession } from "@/lib/services/auth-server";
+import { refresh } from "next/cache";
 
 export const getPreassignedUploadUrl = async (compressedBlob: Blob) => {
   const res = await api("/user/get-upload-url", {
@@ -30,4 +31,5 @@ export const confirmUpload = async (key: string) => {
   }
 
   await refreshSession();
+  refresh();
 };

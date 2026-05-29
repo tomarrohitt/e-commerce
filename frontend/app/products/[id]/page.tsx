@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getProduct } from "@/lib/services/product-cached";
 import { notFound } from "next/navigation";
-import { entranceAnim } from "@/lib/constants/enter-animation";
+
 import { ProductTrustBadges } from "./_components/trust-badges";
 import { ProductReviews } from "./_components/product-reviews";
 import { ProductRating } from "./_components/product-rating";
@@ -75,14 +75,12 @@ export default async function ProductDetailPage({
               stockQuantity={product.stockQuantity}
             />
 
-            <p
-              className={`text-gray-600 leading-relaxed text-lg ${entranceAnim} delay-200`}
-            >
+            <p className={`text-gray-600 leading-relaxed text-lg delay-200`}>
               {product.description}
             </p>
 
             <div className="space-y-6">
-              <div className={`flex gap-4  ${entranceAnim} delay-300`}>
+              <div className={`flex gap-4  delay-300`}>
                 <div className="flex-1">
                   <AddToCartSection
                     productId={product.id}

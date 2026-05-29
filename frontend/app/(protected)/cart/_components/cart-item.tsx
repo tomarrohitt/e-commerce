@@ -26,6 +26,7 @@ export function CartItem({ item, isUpdating }: CartItemProps) {
           {item.product.thumbnail ? (
             <Image
               src={item.product.thumbnail}
+              sizes="96px"
               fill
               alt={item.product.name}
               className="object-cover group-hover:scale-110 transition-transform duration-300 rounded-lg"
