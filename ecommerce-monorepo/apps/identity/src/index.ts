@@ -36,9 +36,6 @@ app.post("/api/auth/resend-verification-email", async (req, res) => {
   });
   res.status(200).json({ message: "Verification email sent" });
 });
-app.use((req, _res, next) => {
-  next();
-});
 
 app.all("/api/auth/*", toNodeHandler(auth));
 

@@ -14,18 +14,19 @@ import { selectRateLimiter } from "./config/rate-limiter-selector";
 import { healthCheck } from "./controller/health-controller";
 
 const app = express();
-const PORT = env.PORT || 4000;
 
+const PORT = env.PORT || 4000;
 app.use(cookieParser());
 
 app.use(
   cors({
-    origin: env.CLIENT_URL,
+    origin: [env.CLIENT_URL],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
+
 app.options("*", cors());
 app.use(requestLogger);
 app.use(errorHandler);
@@ -55,8 +56,12 @@ const onProxyReq = (
   req: Request,
   res: ServerResponse,
 ) => {
-  const user = req.user;
+  // Forward real client IP to downstream services
+  const clientIp = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+  proxyReq.setHeader("x-forwarded-for", clientIp || "");
+  proxyReq.setHeader("x-real-ip", req.socket.remoteAddress || "");
 
+  const user = req.user;
   if (user) {
     proxyReq.setHeader("x-user-id", user.id);
     proxyReq.setHeader("x-user-email", user.email);

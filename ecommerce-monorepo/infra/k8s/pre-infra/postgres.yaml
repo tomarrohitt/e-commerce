@@ -37,6 +37,13 @@ spec:
               memory: "2Gi"
               cpu: "1000m"
           image: postgres:16
+          args:
+            - "-c"
+            - "max_connections=300"
+            - "-c"
+            - "shared_buffers=512MB"
+            - "-c"
+            - "effective_cache_size=1536MB"
           env:
             - name: POSTGRES_PASSWORD
               value: "password"

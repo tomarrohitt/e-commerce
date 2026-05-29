@@ -24,7 +24,7 @@ export async function signUp(data: RegistrationInput): Promise<User> {
   return json;
 }
 
-export async function signIn(data: LoginInput): Promise<User> {
+export async function signIn(data: LoginInput) {
   const res = await baseApi("/auth/sign-in/email", {
     method: "POST",
     body: data,

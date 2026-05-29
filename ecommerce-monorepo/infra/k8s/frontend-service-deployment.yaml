@@ -27,7 +27,8 @@ spec:
               value: "http://api-gateway:4000/api"
             - name: NODE_ENV
               value: "production"
-
+            - name: ORIGIN_URL
+              value: "https://rohit-ecommerce-microservice.dedyn.io"
             - name: NEXT_SERVER_ACTIONS_ENCRYPTION_KEY
               valueFrom:
                 secretKeyRef:
@@ -82,3 +83,4 @@ spec:
       port: 80
       targetPort: 3000
   type: ClusterIP
+

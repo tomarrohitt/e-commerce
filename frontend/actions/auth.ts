@@ -19,7 +19,7 @@ import {
   registrationSchema,
   resetPasswordSchema,
 } from "@/types";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import z from "zod";
 import { redirect } from "next/navigation";
 

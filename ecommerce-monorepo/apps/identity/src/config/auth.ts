@@ -5,7 +5,6 @@ import { authHooks } from "../middleware/validation-middleware";
 import { UserContext, UserEventType } from "@ecommerce/common";
 import { dispatchUserEvent } from "../service/outbox-dispatcher";
 import { env } from "./env";
-import { User } from "better-auth/types";
 
 const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -78,6 +77,12 @@ const auth = betterAuth({
     },
   },
 
+  advanced: {
+    ipAddress: {
+      ipAddressHeaders: ["x-forwarded-for", "x-real-ip"],
+    },
+    trustedProxies: ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"],
+  },
   trustedOrigins: [env.CLIENT_URL, env.BASE_URL],
   databaseHooks: {
     user: {
