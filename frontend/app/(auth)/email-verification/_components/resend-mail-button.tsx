@@ -29,9 +29,9 @@ export const ResendMailButton = ({ email }: { email: string }) => {
       const res = await resendMailAction(email);
 
       if (!res.success) {
-        toast.error("Email Send Failed");
+        toast.error("Failed to send email");
       } else {
-        toast.success("Email Sent");
+        toast.success("Verification email sent");
         setTimeLeft(COOLDOWN_TIME);
       }
     });
@@ -42,24 +42,25 @@ export const ResendMailButton = ({ email }: { email: string }) => {
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-blue-700 bg-blue-50 rounded-lg border border-blue-200 transition-all",
-        !isDisabled && "hover:bg-blue-100",
+        "inline-flex items-center justify-center px-4 py-2.5 text-sm font-semibold rounded-xl border transition-all duration-200 w-full",
+        !isDisabled &&
+          "bg-white text-blue-700 border-white hover:bg-blue-50 active:scale-[0.98] shadow-lg shadow-black/10",
         isDisabled &&
-          "opacity-50 cursor-not-allowed bg-gray-50 text-gray-400 border-gray-200",
+          "bg-white/10 text-white/30 border-white/15 cursor-not-allowed",
       )}
       onClick={handleResend}
       disabled={isDisabled}
     >
       <RefreshCw
-        className={cn("h-4 w-4 mr-2", {
+        className={cn("h-4 w-4 mr-2 shrink-0", {
           "animate-spin": pending,
         })}
       />
       {pending
-        ? "Sending..."
+        ? "Sending…"
         : timeLeft > 0
           ? `Resend in ${timeLeft}s`
-          : "Click to resend"}
+          : "Resend verification email"}
     </button>
   );
 };

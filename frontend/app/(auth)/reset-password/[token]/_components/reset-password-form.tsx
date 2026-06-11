@@ -1,8 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 
 import { resetPasswordAction as resetPassword } from "@/actions/auth";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
@@ -24,17 +23,22 @@ export const ResetPasswordForm = ({ token }: { token: string }) => {
     resetPassword.bind(null, token),
     initialState,
   );
+
   return (
-    <form action={action} className="space-y-6">
+    <form action={action} className="space-y-5">
       {state.message && !state.success && (
-        <div className="p-4 rounded-md text-sm bg-red-50 text-red-700 border border-red-200">
-          {state.message}
+        <div className="flex items-start gap-3 p-4 rounded-xl text-sm bg-red-500/15 text-red-100 border border-red-400/30">
+          <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+          <span>{state.message}</span>
         </div>
       )}
 
       <Field className="gap-0">
-        <FieldLabel className="mb-1" htmlFor="newPassword">
-          New Password
+        <FieldLabel
+          className="mb-1.5 text-sm font-medium text-blue-100"
+          htmlFor="newPassword"
+        >
+          New password
         </FieldLabel>
         <Input
           id="newPassword"
@@ -42,9 +46,10 @@ export const ResetPasswordForm = ({ token }: { token: string }) => {
           type="password"
           disabled={pending}
           defaultValue={state.inputs.newPassword}
-          placeholder="••••••••"
+          placeholder="••••••••••••"
+          className="bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-white/50 focus:ring-white/20 rounded-xl"
         />
-        <FieldError className="my-1 text-xs">
+        <FieldError className="mt-1.5 text-xs text-red-300">
           {state.errors.newPassword}
         </FieldError>
       </Field>
@@ -52,15 +57,15 @@ export const ResetPasswordForm = ({ token }: { token: string }) => {
       <button
         type="submit"
         disabled={pending}
-        className="w-full bg-blue-500 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+        className="w-full bg-white text-blue-700 font-semibold py-3 px-4 rounded-xl transition-all duration-200 hover:bg-blue-50 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center shadow-lg shadow-black/10 mt-1"
       >
         {pending ? (
           <>
-            <Loader2 className="size-5 mr-2 animate-spin" />
-            Updating password...
+            <Loader2 className="size-4 mr-2 animate-spin" />
+            Updating password…
           </>
         ) : (
-          "Set New Password"
+          "Update password"
         )}
       </button>
     </form>

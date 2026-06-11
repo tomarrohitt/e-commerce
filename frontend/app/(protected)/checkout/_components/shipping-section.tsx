@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import type { Address } from "@/types";
 import { useCheckout } from "@/contexts/checkout-context";
 import { AddressDialog } from "@/components/address-modal";
+import { useEffect } from "react";
 
 interface ShippingSectionProps {
   addresses: Address[];
@@ -80,6 +81,11 @@ function AddressCard({
   isSelected: boolean;
   index: number;
 }) {
+  useEffect(() => {
+    if (address.isDefault) {
+      handleSelect(address.id);
+    }
+  }, [address]);
   return (
     <div
       onClick={() => handleSelect(address.id)}

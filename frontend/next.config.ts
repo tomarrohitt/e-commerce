@@ -15,6 +15,11 @@ const nextConfig: NextConfig = {
         hostname: "ecommerce-node-microservices.s3.ap-south-1.amazonaws.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: "/**",
+      },
     ],
   },
 };

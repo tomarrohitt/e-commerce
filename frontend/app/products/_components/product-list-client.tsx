@@ -21,7 +21,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -33,25 +33,6 @@ type Pagination = {
 };
 
 export default function ProductListClient({
-  initialProducts,
-  categories,
-  pagination: initialPagination,
-}: {
-  initialProducts: ProductListProduct[];
-  categories: Category[];
-  pagination: Pagination;
-}) {
-  return (
-    <ProductListInner
-      key={`${initialPagination.page}-${initialProducts[0]?.id ?? "empty"}`}
-      initialProducts={initialProducts}
-      categories={categories}
-      pagination={initialPagination}
-    />
-  );
-}
-
-function ProductListInner({
   initialProducts,
   categories,
   pagination: initialPagination,
@@ -91,45 +72,49 @@ function ProductListInner({
   const [min, max] = committedPriceRange;
   const hasMore = pagination.page < pagination.totalPages;
 
+  const [prevInitialProducts, setPrevInitialProducts] =
+    useState(initialProducts);
+  const [isAppending, setIsAppending] = useState(false);
+
+  if (prevInitialProducts !== initialProducts && !isAppending) {
+    setPrevInitialProducts(initialProducts);
+    if (initialPagination.page === 1) {
+      setProducts(initialProducts);
+      setPagination(initialPagination);
+    }
+  }
+
   useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams();
 
     if (selectedCategory !== "all") {
       params.set("category", selectedCategory);
-    } else {
-      params.delete("category");
     }
 
     if (sortBy !== "default") {
       const [field, order] = sortBy.split("-");
       params.set("sortBy", field);
       params.set("sortOrder", order);
-    } else {
-      params.delete("sortBy");
-      params.delete("sortOrder");
     }
 
     if (min !== 1) {
       params.set("minPrice", String(min));
-    } else {
-      params.delete("minPrice");
     }
 
     if (max !== 1000) {
       params.set("maxPrice", String(max));
-    } else {
-      params.delete("maxPrice");
     }
 
-    params.delete("page");
-
     const newUrl = params.toString();
-    const currentUrl = searchParams.toString();
+    const currentUrl = searchParams
+      .toString()
+      .replace(/[&?]?page=\d+/, "")
+      .replace(/^&/, "");
 
     if (newUrl !== currentUrl) {
       router.replace(`?${newUrl}`, { scroll: false });
     }
-  }, [selectedCategory, sortBy, min, max, searchParams, router]);
+  }, [selectedCategory, sortBy, min, max, router, searchParams]);
 
   const handleClearFilters = () => {
     setPriceRange([1, 1000]);
@@ -143,35 +128,61 @@ function ProductListInner({
   const handleLoadMore = useCallback(async () => {
     if (isLoadingMore) return;
 
+    setIsAppending(true);
     setIsLoadingMore(true);
 
     try {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams();
       const nextPage = pagination.page + 1;
       params.set("page", String(nextPage));
 
-      const response = await fetch(`/web-api/products?${params.toString()}`);
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch products");
+      // build from state, not searchParams
+      if (selectedCategory !== "all") params.set("category", selectedCategory);
+      if (sortBy !== "default") {
+        const [field, order] = sortBy.split("-");
+        params.set("sortBy", field);
+        params.set("sortOrder", order);
       }
+      if (min !== 1) params.set("minPrice", String(min));
+      if (max !== 1000) params.set("maxPrice", String(max));
+
+      const response = await fetch(`/web-api/products?${params.toString()}`);
+      if (!response.ok) throw new Error("Failed to fetch products");
 
       const data = await response.json();
 
       if (data.products && data.products.length > 0) {
-        setProducts((prev) => [...prev, ...data.products]);
+        setProducts((prev) => {
+          const existingIds = new Set(prev.map((p) => p.id));
+          const newProducts = data.products.filter(
+            (p: ProductListProduct) => !existingIds.has(p.id),
+          );
+          return [...prev, ...newProducts];
+        });
         setPagination(data.pagination);
 
-        setTimeout(() => {
-          router.replace(`?${params.toString()}`, { scroll: false });
-        }, 0);
+        // update URL with page number — Effect won't interfere
+        // because it ignores page in its comparison
+        router.replace(`?${params.toString()}`, { scroll: false });
+        setIsAppending(false);
+      } else {
+        setIsAppending(false);
       }
     } catch (error) {
       console.error("Error loading more products:", error);
+      setIsAppending(false);
     } finally {
       setIsLoadingMore(false);
     }
-  }, [pagination.page, searchParams, isLoadingMore, router]);
+  }, [
+    pagination.page,
+    isLoadingMore,
+    selectedCategory,
+    sortBy,
+    min,
+    max,
+    router,
+  ]);
 
   const memoizedProducts = useMemo(() => products, [products]);
 

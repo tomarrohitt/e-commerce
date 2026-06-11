@@ -4,11 +4,9 @@ import Link from "next/link";
 import { AnimatedCart } from "./animated-cart";
 
 import { NavLinks } from "./nav-links";
-import { getUserFromSession } from "@/actions/session";
+import { User } from "@/types";
 
-export async function AuthSection() {
-  const user = await getUserFromSession();
-
+export function AuthSection({ user }: { user: User | null }) {
   if (!user) {
     return <UnProtectedSection />;
   }

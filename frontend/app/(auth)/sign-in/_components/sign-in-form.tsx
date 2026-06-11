@@ -7,7 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { login } from "@/actions/auth";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 
 const initialState = {
   success: false,
@@ -32,21 +32,27 @@ export const SignInForm = () => {
   );
 
   return (
-    <form action={action} className="space-y-6">
+    <form action={action} className="space-y-5">
       {state.message && (
         <div
-          className={`p-4 rounded-md text-sm ${
+          className={`flex items-start gap-3 p-4 rounded-xl text-sm border ${
             state.success
-              ? "bg-green-50 text-green-700"
-              : "bg-red-50 text-red-700"
+              ? "bg-emerald-500/15 text-emerald-100 border-emerald-400/30"
+              : "bg-red-500/15 text-red-100 border-red-400/30"
           }`}
         >
-          {state.message}
+          {!state.success && (
+            <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+          )}
+          <span>{state.message}</span>
         </div>
       )}
 
       <Field className="gap-0">
-        <FieldLabel className="mb-1" htmlFor="email">
+        <FieldLabel
+          className="mb-1.5 text-sm font-medium text-blue-100"
+          htmlFor="email"
+        >
           Email address
         </FieldLabel>
         <Input
@@ -57,16 +63,24 @@ export const SignInForm = () => {
           disabled={pending}
           defaultValue={state.inputs.email}
           placeholder="you@example.com"
+          className="bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-white/50 focus:ring-white/20 rounded-xl"
         />
-        <FieldError className="my-1 text-xs">{state.errors.email}</FieldError>
+        <FieldError className="mt-1.5 text-xs text-red-300">
+          {state.errors.email}
+        </FieldError>
       </Field>
 
       <Field className="gap-0">
-        <div className="flex items-center justify-between mb-1">
-          <FieldLabel htmlFor="password">Password</FieldLabel>
+        <div className="flex items-center justify-between mb-1.5">
+          <FieldLabel
+            htmlFor="password"
+            className="text-sm font-medium text-blue-100"
+          >
+            Password
+          </FieldLabel>
           <Link
             href="/forgot-password"
-            className="text-sm text-blue-500 hover:text-blue-700 transition-colors"
+            className="text-xs text-blue-200 hover:text-white transition-colors font-medium"
           >
             Forgot password?
           </Link>
@@ -77,9 +91,10 @@ export const SignInForm = () => {
           type="password"
           disabled={pending}
           defaultValue={state.inputs.password}
-          placeholder="•••••••••••••••••"
+          placeholder="••••••••••••"
+          className="bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-white/50 focus:ring-white/20 rounded-xl"
         />
-        <FieldError className="my-1 text-xs">
+        <FieldError className="mt-1.5 text-xs text-red-300">
           {state.errors.password}
         </FieldError>
       </Field>
@@ -87,16 +102,15 @@ export const SignInForm = () => {
       <button
         type="submit"
         disabled={pending}
-        className="w-full bg-blue-500 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+        className="w-full bg-white text-blue-700 font-semibold py-3 px-4 rounded-xl transition-all duration-200 hover:bg-blue-50 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center mt-2 shadow-lg shadow-black/10"
       >
         {pending ? (
           <>
-            <Loader2 className="size-5 animate-spin mr-2" />
-
+            <Loader2 className="size-4 animate-spin mr-2" />
             Signing in…
           </>
         ) : (
-          "Sign In"
+          "Sign in"
         )}
       </button>
     </form>

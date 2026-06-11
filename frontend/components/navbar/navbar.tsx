@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { AuthSection } from "./auth-section";
-import { Suspense } from "react";
-export default function Navbar() {
+import { getUserFromSession } from "@/actions/session";
+export default async function Navbar() {
+  const user = await getUserFromSession();
+
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -12,27 +14,10 @@ export default function Navbar() {
           </Link>
 
           <div className="flex items-center justify-end space-x-4 flex-2">
-            <Suspense fallback={<NavbarSkeleton />}>
-              <AuthSection />
-            </Suspense>
+            <AuthSection user={user} />
           </div>
         </div>
       </div>
     </nav>
-  );
-}
-
-function NavbarSkeleton() {
-  return (
-    <div className="hidden md:flex items-center space-x-4">
-      <nav className="hidden md:flex items-center space-x-12 mr-84">
-        <div className="h-5 w-16 bg-gray-200 rounded animate-pulse" />
-        <div className="h-5 w-20 bg-gray-200 rounded animate-pulse" />
-        <div className="h-5 w-16 bg-gray-200 rounded animate-pulse" />
-        <div className="h-5 w-16 bg-gray-200 rounded animate-pulse" />
-        <div className="h-5 w-16 bg-gray-200 rounded animate-pulse" />
-      </nav>
-      <div className="w-24 h-6 bg-gray-200 rounded animate-pulse" />
-    </div>
   );
 }

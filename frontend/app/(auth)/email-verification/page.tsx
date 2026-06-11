@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mail, ArrowRight } from "lucide-react";
+import { Mail, ArrowLeft } from "lucide-react";
 import { ResendMailButton } from "./_components/resend-mail-button";
 
 interface PageProps {
@@ -12,56 +12,47 @@ export default async function VerifyEmailPage({ searchParams }: PageProps) {
   const { email } = await searchParams;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 px-20">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-2xl font-bold text-gray-900 tracking-tight">
-          Verify your account
-        </h2>
-      </div>
-
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-lg mx-20">
-        <div className="bg-white py-12 px-8 shadow-2xl rounded-2xl ring-1 ring-black/5">
-          <div className="text-center">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-blue-100 mb-6 animate-pulse">
-              <Mail className="h-10 w-10 text-blue-500" />
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              Check your inbox
-            </h1>
-            <p className="text-gray-500 mb-8 max-w-md mx-auto text-lg leading-relaxed">
-              We&apos;ve sent a verification link to{" "}
-              <span className="font-semibold text-gray-900 block mt-1">
-                {email || "your email address"}
-              </span>
-            </p>
-            <div className="p-5 bg-gray-50 rounded-xl border border-gray-100 mb-8">
-              <p className="text-sm text-gray-500 mb-3">
-                Didn&apos;t receive the email? Check your spam folder or
-              </p>
-
-              <ResendMailButton email={email} />
-            </div>
-
-            <Link
-              href="/sign-in"
-              className="inline-flex items-center text-gray-500 hover:text-blue-500 font-medium transition-colors"
-            >
-              <ArrowRight className="h-4 w-4 mr-2 rotate-180" />
-              Back to Sign In
-            </Link>
-          </div>
+    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl shadow-2xl p-8">
+      <div className="text-center">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/15 border border-white/20 mb-5 animate-pulse">
+          <Mail className="h-8 w-8 text-white" />
         </div>
 
-        <p className="text-center text-sm text-gray-400 mt-8">
-          Entered the wrong email?{" "}
-          <Link
-            href="/sign-up"
-            className="text-gray-500 underline hover:text-gray-900"
-          >
-            Create a new account
-          </Link>
+        <h1 className="text-2xl font-bold text-white tracking-tight mb-2">
+          Check your inbox
+        </h1>
+        <p className="text-blue-200 text-sm leading-relaxed mb-1">
+          We sent a verification link to
         </p>
+        <p className="font-semibold text-white text-sm mb-7 truncate px-4">
+          {email || "your email address"}
+        </p>
+
+        <div className="p-5 bg-white/10 rounded-2xl border border-white/15 mb-7 text-left">
+          <p className="text-sm text-blue-200 mb-3">
+            Didn&apos;t get it? Check your spam folder or request a new one.
+          </p>
+          <ResendMailButton email={email} />
+        </div>
+
+        <Link
+          href="/sign-in"
+          className="inline-flex items-center text-sm font-medium text-blue-200 hover:text-white transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5 mr-1.5" />
+          Back to sign in
+        </Link>
       </div>
+
+      <p className="text-center text-xs text-blue-300/60 mt-7 pt-7 border-t border-white/10">
+        Wrong email?{" "}
+        <Link
+          href="/sign-up"
+          className="text-blue-200 hover:text-white font-medium"
+        >
+          Create a new account
+        </Link>
+      </p>
     </div>
   );
 }
