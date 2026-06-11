@@ -1,5 +1,5 @@
 import { LottieAnimation } from "@/components/lottie";
-import Cart from "@/public/lottie/auth.json";
+import Auth from "@/public/lottie/auth.json";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -20,7 +20,7 @@ export default async function AuthLayout({
 
       <div className="hidden lg:flex flex-1 flex-col items-center justify-center gap-8 w-full max-w-xl relative z-10">
         <LottieAnimation
-          data={Cart}
+          data={Auth}
           className="w-85 xl:w-100 drop-shadow-2xl"
         />
         <div className="text-center">

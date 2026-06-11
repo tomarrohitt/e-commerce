@@ -3,5 +3,5 @@ export default async function ProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <div>{children} </div>;
+  return <div>{children}</div>;
 }
