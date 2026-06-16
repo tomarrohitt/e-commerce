@@ -35,6 +35,14 @@ The backend is a monorepo managed with `pnpm` and `Turborepo`. It consists of se
 - **`invoice`**: Generates and manages invoices for completed orders.
 - **`email`**: Handles sending transactional emails (e.g., order confirmation).
 
+Built and deployed the infrastructure from scratch on a self-managed VM using:
+
+- Linux
+- Nginx
+- Docker
+- Kubernetes manifests
+- SSH-based deployment workflows
+
 ## 🚀 Getting Started
 
 Follow these instructions to set up and run the project on your local machine.
