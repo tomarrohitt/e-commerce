@@ -191,3 +191,6 @@ export async function resendMail(data: { email: string }) {
 
   return res;
 }
+export async function verifyToken(token: string) {
+  return await baseApi(`/auth/verify-email?token=${token}`);
+}

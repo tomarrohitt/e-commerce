@@ -8,6 +8,7 @@ import {
   forgotPassword,
   resetPassword,
   resendMail,
+  verifyToken,
 } from "@/lib/services/auth-server";
 import { simplifyZodErrors } from "@/lib/constants/error-simplifier";
 import {
@@ -19,7 +20,7 @@ import {
   registrationSchema,
   resetPasswordSchema,
 } from "@/types";
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import z from "zod";
 import { redirect } from "next/navigation";
 
@@ -322,7 +323,7 @@ export async function resendMailAction(email: string) {
       };
     }
 
-    const json = await res.json();
+    await res.json();
 
     return {
       success: true,
@@ -335,3 +336,11 @@ export async function resendMailAction(email: string) {
     };
   }
 }
+
+export const validateToken = async (
+  token: string,
+): Promise<{ success: boolean }> => {
+  const res = await verifyToken(token);
+  const { success } = await res.json();
+  return { success };
+};

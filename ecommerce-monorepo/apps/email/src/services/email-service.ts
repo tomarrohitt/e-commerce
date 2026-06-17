@@ -25,7 +25,8 @@ class EmailService {
   }
 
   async sendVerificationEmail(event: UserRegisteredEvent["data"]) {
-    const { name, email, link: verificationLink } = event;
+    const { name, email, token } = event;
+    const verificationLink = `${env.CLIENT_URL}/validate-email?token=${token}`;
     const html = `
         <div style="font-family: Arial, sans-serif; line-height: 1.6;">
           <h1>Hi ${name}!</h1>
@@ -43,7 +44,7 @@ class EmailService {
   }
 
   async sendPasswordResetEmail(event: UserForgotPasswordEvent["data"]) {
-    const { name, email, link: resetLink } = event;
+    const { name, email, token } = event;
     const html = `
     <div style="font-family: Arial, sans-serif; line-height: 1.6;">
       <h1>Hi ${name},</h1>
@@ -51,7 +52,7 @@ class EmailService {
 
       <p>You requested to reset your password. Click the button below to create a new one.</p>
 
-      <a href="${resetLink}"
+      <a href="${token}"
          style="display: inline-block; padding: 12px 24px; margin: 20px 0;
                 font-size: 16px; color: #fff; background-color: #dc3545;
                 text-decoration: none; border-radius: 5px;">
@@ -59,7 +60,7 @@ class EmailService {
       </a>
 
       <p>If the button doesn’t work, paste this link into your browser:</p>
-      <p style="word-break: break-all;">${resetLink}</p>
+      <p style="word-break: break-all;">${token}</p>
 
       <p style="font-size: 0.9em; color: #777;">
         If you did not request this reset, your account is still safe. You can ignore this email.
@@ -89,7 +90,6 @@ class EmailService {
   async sendOrderConfirmation(event: OrderPaidEvent["data"]) {
     const { userEmail, userName, orderId, totalAmount, items } = event;
 
-    // 1. Build the Items List (HTML Table Rows)
     const itemsListHtml = items
       .map(
         (item) => `
@@ -101,7 +101,6 @@ class EmailService {
       )
       .join("");
 
-    // 2. Build the Main Content
     const contentHtml = `
         <div style="font-family: Arial, sans-serif; color: #333;">
           <h2 style="color: #4CAF50;">Payment Successful!</h2>

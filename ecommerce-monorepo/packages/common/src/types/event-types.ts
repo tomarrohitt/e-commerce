@@ -55,7 +55,7 @@ export interface UserAuthLinkData {
   userId: string;
   email: string;
   name: string;
-  link: string;
+  token: string;
 }
 
 export interface UserRegisteredEvent extends Event<UserAuthLinkData> {
@@ -81,8 +81,6 @@ export type UserEvent =
   | UserRegisteredEvent
   | UserVerifiedEvent
   | UserForgotPasswordEvent;
-
-// PRODUCT EVENTS (PUBLISHER: CATALOG SERVICE)
 
 export enum ProductEventType {
   CREATED = "product.created",
