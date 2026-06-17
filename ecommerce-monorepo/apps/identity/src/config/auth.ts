@@ -69,7 +69,6 @@ const auth = betterAuth({
     autoSignInAfterVerification: true,
     expiresIn: 86400,
     sendVerificationEmail: async ({ user, token, url }) => {
-      console.log({ url, token });
       void dispatchUserEvent(UserEventType.REGISTERED, user, { token });
     },
     afterEmailVerification: async (user) => {

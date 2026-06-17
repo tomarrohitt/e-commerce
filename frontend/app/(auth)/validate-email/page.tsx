@@ -11,8 +11,6 @@ export default async function ValidateEmailPage({
 }: ValidateEmailPageProps) {
   const token = (await searchParams).token ?? null;
 
-  console.log({ token });
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-5">
       <header className="mb-10 text-center">
