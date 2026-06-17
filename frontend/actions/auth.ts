@@ -337,10 +337,11 @@ export async function resendMailAction(email: string) {
   }
 }
 
-export const validateToken = async (
-  token: string,
-): Promise<{ success: boolean }> => {
+export const validateToken = async (token: string): Promise<boolean> => {
   const res = await verifyToken(token);
-  const { success } = await res.json();
-  return { success };
+  if (!res.ok) {
+    return false;
+  }
+  await res.json();
+  return true;
 };

@@ -12,7 +12,7 @@ export const Validate = ({ token }: { token: string }) => {
 
   useEffect(() => {
     async function verify() {
-      const { success } = await validateToken(token);
+      const success = await validateToken(token);
       setStatus(success ? "success" : "error");
     }
     verify();
